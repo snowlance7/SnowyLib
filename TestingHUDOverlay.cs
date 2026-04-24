@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace SnowyLib
 {
-    internal class TestingHUDOverlay : MonoBehaviour
+    public class TestingHUDOverlay : MonoBehaviour
     {
         public static TestingHUDOverlay? Instance { get; private set; }
 

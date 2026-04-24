@@ -14,14 +14,11 @@ namespace SnowyLib
 {
     public class StatusEffectController : NetworkBehaviour
     {
-#pragma warning disable CS8618
-        public VignetteOverlay vignetteOverlay;
-        public StatusEffectAudioLibrary audioLibrary;
+        public VignetteOverlay vignetteOverlay = null!;
 
-        public static StatusEffectController Instance;
+        public static StatusEffectController Instance = null!;
 
-        public PlayerControllerB playerAttachedTo;
-#pragma warning restore CS8618
+        public PlayerControllerB playerAttachedTo = null!;
 
         readonly List<StatusEffect> effects = new();
 
@@ -118,39 +115,6 @@ namespace SnowyLib
 
             effects.Clear();
         }
-
-        public void PlayLocalRandomClip(string id, int bodyPartIndex = 5, float volume = 1f, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
-        {
-            AudioGroup group = audioLibrary.groups.Where(x => x.id == id).FirstOrDefault();
-            if (group == null) return;
-            int index = Utils.randomLocal.Next(0, group.clips.Length);
-            AudioClip clip = group.clips[index];
-            logger.LogDebug($"Playing sound effect {id}, index {index}, volume {volume}, minMaxDistance {min3DDistance}-{max3DDistance}, cutoffFrequency {cutoffFrequency}");
-            Utils.PlaySoundAtPosition(playerAttachedTo.bodyParts[bodyPartIndex], clip, volume, min3DDistance: min3DDistance, max3DDistance: max3DDistance, cutoffFrequency: cutoffFrequency, audibleNoiseID: audibleNoiseID);
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void PlayRandomClipServerRpc(string id, int bodyPartIndex = 5, float volume = 1f, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
-        {
-            if (!IsServer) { return; }
-            PlayRandomClipClientRpc(id, bodyPartIndex, volume, min3DDistance, max3DDistance, cutoffFrequency, audibleNoiseID);
-        }
-
-        [ClientRpc]
-        public void PlayRandomClipClientRpc(string id, int bodyPartIndex = 5, float volume = 1f, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
-        {
-            AudioGroup group = audioLibrary.groups.Where(x => x.id == id).FirstOrDefault();
-            if (group == null) return;
-            int index = Utils.randomGlobal.Next(0, group.clips.Length);
-            AudioClip clip = group.clips[index];
-            logger.LogDebug($"Playing sound effect {id}, index {index}, volume {volume}, minMaxDistance {min3DDistance}-{max3DDistance}, cutoffFrequency {cutoffFrequency}");
-            Utils.PlaySoundAtPosition(playerAttachedTo.bodyParts[bodyPartIndex], clip, volume, min3DDistance: min3DDistance, max3DDistance: max3DDistance, cutoffFrequency: cutoffFrequency, audibleNoiseID: audibleNoiseID);
-        }
-
-        public void TestAudio()
-        {
-            PlayRandomClipServerRpc("cough", 0, 0.6f, 2, 10, 1500);
-        }
     }
 
     public abstract class StatusEffect(string source, string id, float duration, bool removeOnDeath, bool pauseInOrbit, Func<StatusEffect, StatusEffect, ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true)
@@ -225,23 +189,6 @@ namespace SnowyLib
             currentIntensity = Mathf.Clamp01(intensity);
             material.SetFloat(InsetId, currentIntensity);
         }
-    }
-
-    [CreateAssetMenu]
-    public class StatusEffectAudioLibrary : ScriptableObject
-    {
-#pragma warning disable CS8618
-        public AudioGroup[] groups;
-#pragma warning restore CS8618
-    }
-
-    [System.Serializable]
-    public class AudioGroup
-    {
-#pragma warning disable CS8618
-        public string id;
-        public AudioClip[] clips;
-#pragma warning restore CS8618
     }
 
     [HarmonyPatch]
