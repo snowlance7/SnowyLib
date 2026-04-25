@@ -432,10 +432,11 @@ namespace SnowyLib
             return array[random.Next(array.Length)];
         }
 
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T> excluded) where T : class
+        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null) where T : class
         {
             T? closest = null;
             float closestDistance = Mathf.Infinity;
+            excluded ??= [];
 
             foreach (var item in list)
             {
@@ -451,10 +452,11 @@ namespace SnowyLib
             return closest;
         }
 
-        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T> excluded) where T : class
+        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null) where T : class
         {
             T? farthest = null;
             float farthestDistance = 0f;
+            excluded ??= [];
 
             foreach (var item in list)
             {

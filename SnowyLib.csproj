@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.SnowyLib</AssemblyName>
         <Product>SnowyLib</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.0.0</Version>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
@@ -68,6 +68,7 @@
 
     <ItemGroup>
       <Folder Include="Assets\" />
+      <Folder Include="ThunderStore\plugins\Assets\" />
     </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->
