@@ -568,6 +568,25 @@ namespace SnowyLib
             return positions;
         }
 
+        public static EnemyAI? SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default)
+        {
+            if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation);
+            EnemyAI enemy = obj.GetComponent<EnemyAI>();
+            enemy.NetworkObject.Spawn();
+            return enemy;
+        }
+
+        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f)
+        {
+            if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
+            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
+            grabObj.fallTime = fallTime;
+            grabObj.NetworkObject.Spawn();
+            return grabObj;
+        }
+
         public static PlayerControllerB[] GetNearbyPlayers(Vector3 position, float distance = 10f, List<PlayerControllerB>? ignoredPlayers = null)
         {
             List<PlayerControllerB> players = [];
@@ -689,17 +708,6 @@ namespace SnowyLib
         {
             var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
             return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[random.Next(StartOfRound.Instance.allPlayerScripts.Length)] : players[random.Next(players.Length)];
-        }
-
-
-        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f)
-        {
-            if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
-            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
-            grabObj.fallTime = fallTime;
-            grabObj.NetworkObject.Spawn();
-            return grabObj;
         }
 
         public static void MufflePlayer(PlayerControllerB player, bool muffle)
