@@ -103,6 +103,19 @@ namespace SnowyLib
             effects.Remove(effect);
         }
 
+        public void RemoveEffect(Func<StatusEffect, bool> predicate)
+        {
+            effects.RemoveAll(e =>
+            {
+                if (predicate(e))
+                {
+                    e.OnRemove();
+                    return true;
+                }
+                return false;
+            });
+        }
+
         public bool HasEffect<T>() where T : StatusEffect
         {
             return effects.Any(e => e is T);

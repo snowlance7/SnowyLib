@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Dawn;
 using Dusk;
@@ -36,12 +37,16 @@ namespace SnowyLib
         public const ulong SnowySteamID = 76561198253760639;
         public const ulong FunoSteamID = 76561198993437314;
 
+        public static ConfigEntry<bool> cfgTesting = null!;
+
         private void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
             }
+
+            cfgTesting = Config.Bind("Debugging", "Testing", false, "For debugging purposes");
 
             logger = Instance.Logger;
 

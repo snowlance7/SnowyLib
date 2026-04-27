@@ -11,26 +11,19 @@ using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.Utilities;
+using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
     public static class Utils
     {
-        public static bool isBeta = false;
-        public static bool testing => _testing && isBeta;
-        private static bool _testing = false;
-
-        public static bool trailerMode = false;
+        public static bool testing => cfgTesting.Value;
 
         public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
         public static bool DEBUG_disableSpawning = false;
-        public static bool DEBUG_disableTargetting = false;
-        public static bool DEBUG_disableHostTargetting = false;
-        public static bool DEBUG_disableMoving = false;
-
-        static bool IsServerOrHost => Plugin.IsServerOrHost;
-        static ManualLogSource logger => Plugin.logger;
-        static PlayerControllerB localPlayer => Plugin.localPlayer;
+        //public static bool DEBUG_disableTargetting = false;
+        //public static bool DEBUG_disableHostTargetting = false;
+        //public static bool DEBUG_disableMoving = false;
 
         public static bool localPlayerFrozen = false;
 
@@ -154,6 +147,8 @@ namespace SnowyLib
 
         public static void ChatCommand(string[] args)
         {
+            if (!testing) { return; }
+
             switch (args[0])
             {
                 case "/spawning":
@@ -167,10 +162,6 @@ namespace SnowyLib
                     {
                         logger.LogDebug(hazard);
                     }
-                    break;
-                case "/testing":
-                    _testing = !_testing;
-                    HUDManager.Instance.DisplayTip("Testing", _testing.ToString());
                     break;
                 case "/surfaces":
                     foreach (var surface in StartOfRound.Instance.footstepSurfaces)
@@ -744,7 +735,7 @@ namespace SnowyLib
         {
             try
             {
-                if (Utils.isBeta && Utils.DEBUG_disableSpawning) { return false; }
+                if (Utils.testing && Utils.DEBUG_disableSpawning) { return false; }
                 return true;
             }
             catch
@@ -758,7 +749,7 @@ namespace SnowyLib
         {
             try
             {
-                if (Utils.isBeta && Utils.DEBUG_disableSpawning) { return false; }
+                if (Utils.testing && Utils.DEBUG_disableSpawning) { return false; }
                 return true;
             }
             catch
@@ -772,7 +763,7 @@ namespace SnowyLib
         {
             try
             {
-                if (Utils.isBeta && Utils.DEBUG_disableSpawning) { return false; }
+                if (Utils.testing && Utils.DEBUG_disableSpawning) { return false; }
                 return true;
             }
             catch
@@ -813,6 +804,23 @@ namespace SnowyLib
             catch
             {
                 return;
+            }
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
+        public static void SubmitChat_performedPrefix(HUDManager __instance)
+        {
+            try
+            {
+                if (!Utils.testing) { return; }
+                string msg = __instance.chatTextField.text;
+                string[] args = msg.Split(" ");
+
+                Utils.ChatCommand(args);
+            }
+            catch (System.Exception e)
+            {
+                logger.LogError(e);
             }
         }
     }
