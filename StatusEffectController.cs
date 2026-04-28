@@ -1,26 +1,18 @@
 ﻿using Dawn.Utils;
 using GameNetcodeStuff;
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
-using static SnowyLib.Plugin;
 using static SnowyLib.StatusEffectController;
 
 namespace SnowyLib
 {
-    public class StatusEffectController : NetworkBehaviour
+    public class StatusEffectController : MonoBehaviour
     {
-        public VignetteOverlay vignetteOverlay = null!;
-
-        public static StatusEffectController Instance = null!;
-
-        public PlayerControllerB playerAttachedTo = null!;
-
-        readonly List<StatusEffect> effects = new();
+        public List<StatusEffect> effects { get; private set; } = new List<StatusEffect>();
+        public PlayerControllerB? player => gameObject.GetComponent<PlayerControllerB>();
+        public EnemyAI? enemy => gameObject.GetComponent<EnemyAI>();
 
         public enum ConflictResult
         {
@@ -29,30 +21,26 @@ namespace SnowyLib
             Deny
         }
 
-        public static void Init(PlayerControllerB player)
+        private void OnDestroy()
         {
-            StatusEffectController _instance = GameObject.Instantiate(SnowyLibContentHandler.Instance.StatusEffectController!.StatusEffectControllerPrefab, player.transform).GetComponent<StatusEffectController>();
-
-            if (IsServerOrHost)
-                _instance.NetworkObject.Spawn();
-
-            _instance.playerAttachedTo = player;
-
-            if (player == localPlayer)
-                StatusEffectController.Instance = _instance;
+            foreach (var effect in effects)
+            {
+                effect.OnRemove();
+            }
         }
 
-        void Update()
+        private void Update()
         {
-            for (int i = effects.Count - 1; i >= 0; i--)
+            foreach (var effect in effects)
             {
-                var effect = effects[i];
                 effect.Tick();
 
-                if (effect.isFinished || (playerAttachedTo.isPlayerDead && effect.removeOnDeath))
+                if (effect.isFinished
+                    || (player != null && player.isPlayerDead && effect.removeOnDeath)
+                    || (enemy != null && enemy.isEnemyDead && effect.removeOnDeath))
                 {
                     effect.OnRemove();
-                    effects.RemoveAt(i);
+                    effects.Remove(effect);
                 }
             }
         }
@@ -80,6 +68,7 @@ namespace SnowyLib
                 }
             }
 
+            newEffect.controller = this;
             newEffect.OnApply();
             effects.Add(newEffect);
         }
@@ -130,20 +119,18 @@ namespace SnowyLib
         }
     }
 
-    public abstract class StatusEffect(string source, string id, float duration, bool removeOnDeath, bool pauseInOrbit, Func<StatusEffect, StatusEffect, ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true)
+    public abstract class StatusEffect(string source, string id, float duration, bool removeOnDeath, bool pauseInOrbit, Func<StatusEffect, StatusEffect, ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true)
     {
-        protected StatusEffectController controller => StatusEffectController.Instance;
+        public StatusEffectController? controller;
 
         public string source = source;
         public string id = id;
         public float duration = duration;
         public bool removeOnDeath = removeOnDeath;
         public bool pauseInOrbit = pauseInOrbit;
-        public Action? onRemove = onRemove;
+        public Action<StatusEffect>? onRemove = onRemove;
         public bool curableBySCP500 = curableBySCP500;
 
-        // Takes (existingEffect, newEffect) → returns bool
-        // Default: no conflict (always false)
         public Func<StatusEffect, StatusEffect, ConflictResult> onConflict = onConflict ?? ((existing, incoming) => ConflictResult.Deny);
 
         protected float elapsedTime;
@@ -163,62 +150,12 @@ namespace SnowyLib
         public virtual void OnTick() { }
         public void Remove()
         {
-            onRemove?.Invoke();
+            onRemove?.Invoke(this);
             controller?.RemoveEffect(this);
         }
-        public virtual void OnRemove() { }
-    }
-
-    public class VignetteOverlay : MonoBehaviour
-    {
-#pragma warning disable CS8618
-        public Image visual;
-        Material material;
-#pragma warning restore CS8618
-
-        static readonly int InsetId = Shader.PropertyToID("_Inset");
-
-        public float intensityDecreasePerSecond = 0.05f;
-
-        float currentIntensity;
-
-        void Awake()
+        public virtual void OnRemove()
         {
-            material = visual.material;
-        }
-
-        void Update()
-        {
-            if (currentIntensity <= 0f) return;
-
-            currentIntensity = Mathf.Max(0f,
-                currentIntensity - intensityDecreasePerSecond * Time.deltaTime);
-
-            material.SetFloat(InsetId, currentIntensity);
-        }
-
-        public void SetIntensity(float intensity)
-        {
-            currentIntensity = Mathf.Clamp01(intensity);
-            material.SetFloat(InsetId, currentIntensity);
-        }
-    }
-
-    [HarmonyPatch]
-    public class StatusEffectControllerPatches
-    {
-
-        [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
-        public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)
-        {
-            try
-            {
-                StatusEffectController.Init(__instance);
-            }
-            catch
-            {
-                return;
-            }
+            onRemove?.Invoke(this);
         }
     }
 
@@ -249,7 +186,7 @@ namespace SnowyLib
     SA_ChargeItem (Trigger) - hand out
     SA_PushLeverBack (Trigger) - forces screen to middle and does quick animation*/
 
-    public class RandomIntervalActionEffect(BoundedRange randomInterval, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class RandomIntervalActionEffect(BoundedRange randomInterval, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         BoundedRange randomInterval = randomInterval;
         Action action = action;
@@ -276,7 +213,7 @@ namespace SnowyLib
         }
     }
 
-    public class IntervalActionEffect(float interval, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class IntervalActionEffect(float interval, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         float interval = interval;
         Action action = action;
@@ -305,7 +242,7 @@ namespace SnowyLib
         }
     }
 
-    public class TickActionEffect(Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class TickActionEffect(Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         Action action = action;
 
@@ -315,7 +252,7 @@ namespace SnowyLib
         }
     }
 
-    public class ChanceTickActionEffect(float chancePerSecond, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class ChanceTickActionEffect(float chancePerSecond, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         float chance = chancePerSecond;
         Action action = action;
@@ -327,7 +264,7 @@ namespace SnowyLib
         }
     }
 
-    public class ConditionalActionEffect(Func<bool> condition, Action action, bool removeOnTrigger, string source, float cooldown = 0f, int maxTriggerCount = 0, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class ConditionalActionEffect(Func<bool> condition, Action action, bool removeOnTrigger, string source, float cooldown = 0f, int maxTriggerCount = 0, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         Func<bool> condition = condition;
         Action action = action;
@@ -354,7 +291,7 @@ namespace SnowyLib
         }
     }
 
-    public class LerpValueEffect(Action<float> setter, float startValue, float endValue, float duration, string source, string id = "", bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class LerpValueEffect(Action<float> setter, float startValue, float endValue, float duration, string source, string id = "", bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         Action<float> setter = setter;
 
@@ -383,7 +320,7 @@ namespace SnowyLib
         }
     }
 
-    public class RandomIntervalPhaseActionEffect(BoundedRange randomInterval, BoundedRange randomPhaseDuration, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class RandomIntervalPhaseActionEffect(BoundedRange randomInterval, BoundedRange randomPhaseDuration, Action action, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         BoundedRange randomInterval = randomInterval;
         BoundedRange randomPhaseDuration = randomPhaseDuration;
@@ -419,7 +356,7 @@ namespace SnowyLib
         }
     }
 
-    public class CurveValueEffect(Action<float> setter, AnimationCurve curve, float duration, string source, string id = "", bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class CurveValueEffect(Action<float> setter, AnimationCurve curve, float duration, string source, string id = "", bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         Action<float> setter = setter;
         AnimationCurve curve = curve;

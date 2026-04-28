@@ -59,10 +59,16 @@ namespace SnowyLib
         public static Terminal? terminal;
 
         public static BoundedRange randomPercentage = new BoundedRange(0f, 1f);
-        public static System.Random randomLocal = new();
-        public static System.Random randomGlobal = new();
+        public static System.Random randomLocal { get; private set; } = new();
+        public static System.Random randomGlobal { get; private set; } = new();
 
         public static UnityEvent OnFinishGeneratingLevel = new();
+
+        public static void SetRandoms()
+        {
+            Utils.randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
+            Utils.randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
+        }
 
         public static bool SmartCanPathToPoint(Vector3 startPos, Vector3 endPos, bool isOutside)
         {
@@ -783,8 +789,7 @@ namespace SnowyLib
                 Utils.entrances = GameObject.FindObjectsOfType<EntranceTeleport>(includeInactive: false).ToList();
                 Utils.elevator = GameObject.FindObjectOfType<MineshaftElevatorController>();
 
-                Utils.randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
-                Utils.randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
+                Utils.SetRandoms();
 
                 Utils.OnFinishGeneratingLevel.Invoke();
             }

@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿using SnowyLib;
 using System.Linq;
+using UnityEngine;
 
 // See https://github.com/adammyhre/Unity-Utils for more extension methods
 public static class GameObjectExtensions {
@@ -16,4 +17,8 @@ public static class GameObjectExtensions {
     /// <param name="obj">The object being checked.</param>
     /// <returns>The object itself if it exists and not destroyed, null otherwise.</returns>
     public static T OrNull<T>(this T obj) where T : Object => obj ? obj : null;
+    public static StatusEffectController StatusEffectController(this GameObject gameObject)
+    {
+        return gameObject.TryGetComponent(out StatusEffectController controller) ? controller : gameObject.AddComponent<StatusEffectController>();
+    }
 }

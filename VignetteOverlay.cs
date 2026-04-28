@@ -1,0 +1,72 @@
+﻿using GameNetcodeStuff;
+using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+using UnityEngine.UI;
+using static SnowyLib.Plugin;
+
+namespace SnowyLib
+{
+    public class VignetteOverlay : MonoBehaviour
+    {
+        public static VignetteOverlay Instance { get; private set; } = null!;
+
+        [SerializeField] Image visual = null!;
+
+        Material material = null!;
+
+        static readonly int InsetId = Shader.PropertyToID("_Inset");
+
+        public float intensityDecreasePerSecond = 0.01f;
+
+        float currentIntensity;
+
+        void Awake()
+        {
+            material = visual.material;
+        }
+
+        void Update()
+        {
+            if (currentIntensity <= 0f) return;
+
+            currentIntensity = Mathf.Max(0f,
+                currentIntensity - intensityDecreasePerSecond * Time.deltaTime);
+
+            material.SetFloat(InsetId, currentIntensity);
+        }
+
+        public void SetIntensity(float intensity, float intensityDecreasePerSecond)
+        {
+            this.intensityDecreasePerSecond = intensityDecreasePerSecond;
+            currentIntensity = Mathf.Clamp01(intensity);
+            material.SetFloat(InsetId, currentIntensity);
+        }
+
+        public static void Init(PlayerControllerB player)
+        {
+            GameObject prefab = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/VignetteOverlay.prefab");
+            Instance = Instantiate(prefab, player.transform).GetComponent<VignetteOverlay>();
+        }
+    }
+
+    [HarmonyPatch]
+    public class VignetteOverlayPatches
+    {
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
+        public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)
+        {
+            try
+            {
+                VignetteOverlay.Init(__instance);
+            }
+            catch
+            {
+                return;
+            }
+        }
+    }
+}

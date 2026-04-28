@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.SnowyLib</AssemblyName>
         <Product>SnowyLib</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.0.3</Version>
+        <Version>1.1.0</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
@@ -46,11 +46,8 @@
     </PropertyGroup>
     <ItemGroup>
       <Compile Remove="SnowyLibUnityProject\**" />
-      <Compile Remove="ThunderStore\plugins\Assets\**" />
       <EmbeddedResource Remove="SnowyLibUnityProject\**" />
-      <EmbeddedResource Remove="ThunderStore\plugins\Assets\**" />
       <None Remove="SnowyLibUnityProject\**" />
-      <None Remove="ThunderStore\plugins\Assets\**" />
     </ItemGroup>
 
     <!-- Primary Package References -->
@@ -60,8 +57,7 @@
         <PackageReference Include="BepInEx.Core" Version="5.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" PrivateAssets="all" />
         <PackageReference Include="LethalCompany.GameLibs.Steam" Version="*-*" Publicize="true" PrivateAssets="all" />
-        <PackageReference Include="TeamXiaolan.DawnLib" Version="0.9.10" />
-        <PackageReference Include="TeamXiaolan.DawnLib.DuskMod" Version="0.9.10" />
+        <PackageReference Include="TeamXiaolan.DawnLib" Version="0.9.12" />
         <PackageReference Include="UnityEngine.Modules" Version="2022.3.62" IncludeAssets="compile" PrivateAssets="all" />
     </ItemGroup>
 
@@ -71,7 +67,6 @@
 
     <ItemGroup>
       <Folder Include="Assets\" />
-      <Folder Include="ThunderStore\plugins\" />
     </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->

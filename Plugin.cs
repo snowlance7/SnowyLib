@@ -1,8 +1,6 @@
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using Dawn;
-using Dusk;
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.IO;
@@ -14,13 +12,12 @@ using UnityEngine;
 namespace SnowyLib
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    [BepInDependency(DawnLib.PLUGIN_GUID)]
+    [BepInDependency(Dawn.DawnLib.PLUGIN_GUID)]
     public class Plugin : BaseUnityPlugin
     {
 #pragma warning disable CS8618
         public static Plugin Instance { get; private set; }
         public static ManualLogSource logger { get; private set; }
-        public static DuskMod Mod { get; private set; }
 #pragma warning restore CS8618
 
         private readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
@@ -39,6 +36,8 @@ namespace SnowyLib
 
         public static ConfigEntry<bool> cfgTesting = null!;
 
+        public static AssetBundle ModAssets = null!;
+
         private void Awake()
         {
             if (Instance == null)
@@ -52,9 +51,7 @@ namespace SnowyLib
 
             harmony.PatchAll();
 
-            AssetBundle? mainBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowylib_mainassets"));
-            Mod = DuskMod.RegisterMod(this, mainBundle);
-            Mod.RegisterContentHandlers();
+            ModAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowylibassets"));
 
             InitializeNetworkBehaviours();
 
@@ -81,10 +78,3 @@ namespace SnowyLib
         }
     }
 }
-
-/*
-Voice.ListenForPhrase("my cool phrase", (message) => {
-    Plugin.logger.LogInfo("my cool voice phrase was said!");
-});
-https://github.com/LoafOrc/VoiceRecognitionAPI/wiki/For-Developers
-*/
