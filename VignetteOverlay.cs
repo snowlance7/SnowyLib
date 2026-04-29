@@ -1,8 +1,5 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using static SnowyLib.Plugin;
@@ -55,7 +52,6 @@ namespace SnowyLib
     [HarmonyPatch]
     public class VignetteOverlayPatches
     {
-
         [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
         public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)
         {

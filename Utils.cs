@@ -469,6 +469,22 @@ namespace SnowyLib
             return farthest;
         }
 
+        public static List<T> GetInRange<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, float range, IEnumerable<T>? excluded = null) where T : class
+        {
+            List<T> inRange = new List<T>();
+            excluded ??= [];
+
+            foreach (var item in list)
+            {
+                if (item == null || excluded.Contains(item)) continue;
+
+                if (Vector3.Distance(position, positionSelector(item)) < range)
+                    inRange.Add(item);
+            }
+
+            return inRange;
+        }
+
         public static Dictionary<string, GameObject> GetAllHazards()
         {
             Dictionary<string, GameObject> hazards = new Dictionary<string, GameObject>();
@@ -715,8 +731,8 @@ namespace SnowyLib
             }
             if (player.currentVoiceChatAudioSource != null)
             {
-                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
                 player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = muffle ? 5f : 1f;
+                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
                 component.overridingLowPass = muffle;
                 component.lowPassOverride = muffle ? 500f : 20000f;
                 player.voiceMuffledByEnemy = muffle;
