@@ -320,11 +320,11 @@ namespace SnowyLib
         }
     }
 
-    public class RandomIntervalPhaseActionEffect(BoundedRange randomInterval, BoundedRange randomPhaseDuration, Action onStartAction, Action<float> tickAction, Action onEndAction, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    public class RandomIntervalPhaseActionEffect(BoundedRange randomInterval, BoundedRange randomPhaseDuration, Action<float> onStartAction, Action<float> tickAction, Action onEndAction, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
     {
         BoundedRange randomInterval = randomInterval;
         BoundedRange randomPhaseDuration = randomPhaseDuration;
-        Action onStartAction = onStartAction;
+        Action<float> onStartAction = onStartAction;
         Action<float> tickAction = tickAction;
         Action onEndAction = onEndAction;
 
@@ -348,7 +348,7 @@ namespace SnowyLib
                 timeSinceLastInterval = 0f;
                 nextInterval = randomInterval.GetRandomInRange(Utils.randomLocal);
                 phaseTimer = randomPhaseDuration.GetRandomInRange(Utils.randomLocal);
-                onStartAction.Invoke();
+                onStartAction.Invoke(phaseTimer);
             }
 
             if (phaseTimer > 0)
