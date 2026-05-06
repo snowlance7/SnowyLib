@@ -35,7 +35,7 @@ namespace SnowyLib
             material.SetFloat(InsetId, currentIntensity);
         }
 
-        public void SetIntensity(float intensity, float intensityDecreasePerSecond)
+        public void SetIntensity(float intensity, float intensityDecreasePerSecond = 0.01f)
         {
             this.intensityDecreasePerSecond = intensityDecreasePerSecond;
             currentIntensity = Mathf.Clamp01(intensity);

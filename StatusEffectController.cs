@@ -393,4 +393,43 @@ namespace SnowyLib
             setter.Invoke(curve.Evaluate(1f));
         }
     }
+
+    public class DistributedActionEffect(Action action, int totalActions, string source, string id = "", float duration = 0, bool removeOnDeath = true, bool pauseInOrbit = true, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, Action<StatusEffect>? onRemove = null, bool curableBySCP500 = true) : StatusEffect(source, id, duration, removeOnDeath, pauseInOrbit, onConflict, onRemove, curableBySCP500)
+    {
+        int totalActions = totalActions;
+        Action action = action;
+
+        List<float> triggerTimes = new();
+        int currentIndex;
+
+        public override void OnApply()
+        {
+            triggerTimes.Clear();
+
+            float segmentLength = duration / totalActions;
+
+            for (int i = 0; i < totalActions; i++)
+            {
+                float segmentStart = i * segmentLength;
+                float segmentEnd = segmentStart + segmentLength;
+
+                float time = Utils.randomLocal.NextFloat(segmentStart, segmentEnd);
+                triggerTimes.Add(time);
+            }
+
+            triggerTimes.Sort();
+
+            currentIndex = 0;
+        }
+
+        public override void OnTick()
+        {
+            while (currentIndex < triggerTimes.Count &&
+                   elapsedTime >= triggerTimes[currentIndex])
+            {
+                action.Invoke();
+                currentIndex++;
+            }
+        }
+    }
 }
