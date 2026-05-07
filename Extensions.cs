@@ -1,8 +1,10 @@
-﻿using GameNetcodeStuff;
+﻿using Dawn.Utils;
+using GameNetcodeStuff;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
 using static SnowyLib.Plugin;
 using static SnowyLib.Utils;

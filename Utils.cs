@@ -151,13 +151,22 @@ namespace SnowyLib
             return false;
         }
 
-        public static bool CalculatePath(Vector3 fromPos, Vector3 toPos)
+        public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
         {
-            Vector3 from = RoundManager.Instance.GetNavMeshPosition(fromPos, RoundManager.Instance.navHit, 1.75f);
-            Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
-
-            NavMeshPath path = new();
-            return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f;
+            NavMeshPath path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(startPos, endPos, -1, path) || (int)path.status != 0)
+            {
+                return false;
+            }
+            float pathDistance = 0f;
+            if (path.corners.Length > 1)
+            {
+                for (int i = 1; i < path.corners.Length; i++)
+                {
+                    pathDistance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+                }
+            }
+            return pathDistance > 0;
         }
 
         public static void ChatCommand(string[] args)
@@ -413,24 +422,6 @@ namespace SnowyLib
             }
 
             return players.ToArray();
-        }
-
-        public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
-        {
-            NavMeshPath path = new NavMeshPath();
-            if (!NavMesh.CalculatePath(startPos, endPos, -1, path) || (int)path.status != 0)
-            {
-                return false;
-            }
-            float pathDistance = 0f;
-            if (path.corners.Length > 1)
-            {
-                for (int i = 1; i < path.corners.Length; i++)
-                {
-                    pathDistance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
-                }
-            }
-            return pathDistance > 0;
         }
 
         public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
