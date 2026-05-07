@@ -5,6 +5,6 @@
   "description": "Personal library for my mods",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305",
-    "TeamXiaolan-DawnLib-0.9.12"
+    "TeamXiaolan-DawnLib-0.9.16"
   ]
 }
