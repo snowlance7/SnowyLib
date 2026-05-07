@@ -151,6 +151,15 @@ namespace SnowyLib
             return false;
         }
 
+        public static bool CalculatePath(Vector3 fromPos, Vector3 toPos)
+        {
+            Vector3 from = RoundManager.Instance.GetNavMeshPosition(fromPos, RoundManager.Instance.navHit, 1.75f);
+            Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
+
+            NavMeshPath path = new();
+            return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f;
+        }
+
         public static void ChatCommand(string[] args)
         {
             if (!testing) { return; }
@@ -233,12 +242,6 @@ namespace SnowyLib
             }
         }
 
-
-        public static void LogChat(string msg)
-        {
-            HUDManager.Instance.AddChatMessage(msg, "Server");
-        }
-
         public static Vector3 GetBestThrowDirection(Vector3 origin, Vector3 forward, int rayCount, float maxDistance, LayerMask layerMask)
         {
             Vector3 bestDirection = forward;
@@ -268,102 +271,6 @@ namespace SnowyLib
             return bestDirection;
         }
 
-        public static Vector3 GetSpeed()
-        {
-            float num3 = localPlayer.movementSpeed / localPlayer.carryWeight;
-            if (localPlayer.sinkingValue > 0.73f)
-            {
-                num3 = 0f;
-            }
-            else
-            {
-                if (localPlayer.isCrouching)
-                {
-                    num3 /= 1.5f;
-                }
-                else if (localPlayer.criticallyInjured && !localPlayer.isCrouching)
-                {
-                    num3 *= localPlayer.limpMultiplier;
-                }
-                if (localPlayer.isSpeedCheating)
-                {
-                    num3 *= 15f;
-                }
-                if (localPlayer.movementHinderedPrev > 0)
-                {
-                    num3 /= 2f * localPlayer.hinderedMultiplier;
-                }
-                if (localPlayer.drunkness > 0f)
-                {
-                    num3 *= StartOfRound.Instance.drunknessSpeedEffect.Evaluate(localPlayer.drunkness) / 5f + 1f;
-                }
-                if (!localPlayer.isCrouching && localPlayer.crouchMeter > 1.2f)
-                {
-                    num3 *= 0.5f;
-                }
-                if (!localPlayer.isCrouching)
-                {
-                    float num4 = Vector3.Dot(localPlayer.playerGroundNormal, localPlayer.walkForce);
-                    if (num4 > 0.05f)
-                    {
-                        localPlayer.slopeModifier = Mathf.MoveTowards(localPlayer.slopeModifier, num4, (localPlayer.slopeModifierSpeed + 0.45f) * Time.deltaTime);
-                    }
-                    else
-                    {
-                        localPlayer.slopeModifier = Mathf.MoveTowards(localPlayer.slopeModifier, num4, localPlayer.slopeModifierSpeed / 2f * Time.deltaTime);
-                    }
-                    num3 = Mathf.Max(num3 * 0.8f, num3 + localPlayer.slopeIntensity * localPlayer.slopeModifier);
-                }
-            }
-
-            Vector3 vector3 = new Vector3(0f, 0f, 0f);
-            int num5 = Physics.OverlapSphereNonAlloc(localPlayer.transform.position, 0.65f, localPlayer.nearByPlayers, StartOfRound.Instance.playersMask);
-            for (int i = 0; i < num5; i++)
-            {
-                vector3 += Vector3.Normalize((localPlayer.transform.position - localPlayer.nearByPlayers[i].transform.position) * 100f) * 1.2f;
-            }
-            int num6 = Physics.OverlapSphereNonAlloc(localPlayer.transform.position, 1.25f, localPlayer.nearByPlayers, 524288);
-            for (int j = 0; j < num6; j++)
-            {
-                EnemyAICollisionDetect component = localPlayer.nearByPlayers[j].gameObject.GetComponent<EnemyAICollisionDetect>();
-                if (component != null && component.mainScript != null && !component.mainScript.isEnemyDead && Vector3.Distance(localPlayer.transform.position, localPlayer.nearByPlayers[j].transform.position) < component.mainScript.enemyType.pushPlayerDistance)
-                {
-                    vector3 += Vector3.Normalize((localPlayer.transform.position - localPlayer.nearByPlayers[j].transform.position) * 100f) * component.mainScript.enemyType.pushPlayerForce;
-                }
-            }
-
-            Vector3 vector4 = localPlayer.walkForce * num3 * localPlayer.sprintMultiplier + new Vector3(0f, localPlayer.fallValue, 0f) + vector3;
-            vector4 += localPlayer.externalForces;
-            return vector4;
-        }
-
-        public static void FreezePlayer(PlayerControllerB player, bool value)
-        {
-            localPlayerFrozen = value;
-            player.disableInteract = value;
-            player.disableLookInput = value;
-            player.disableMoveInput = value;
-        }
-
-        public static void DespawnItemInSlotOnClient(int itemSlot)
-        {
-            HUDManager.Instance.itemSlotIcons[itemSlot].enabled = false;
-            localPlayer.DestroyItemInSlotAndSync(itemSlot);
-        }
-
-        public static void MakePlayerInvisible(PlayerControllerB player, bool value)
-        {
-            GameObject scavengerModel = player.gameObject.transform.Find("ScavengerModel").gameObject;
-            if (scavengerModel == null) { logger.LogError("ScavengerModel not found"); return; }
-            scavengerModel.transform.Find("LOD1").gameObject.SetActive(!value);
-            scavengerModel.transform.Find("LOD2").gameObject.SetActive(!value);
-            scavengerModel.transform.Find("LOD3").gameObject.SetActive(!value);
-            scavengerModel.transform.Find("metarig/spine/spine.001/spine.002/spine.003/LevelSticker").gameObject.SetActive(!value);
-            scavengerModel.transform.Find("metarig/spine/spine.001/spine.002/spine.003/BetaBadge").gameObject.SetActive(!value);
-            player.playerBadgeMesh.gameObject.SetActive(!value);
-
-        }
-
         public static List<SpawnableEnemyWithRarity> GetEnemies()
         {
             List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
@@ -376,113 +283,6 @@ namespace SnowyLib
                 .ToList();
 
             return enemies;
-        }
-
-        public static EnemyVent GetClosestVentToPosition(Vector3 pos)
-        {
-            float mostOptimalDistance = 2000f;
-            EnemyVent targetVent = null!;
-            foreach (var vent in RoundManager.Instance.allEnemyVents)
-            {
-                float distance = Vector3.Distance(pos, vent.floorNode.transform.position);
-
-                if (distance < mostOptimalDistance)
-                {
-                    mostOptimalDistance = distance;
-                    targetVent = vent;
-                }
-            }
-
-            return targetVent;
-        }
-
-        public static T? GetClosestGameObjectOfType<T>(Vector3 position) where T : Component
-        {
-            T[] objects = GameObject.FindObjectsOfType<T>();
-            T closest = null!;
-            float closestDistance = Mathf.Infinity;
-
-            foreach (T obj in objects)
-            {
-                float distance = Vector3.Distance(position, obj.transform.position);
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    closest = obj;
-                }
-            }
-
-            return closest;
-        }
-
-        public static T? GetRandom<T>(this IEnumerable<T> source, System.Random random) where T : class
-        {
-            if (source is IList<T> list)
-            {
-                if (list.Count == 0) return null;
-                return list[random.Next(list.Count)];
-            }
-
-            var array = source as T[] ?? source.ToArray();
-            if (array.Length == 0) return null;
-
-            return array[random.Next(array.Length)];
-        }
-
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null) where T : class
-        {
-            T? closest = null;
-            float closestDistance = Mathf.Infinity;
-            excluded ??= [];
-
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
-
-                float distance = Vector3.Distance(position, positionSelector(item));
-                if (distance >= closestDistance) continue;
-
-                closest = item;
-                closestDistance = distance;
-            }
-
-            return closest;
-        }
-
-        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null) where T : class
-        {
-            T? farthest = null;
-            float farthestDistance = 0f;
-            excluded ??= [];
-
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
-
-                float distance = Vector3.Distance(position, positionSelector(item));
-                if (distance <= farthestDistance) continue;
-
-                farthest = item;
-                farthestDistance = distance;
-            }
-
-            return farthest;
-        }
-
-        public static List<T> GetInRange<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, float range, IEnumerable<T>? excluded = null) where T : class
-        {
-            List<T> inRange = new List<T>();
-            excluded ??= [];
-
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
-
-                if (Vector3.Distance(position, positionSelector(item)) < range)
-                    inRange.Add(item);
-            }
-
-            return inRange;
         }
 
         public static Dictionary<string, GameObject> GetAllHazards()
@@ -615,20 +415,6 @@ namespace SnowyLib
             return players.ToArray();
         }
 
-        public static void RebuildRig(PlayerControllerB pcb)
-        {
-            if (pcb != null && pcb.playerBodyAnimator != null)
-            {
-                pcb.playerBodyAnimator.WriteDefaultValues();
-                pcb.playerBodyAnimator.GetComponent<RigBuilder>()?.Build();
-            }
-        }
-
-        public static bool IsPlayerChild(PlayerControllerB player)
-        {
-            return player.thisPlayerBody.localScale.y < 1f;
-        }
-
         public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
         {
             NavMeshPath path = new NavMeshPath();
@@ -723,29 +509,21 @@ namespace SnowyLib
             return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[random.Next(StartOfRound.Instance.allPlayerScripts.Length)] : players[random.Next(players.Length)];
         }
 
-        public static void MufflePlayer(PlayerControllerB player, bool muffle)
+        public static PlayerControllerB GetRandomPlayer()
         {
-            if (player.currentVoiceChatAudioSource == null)
-            {
-                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
-            }
-            if (player.currentVoiceChatAudioSource != null)
-            {
-                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = muffle ? 5f : 1f;
-                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
-                component.overridingLowPass = muffle;
-                component.lowPassOverride = muffle ? 500f : 20000f;
-                player.voiceMuffledByEnemy = muffle;
-            }
+            var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
+            return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[UnityEngine.Random.Range(0, StartOfRound.Instance.allPlayerScripts.Length)] : players[UnityEngine.Random.Range(0, players.Length)];
         }
 
-        public static Vector3 GetFloorPosition(Vector3 position, float verticalOffset = 0)
+        public static void DespawnItemInSlotOnClient(int itemSlot)
         {
-            if (Physics.Raycast(position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore))
-            {
-                return hitInfo.point + Vector3.up * 0.04f + verticalOffset * Vector3.up;
-            }
-            return position;
+            HUDManager.Instance.itemSlotIcons[itemSlot].enabled = false;
+            localPlayer.DestroyItemInSlotAndSync(itemSlot);
+        }
+
+        public static void LogChat(string msg)
+        {
+            HUDManager.Instance.AddChatMessage(msg, "Server");
         }
     }
 
