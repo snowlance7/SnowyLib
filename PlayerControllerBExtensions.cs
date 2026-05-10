@@ -14,7 +14,7 @@ namespace SnowyLib
             return player.gameObject.TryGetComponent(out StatusEffectController controller) ? controller : player.gameObject.AddComponent<StatusEffectController>();
         }
 
-        public static bool GrabObject(this PlayerControllerB player, GrabbableObject grabbableObject)
+        public static bool GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
         {
             player.currentlyGrabbingObject = grabbableObject;
             player.grabInvalidated = false;
