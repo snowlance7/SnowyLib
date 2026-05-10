@@ -1,8 +1,4 @@
 ﻿using GameNetcodeStuff;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace SnowyLib
@@ -14,12 +10,12 @@ namespace SnowyLib
             return player.gameObject.TryGetComponent(out StatusEffectController controller) ? controller : player.gameObject.AddComponent<StatusEffectController>();
         }
 
-        public static bool GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
+        public static void GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
         {
             player.currentlyGrabbingObject = grabbableObject;
             player.grabInvalidated = false;
 
-            if (player.FirstEmptyItemSlot(grabbableObject) == -1) { return false; }
+            if (player.FirstEmptyItemSlot(grabbableObject) == -1) { return; }
 
             player.playerBodyAnimator.SetBool("GrabInvalidated", value: false);
             player.playerBodyAnimator.SetBool("GrabValidated", value: false);
@@ -49,7 +45,7 @@ namespace SnowyLib
                 player.StopCoroutine(player.grabObjectCoroutine);
             }
             player.grabObjectCoroutine = player.StartCoroutine(player.GrabObject());
-            return true;
+            return;
         }
     }
 }
