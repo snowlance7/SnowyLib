@@ -81,7 +81,7 @@ namespace SnowyLib
             return array[UnityEngine.Random.Range(0, array.Length)];
         }
 
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null) where T : class
+        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null, bool fastDistance = false) where T : class
         {
             T? closest = null;
             float closestDistance = Mathf.Infinity;
@@ -100,6 +100,26 @@ namespace SnowyLib
 
             return closest;
         }
+
+        /*public static T? SmartGetClosestToPosition<T>(this IEnumerable<T> list, PositionInfo positionInfo, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null, bool fastDistance = false) where T : class
+        {
+            T? closest = null;
+            float closestDistance = Mathf.Infinity;
+            excluded ??= [];
+
+            foreach (var item in list)
+            {
+                if (item == null || excluded.Contains(item)) continue;
+
+                float distance = Vector3.Distance(position, positionSelector(item));
+                if (distance >= closestDistance) continue;
+
+                closest = item;
+                closestDistance = distance;
+            }
+
+            return closest;
+        }*/
 
         public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, IEnumerable<T>? excluded = null) where T : class
         {

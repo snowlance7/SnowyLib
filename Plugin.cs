@@ -13,7 +13,7 @@ namespace SnowyLib
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency(Dawn.DawnLib.PLUGIN_GUID)]
-    public class Plugin : BaseUnityPlugin
+    internal class Plugin : BaseUnityPlugin
     {
 #pragma warning disable CS8618
         public static Plugin Instance { get; private set; }
@@ -53,28 +53,8 @@ namespace SnowyLib
 
             ModAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowylibassets"));
 
-            InitializeNetworkBehaviours();
-
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
-        }
-
-        private static void InitializeNetworkBehaviours()
-        {
-            var types = Assembly.GetExecutingAssembly().GetTypes();
-            foreach (var type in types)
-            {
-                var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                foreach (var method in methods)
-                {
-                    var attributes = method.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false);
-                    if (attributes.Length > 0)
-                    {
-                        method.Invoke(null, null);
-                    }
-                }
-            }
-            logger.LogDebug("Finished initializing network behaviours");
         }
     }
 }
