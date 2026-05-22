@@ -409,6 +409,17 @@ namespace SnowyLib
             return grabObj;
         }
 
+        public static SpawnableMapObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default)
+        {
+            throw new NotImplementedException();
+            /*if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].OutsideInfo.p.spawnPrefab, position, rotation, StartOfRound);
+            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
+            grabObj.fallTime = fallTime;
+            grabObj.NetworkObject.Spawn();
+            return grabObj;*/
+        } // TODO
+
         public static PlayerControllerB[] GetNearbyPlayers(Vector3 position, float distance = 10f, List<PlayerControllerB>? ignoredPlayers = null)
         {
             List<PlayerControllerB> players = [];
@@ -515,6 +526,33 @@ namespace SnowyLib
         public static void LogChat(string msg)
         {
             HUDManager.Instance.AddChatMessage(msg, "Server");
+        }
+
+        public static float CalculateDistance(PositionInfo position1, PositionInfo position2)
+        {
+            if (position1.isOutside == position2.isOutside)
+            {
+                return Vector3.Distance(position1.position, position2.position);
+            }
+            else
+            {
+                float closestDistance = Mathf.Infinity;
+                foreach (var entrance in Utils.entrances)
+                {
+                    if (entrance == null) { continue; }
+                    if (entrance.isEntranceToBuilding != position1.isOutside) { continue; }
+                    if (entrance.exitScript == null && (entrance.exitPointDoesntExist || !entrance.FindExitPoint())) { continue; }
+                    if (entrance.exitScript == null) { continue; }
+
+                    float position1ToEntrance = Vector3.Distance(position1.position, entrance.transform.position);
+                    float exitToPosition2 = Vector3.Distance(entrance.exitScript.transform.position, position2.position);
+                    float totalDistance = position1ToEntrance + exitToPosition2;
+                    if (totalDistance > closestDistance) { continue; }
+                    closestDistance = totalDistance;
+                }
+
+                return closestDistance;
+            }
         }
     }
 
