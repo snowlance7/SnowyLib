@@ -528,7 +528,7 @@ namespace SnowyLib
             HUDManager.Instance.AddChatMessage(msg, "Server");
         }
 
-        public static float CalculateDistance(PositionInfo position1, PositionInfo position2)
+        public static float SmartDistance(PositionInfo position1, PositionInfo position2)
         {
             if (position1.isOutside == position2.isOutside)
             {
