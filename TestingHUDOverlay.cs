@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿/*using UnityEngine;
 using UnityEngine.UI;
 
 namespace SnowyLib
@@ -59,4 +59,4 @@ namespace SnowyLib
         public void SetLabel2(string value) => label2.text = value;
         public void SetLabel3(string value) => label3.text = value;
     }
-}
+}*/

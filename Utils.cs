@@ -64,7 +64,7 @@ namespace SnowyLib
 
         public static UnityEvent OnFinishGeneratingLevel = new();
 
-        public static void SetRandoms()
+        internal static void SetRandoms()
         {
             Utils.randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
             Utils.randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
@@ -361,22 +361,17 @@ namespace SnowyLib
 
             for (int i = 0; i < count; i++)
             {
-                // Angle in degrees
                 float angle = i * angleStep;
 
-                // Convert angle to radians
                 float radians = angle * Mathf.Deg2Rad;
 
-                // Use random radius between min and max for some variation (optional)
                 float radius = UnityEngine.Random.Range(minRadius, maxRadius);
 
-                // Direction on XZ plane
                 float x = Mathf.Cos(radians) * radius;
                 float z = Mathf.Sin(radians) * radius;
 
                 Vector3 pos = new Vector3(center.x + x, y, center.z + z);
 
-                // Try to snap to NavMesh
                 if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
                 {
                     positions.Add(hit.position);
@@ -419,21 +414,6 @@ namespace SnowyLib
             grabObj.NetworkObject.Spawn();
             return grabObj;*/
         } // TODO
-
-        public static PlayerControllerB[] GetNearbyPlayers(Vector3 position, float distance = 10f, List<PlayerControllerB>? ignoredPlayers = null)
-        {
-            List<PlayerControllerB> players = [];
-
-            foreach (var player in StartOfRound.Instance.allPlayerScripts)
-            {
-                if (player == null || !player.isPlayerControlled) { continue; }
-                if (ignoredPlayers != null && ignoredPlayers.Contains(player)) { continue; }
-                if (Vector3.Distance(position, player.transform.position) > distance) { continue; }
-                players.Add(player);
-            }
-
-            return players.ToArray();
-        }
 
         public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
@@ -523,9 +503,9 @@ namespace SnowyLib
             localPlayer.DestroyItemInSlotAndSync(itemSlot);
         }
 
-        public static void LogChat(string msg)
+        public static void LogChat(string msg, string nameOfUserWhoTyped = "Server")
         {
-            HUDManager.Instance.AddChatMessage(msg, "Server");
+            HUDManager.Instance.AddChatMessage(msg, nameOfUserWhoTyped);
         }
 
         public static float SmartDistance(PositionInfo position1, PositionInfo position2)

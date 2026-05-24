@@ -1,10 +1,6 @@
-﻿using GameNetcodeStuff;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace SnowyLib
+namespace SnowyLib.Extensions
 {
     public static class GameObjectExtensions
     {

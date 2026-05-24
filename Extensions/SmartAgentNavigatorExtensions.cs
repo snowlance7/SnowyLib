@@ -1,9 +1,7 @@
 ﻿using Dawn.Utils;
 using UnityEngine;
-using UnityEngine.AI;
-using static SnowyLib.Utils;
 
-namespace SnowyLib
+namespace SnowyLib.Extensions
 {
     public static class SmartAgentNavigatorExtensions
     {
