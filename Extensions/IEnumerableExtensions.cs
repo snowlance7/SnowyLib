@@ -55,10 +55,50 @@ namespace SnowyLib.Extensions
             return closest;
         }
 
+        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
+        {
+            T? closest = null;
+            float closestDistance = Mathf.Infinity;
+            excluded ??= [];
+
+            foreach (var item in list)
+            {
+                if (item == null || excluded.Contains(item)) continue;
+
+                float distance = skipSqrt ? (position - positionSelector(item)).sqrMagnitude : Vector3.Distance(position, positionSelector(item));
+                if (distance >= closestDistance) continue;
+
+                closest = item;
+                closestDistance = distance;
+            }
+
+            return closest;
+        }
+
         public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
         {
             T? farthest = null;
             farthestDistance = 0f;
+            excluded ??= [];
+
+            foreach (var item in list)
+            {
+                if (item == null || excluded.Contains(item)) continue;
+
+                float distance = skipSqrt ? (position - positionSelector(item)).sqrMagnitude : Vector3.Distance(position, positionSelector(item));
+                if (distance <= farthestDistance) continue;
+
+                farthest = item;
+                farthestDistance = distance;
+            }
+
+            return farthest;
+        }
+
+        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
+        {
+            T? farthest = null;
+            float farthestDistance = 0f;
             excluded ??= [];
 
             foreach (var item in list)
