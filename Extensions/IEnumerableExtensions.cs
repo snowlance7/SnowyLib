@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace SnowyLib.Extensions
+namespace SnowyLib
 {
     public static class IEnumerableExtensions
     {

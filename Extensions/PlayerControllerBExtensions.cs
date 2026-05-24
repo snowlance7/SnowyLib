@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using static SnowyLib.Plugin;
 
-namespace SnowyLib.Extensions
+namespace SnowyLib
 {
     public static class PlayerControllerBExtensions
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SnowyLib.Extensions.Extensions
+namespace SnowyLib
 {
     public static class Vector3Extensions
     {

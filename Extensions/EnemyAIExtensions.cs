@@ -1,4 +1,4 @@
-﻿namespace SnowyLib.Extensions.Extensions
+﻿namespace SnowyLib
 {
     public static class EnemyAIExtensions
     {
