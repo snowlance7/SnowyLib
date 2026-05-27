@@ -16,9 +16,9 @@ namespace SnowyLib
 
         static readonly int InsetId = Shader.PropertyToID("_Inset");
 
-        public float intensityDecreasePerSecond = 0.01f;
+        public float intensityDecreasePerSecond { get; private set; } = 0.01f;
 
-        float currentIntensity;
+        public float currentIntensity { get; private set; }
 
         void Awake()
         {
@@ -42,7 +42,7 @@ namespace SnowyLib
             material.SetFloat(InsetId, currentIntensity);
         }
 
-        public static void Init(PlayerControllerB player)
+        internal static void Init(PlayerControllerB player)
         {
             GameObject prefab = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/VignetteOverlay.prefab");
             Instance = Instantiate(prefab, player.transform).GetComponent<VignetteOverlay>();
@@ -50,7 +50,7 @@ namespace SnowyLib
     }
 
     [HarmonyPatch]
-    public class VignetteOverlayPatches
+    internal class VignetteOverlayPatches
     {
         [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
         public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)

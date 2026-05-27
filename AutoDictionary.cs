@@ -2,8 +2,7 @@
 
 namespace SnowyLib
 {
-    public class AutoDictionary<TKey, TValue> : Dictionary<TKey, TValue>
-    where TValue : new()
+    public class AutoDictionary<TKey, TValue> : Dictionary<TKey, TValue> where TValue : new()
     {
         public new TValue this[TKey key]
         {
