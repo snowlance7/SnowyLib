@@ -64,6 +64,13 @@ namespace SnowyLib
 
         public static UnityEvent OnFinishGeneratingLevel = new();
 
+        public enum ContentType
+        {
+            Item,
+            Enemy,
+            MapObject
+        }
+
         internal static void SetRandoms()
         {
             Utils.randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
@@ -221,8 +228,59 @@ namespace SnowyLib
                 case "/animations":
                     LogAnimatorParameters(localPlayer.playerBodyAnimator);
                     break;
+                case "/rarities":
+
+                    switch (args[1])
+                    {
+                        case "item":
+                            LogRarities(ContentType.Item);
+                            break;
+                        case "enemy":
+                            LogRarities(ContentType.Enemy);
+                            break;
+                        case "mapobject":
+                            LogRarities(ContentType.MapObject);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    break;
                 default:
                     break;
+            }
+        }
+
+        public static void LogRarities(ContentType contentType)
+        {
+            foreach (var level in StartOfRound.Instance.levels)
+            {
+                logger.LogDebug($"- {level.name}:");
+
+                switch (contentType)
+                {
+                    case ContentType.Item:
+                        foreach (var item in level.spawnableScrap)
+                        {
+                            logger.LogDebug($"-- {item.spawnableItem.itemName}: {item.rarity}");
+                        }
+                        break;
+                    case ContentType.Enemy:
+                        foreach (var enemy in level.Enemies)
+                        {
+                            logger.LogDebug($"-- {enemy.enemyType.name}: {enemy.rarity}");
+                        }
+                        break;
+                    case ContentType.MapObject:
+                        foreach (var mapObject in level.spawnableMapObjects)
+                        {
+                            logger.LogDebug($"-- {mapObject.prefabToSpawn.name}:");
+                            Debug.Log(string.Join("\n", mapObject.numberToSpawn.keys.Select(k => $"--- ({k.time}, {k.value})")));
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
