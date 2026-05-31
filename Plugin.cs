@@ -35,8 +35,6 @@ namespace SnowyLib
 
         public static ConfigEntry<bool> cfgTesting = null!;
 
-        public static AssetBundle ModAssets = null!;
-
         private void Awake()
         {
             if (Instance == null)
@@ -49,8 +47,6 @@ namespace SnowyLib
             logger = Instance.Logger;
 
             harmony.PatchAll();
-
-            ModAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowylibassets"));
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");

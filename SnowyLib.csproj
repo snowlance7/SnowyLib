@@ -64,10 +64,10 @@
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Assets\" />
-    </ItemGroup>
+    
+  <ItemGroup>
+    <EmbeddedResource Include="Embedded\vignette.png" />
+  </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->
   <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">

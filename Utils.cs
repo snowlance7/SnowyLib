@@ -5,7 +5,9 @@ using GameNetcodeStuff;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
@@ -75,6 +77,86 @@ namespace SnowyLib
         {
             Utils.randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
             Utils.randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
+        }
+
+        public static void ChatCommand(string[] args)
+        {
+            if (!testing) { return; }
+
+            switch (args[0])
+            {
+                case "/spawning":
+                    DEBUG_disableSpawning = !DEBUG_disableSpawning;
+                    HUDManager.Instance.DisplayTip("Disable Spawning", DEBUG_disableSpawning.ToString());
+                    break;
+                case "/hazards":
+                    Dictionary<string, GameObject> hazards = Utils.GetAllHazards();
+
+                    foreach (var hazard in hazards)
+                    {
+                        logger.LogDebug(hazard);
+                    }
+                    break;
+                case "/surfaces":
+                    foreach (var surface in StartOfRound.Instance.footstepSurfaces)
+                    {
+                        logger.LogDebug(surface.surfaceTag);
+                    }
+                    break;
+                case "/enemies":
+                    foreach (var enemy in Utils.GetEnemies())
+                    {
+                        logger.LogDebug(enemy.enemyType.name);
+                    }
+                    break;
+                case "/refresh":
+                    RoundManager.Instance.RefreshEnemiesList();
+                    HoarderBugAI.RefreshGrabbableObjectsInMapList();
+                    break;
+                case "/levels":
+                    foreach (var level in StartOfRound.Instance.levels)
+                    {
+                        logger.LogDebug(level.name);
+                    }
+                    break;
+                case "/dungeon":
+                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
+                    break;
+                case "/dungeons":
+                    foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
+                    {
+                        logger.LogDebug(dungeon.dungeonFlow.name);
+                    }
+                    break;
+                case "/animations":
+                    LogAnimatorParameters(localPlayer.playerBodyAnimator);
+                    break;
+                case "/rarities":
+                    switch (args[1])
+                    {
+                        case "item":
+                            LogRarities(ContentType.Item);
+                            break;
+                        case "enemy":
+                            LogRarities(ContentType.Enemy);
+                            break;
+                        case "mapobject":
+                            LogRarities(ContentType.MapObject);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "/vignette":
+                    VignetteOverlay.Instance.SetIntensity(float.Parse(args[1]));
+                    HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {args[1]}");
+                    break;
+                case "/spawnanim":
+                    localPlayer.SpawnPlayerAnimation();
+                    break;
+                default:
+                    break;
+            }
         }
 
         public static bool SmartCanPathToPoint(Vector3 startPos, Vector3 endPos, bool isOutside)
@@ -174,81 +256,6 @@ namespace SnowyLib
                 }
             }
             return pathDistance > 0;
-        }
-
-        public static void ChatCommand(string[] args)
-        {
-            if (!testing) { return; }
-
-            switch (args[0])
-            {
-                case "/spawning":
-                    DEBUG_disableSpawning = !DEBUG_disableSpawning;
-                    HUDManager.Instance.DisplayTip("Disable Spawning", DEBUG_disableSpawning.ToString());
-                    break;
-                case "/hazards":
-                    Dictionary<string, GameObject> hazards = Utils.GetAllHazards();
-
-                    foreach (var hazard in hazards)
-                    {
-                        logger.LogDebug(hazard);
-                    }
-                    break;
-                case "/surfaces":
-                    foreach (var surface in StartOfRound.Instance.footstepSurfaces)
-                    {
-                        logger.LogDebug(surface.surfaceTag);
-                    }
-                    break;
-                case "/enemies":
-                    foreach (var enemy in Utils.GetEnemies())
-                    {
-                        logger.LogDebug(enemy.enemyType.name);
-                    }
-                    break;
-                case "/refresh":
-                    RoundManager.Instance.RefreshEnemiesList();
-                    HoarderBugAI.RefreshGrabbableObjectsInMapList();
-                    break;
-                case "/levels":
-                    foreach (var level in StartOfRound.Instance.levels)
-                    {
-                        logger.LogDebug(level.name);
-                    }
-                    break;
-                case "/dungeon":
-                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
-                    break;
-                case "/dungeons":
-                    foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
-                    {
-                        logger.LogDebug(dungeon.dungeonFlow.name);
-                    }
-                    break;
-                case "/animations":
-                    LogAnimatorParameters(localPlayer.playerBodyAnimator);
-                    break;
-                case "/rarities":
-
-                    switch (args[1])
-                    {
-                        case "item":
-                            LogRarities(ContentType.Item);
-                            break;
-                        case "enemy":
-                            LogRarities(ContentType.Enemy);
-                            break;
-                        case "mapobject":
-                            LogRarities(ContentType.MapObject);
-                            break;
-                        default:
-                            break;
-                    }
-
-                    break;
-                default:
-                    break;
-            }
         }
 
         public static void LogRarities(ContentType contentType)
@@ -592,6 +599,27 @@ namespace SnowyLib
 
                 return closestDistance;
             }
+        }
+
+        public static Texture2D? LoadEmbeddedTexture(string resourceName)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            using Stream stream = assembly.GetManifestResourceStream(resourceName);
+
+            if (stream == null)
+            {
+                logger.LogError($"Resource not found: {resourceName}");
+                return null;
+            }
+
+            byte[] data = new byte[stream.Length];
+            stream.Read(data, 0, data.Length);
+
+            Texture2D texture = new Texture2D(2, 2);
+            texture.LoadImage(data);
+
+            return texture;
         }
     }
 
