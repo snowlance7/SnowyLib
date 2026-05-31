@@ -391,6 +391,7 @@ namespace SnowyLib
             GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation);
             EnemyAI enemy = obj.GetComponent<EnemyAI>();
             enemy.NetworkObject.Spawn();
+            RoundManager.Instance.SpawnedEnemies.Add(enemy);
             return enemy;
         }
 
