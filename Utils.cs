@@ -65,6 +65,7 @@ namespace SnowyLib
         public static System.Random randomGlobal { get; private set; } = new();
 
         public static UnityEvent OnFinishGeneratingLevel = new();
+        public static UnityEvent OnShipLanded = new();
 
         public enum ContentType
         {
@@ -627,7 +628,7 @@ namespace SnowyLib
     public class UtilsPatches
     {
         [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnInsideEnemiesFromVentsIfReady))]
-        public static bool SpawnInsideEnemiesFromVentsIfReadyPrefix()
+        public static bool RoundManager_SpawnInsideEnemiesFromVentsIfReady_Prefix()
         {
             try
             {
@@ -641,7 +642,7 @@ namespace SnowyLib
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnDaytimeEnemiesOutside))]
-        public static bool SpawnDaytimeEnemiesOutsidePrefix()
+        public static bool RoundManager_SpawnDaytimeEnemiesOutside_Prefix()
         {
             try
             {
@@ -655,7 +656,7 @@ namespace SnowyLib
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnEnemiesOutside))]
-        public static bool SpawnEnemiesOutsidePrefix()
+        public static bool RoundManager_SpawnEnemiesOutside_Prefix()
         {
             try
             {
@@ -669,7 +670,7 @@ namespace SnowyLib
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.FinishGeneratingLevel))]
-        public static void FinishGeneratingLevelPostfix()
+        public static void RoundManager_FinishGeneratingLevel_Postfix()
         {
             try
             {
@@ -689,8 +690,22 @@ namespace SnowyLib
             }
         }
 
+
+        [HarmonyPostfix, HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.OnShipLandedMiscEvents))]
+        public static void StartOfRound_OnShipLandedMiscEvents_Postfix()
+        {
+            try
+            {
+                Utils.OnShipLanded.Invoke();
+            }
+            catch
+            {
+                return;
+            }
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
-        public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)
+        public static void PlayerControllerB_ConnectClientToPlayerObject_Postfix(PlayerControllerB __instance)
         {
             try
             {
@@ -703,7 +718,7 @@ namespace SnowyLib
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
-        public static void SubmitChat_performedPrefix(HUDManager __instance)
+        public static void HUDManager_SubmitChat_performed_Prefix(HUDManager __instance)
         {
             try
             {
