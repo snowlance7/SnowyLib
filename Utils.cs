@@ -317,6 +317,11 @@ namespace SnowyLib
             }
         }
 
+        public static bool FastDistance(Vector3 posA, Vector3 posB, float maxDistance)
+        {
+            return (posA - posB).sqrMagnitude <= (maxDistance * maxDistance);
+        }
+
         public static Vector3 GetBestThrowDirection(Vector3 origin, Vector3 forward, int rayCount, float maxDistance, LayerMask layerMask)
         {
             Vector3 bestDirection = forward;
