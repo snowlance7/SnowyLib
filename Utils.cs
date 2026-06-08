@@ -56,6 +56,8 @@ namespace SnowyLib
             }
         }
 
+        public static List<GrabbableObject> spawnedItems = new List<GrabbableObject>();
+
         public static List<EntranceTeleport> entrances = [];
         public static MineshaftElevatorController? elevator;
         public static Terminal? terminal;
@@ -317,7 +319,7 @@ namespace SnowyLib
             }
         }
 
-        public static bool FastDistance(Vector3 posA, Vector3 posB, float maxDistance)
+        public static bool FastInRange(Vector3 posA, Vector3 posB, float maxDistance)
         {
             return (posA - posB).sqrMagnitude <= (maxDistance * maxDistance);
         }
@@ -732,6 +734,32 @@ namespace SnowyLib
                 string[] args = msg.Split(" ");
 
                 Utils.ChatCommand(args);
+            }
+            catch (System.Exception e)
+            {
+                logger.LogError(e);
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnNetworkSpawn))]
+        public static void GrabbableObject_OnNetworkSpawn_Postfix(GrabbableObject __instance)
+        {
+            try
+            {
+                Utils.spawnedItems.Add(__instance);
+            }
+            catch (System.Exception e)
+            {
+                logger.LogError(e);
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnNetworkDespawn))]
+        public static void GrabbableObject_OnNetworkDespawn_Postfix(GrabbableObject __instance)
+        {
+            try
+            {
+                Utils.spawnedItems.Remove(__instance);
             }
             catch (System.Exception e)
             {
