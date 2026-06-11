@@ -23,6 +23,7 @@ namespace SnowyLib
 
         public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
         public static bool DEBUG_disableSpawning = false;
+        public static bool DEBUG_disableTime = false;
         //public static bool DEBUG_disableTargetting = false;
         //public static bool DEBUG_disableHostTargetting = false;
         //public static bool DEBUG_disableMoving = false;
@@ -156,6 +157,11 @@ namespace SnowyLib
                     break;
                 case "/spawnanim":
                     localPlayer.SpawnPlayerAnimation();
+                    break;
+                case "/time":
+                    DEBUG_disableTime = !DEBUG_disableTime;
+                    StartOfRound.Instance.currentLevel.planetHasTime = !DEBUG_disableTime;
+                    HUDManager.Instance.DisplayTip("Snowylib", "disableTime: " + DEBUG_disableTime);
                     break;
                 default:
                     break;
