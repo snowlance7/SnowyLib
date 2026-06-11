@@ -741,8 +741,8 @@ namespace SnowyLib
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnNetworkSpawn))]
-        public static void GrabbableObject_OnNetworkSpawn_Postfix(GrabbableObject __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
+        public static void GrabbableObject_Start_Postfix(GrabbableObject __instance)
         {
             try
             {
@@ -754,8 +754,8 @@ namespace SnowyLib
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnNetworkDespawn))]
-        public static void GrabbableObject_OnNetworkDespawn_Postfix(GrabbableObject __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnDestroy))]
+        public static void GrabbableObject_OnDestroy_Postfix(GrabbableObject __instance)
         {
             try
             {
