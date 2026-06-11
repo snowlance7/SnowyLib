@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
@@ -464,36 +465,34 @@ namespace SnowyLib
             return positions;
         }
 
-        public static EnemyAI? SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default)
+        public static EnemyAI? SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation);
+            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation, parentTo);
             EnemyAI enemy = obj.GetComponent<EnemyAI>();
-            enemy.NetworkObject.Spawn();
+            enemy.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             RoundManager.Instance.SpawnedEnemies.Add(enemy);
             return enemy;
         }
 
-        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f)
+        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
             GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
             GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
             grabObj.fallTime = fallTime;
-            grabObj.NetworkObject.Spawn();
+            grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             return grabObj;
         }
 
-        public static SpawnableMapObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default)
+        public static SpawnableMapObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
-            throw new NotImplementedException();
-            /*if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].OutsideInfo.p.spawnPrefab, position, rotation, StartOfRound);
-            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
-            grabObj.fallTime = fallTime;
-            grabObj.NetworkObject.Spawn();
-            return grabObj;*/
-        } // TODO
+            if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].GetMapObjectPrefab(), position, rotation, parentTo);
+            var mapObj = obj.GetComponent<SpawnableMapObject>();
+            obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
+            return mapObj;
+        }
 
         public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
