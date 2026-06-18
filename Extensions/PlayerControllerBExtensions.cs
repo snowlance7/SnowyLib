@@ -1,4 +1,5 @@
 ﻿using GameNetcodeStuff;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using static SnowyLib.Plugin;
@@ -12,12 +13,24 @@ namespace SnowyLib
             return player.gameObject.TryGetComponent(out StatusEffectController controller) ? controller : player.gameObject.AddComponent<StatusEffectController>();
         }
 
-        public static void GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
+        public static bool GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
         {
+            if (player.twoHanded || player.sinkingValue > 0.73f) { return false; }
+
             player.currentlyGrabbingObject = grabbableObject;
+
+            if (!GameNetworkManager.Instance.gameHasStarted && !player.currentlyGrabbingObject.itemProperties.canBeGrabbedBeforeGameStart && StartOfRound.Instance.testRoom == null) { return false; }
+
             player.grabInvalidated = false;
 
-            if (player.FirstEmptyItemSlot(grabbableObject) == -1) { return; }
+            if (player.currentlyGrabbingObject == null || player.inSpecialInteractAnimation || player.currentlyGrabbingObject.isHeld || player.currentlyGrabbingObject.isPocketed) { return false; }
+
+            NetworkObject networkObject = player.currentlyGrabbingObject.NetworkObject;
+            if (networkObject == null || !networkObject.IsSpawned) { return false; }
+
+            player.currentlyGrabbingObject.InteractItem();
+
+            if (!player.currentlyGrabbingObject.grabbable || player.FirstEmptyItemSlot(player.currentlyGrabbingObject) == -1) { return false; }
 
             player.playerBodyAnimator.SetBool("GrabInvalidated", value: false);
             player.playerBodyAnimator.SetBool("GrabValidated", value: false);
@@ -27,12 +40,12 @@ namespace SnowyLib
             player.isGrabbingObjectAnimation = true;
             player.cursorIcon.enabled = false;
             player.cursorTip.text = "";
-            player.twoHanded = grabbableObject.itemProperties.twoHanded;
-            player.carryWeight = Mathf.Clamp(player.carryWeight + (grabbableObject.itemProperties.weight - 1f), 1f, 10f);
+            player.twoHanded = player.currentlyGrabbingObject.itemProperties.twoHanded;
+            player.carryWeight = Mathf.Clamp(player.carryWeight + (player.currentlyGrabbingObject.itemProperties.weight - 1f), 1f, 10f);
             StartOfRound.Instance.SendChangedWeightEvent();
-            if (grabbableObject.itemProperties.grabAnimationTime > 0f)
+            if (player.currentlyGrabbingObject.itemProperties.grabAnimationTime > 0f)
             {
-                player.grabObjectAnimationTime = grabbableObject.itemProperties.grabAnimationTime;
+                player.grabObjectAnimationTime = player.currentlyGrabbingObject.itemProperties.grabAnimationTime;
             }
             else
             {
@@ -40,14 +53,15 @@ namespace SnowyLib
             }
             if (!player.isTestingPlayer)
             {
-                player.GrabObjectServerRpc(grabbableObject.NetworkObject);
+                player.GrabObjectServerRpc(networkObject);
             }
             if (player.grabObjectCoroutine != null)
             {
                 player.StopCoroutine(player.grabObjectCoroutine);
             }
             player.grabObjectCoroutine = player.StartCoroutine(player.GrabObject());
-            return;
+
+            return true;
         }
 
         public static void FreezePlayer(this PlayerControllerB player, bool value)
