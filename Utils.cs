@@ -634,6 +634,20 @@ namespace SnowyLib
 
             return texture;
         }
+
+        public static LayerMask CreateMask(params string[] layerNames)
+        {
+            LayerMask mask = 0;
+
+            foreach (var name in layerNames)
+            {
+                int layer = LayerMask.NameToLayer(name);
+                if (layer >= 0)
+                    mask |= (1 << layer);
+            }
+
+            return mask;
+        }
     }
 
     [HarmonyPatch]
