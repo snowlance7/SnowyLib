@@ -152,10 +152,10 @@ namespace SnowyLib
                             break;
                     }
                     break;
-                case "/vignette":
-                    VignetteOverlay.Instance.SetIntensity(float.Parse(args[1]));
-                    HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {args[1]}");
-                    break;
+                //case "/vignette":
+                //    VignetteOverlay.Instance.SetIntensity(float.Parse(args[1]));
+                //    HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {args[1]}");
+                //    break;
                 case "/spawnanim":
                     localPlayer.SpawnPlayerAnimation();
                     break;
