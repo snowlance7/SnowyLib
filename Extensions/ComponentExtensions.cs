@@ -2,7 +2,7 @@
 
 namespace SnowyLib
 {
-    internal static class ComponentExtensions
+    public static class ComponentExtensions
     {
         public static bool TryGetComponentInChildren<T>(this Component comp, out T? component) where T : Component
         {
