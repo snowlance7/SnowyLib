@@ -648,6 +648,30 @@ namespace SnowyLib
 
             return mask;
         }
+
+        public static Collider? GetLargestCollider(Collider[] colliders)
+        {
+            Collider? largest = null;
+            float largestVolume = 0f;
+
+            foreach (Collider col in colliders)
+            {
+                Bounds bounds = col.bounds;
+
+                float volume =
+                    bounds.size.x *
+                    bounds.size.y *
+                    bounds.size.z;
+
+                if (volume > largestVolume)
+                {
+                    largestVolume = volume;
+                    largest = col;
+                }
+            }
+
+            return largest;
+        }
     }
 
     [HarmonyPatch]
