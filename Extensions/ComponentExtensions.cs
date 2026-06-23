@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SnowyLib.Extensions
+namespace SnowyLib
 {
     internal static class ComponentExtensions
     {
