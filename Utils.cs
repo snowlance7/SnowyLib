@@ -125,7 +125,7 @@ namespace SnowyLib
                     }
                     break;
                 case "/dungeon":
-                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
+                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.GetDawnInfo(). RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
                     break;
                 case "/dungeons":
                     foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
