@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Unity.Netcode;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Text;
+//using Unity.Netcode;
 
-namespace SnowyLib
-{
-    public class NetworkHandler : NetworkBehaviour
-    {
+//namespace SnowyLib
+//{
+//    public class NetworkHandler : NetworkBehaviour
+//    {
 
-    }
-}
+//    }
+//}

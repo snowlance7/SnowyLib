@@ -121,16 +121,22 @@ namespace SnowyLib
                 case "/levels":
                     foreach (var level in StartOfRound.Instance.levels)
                     {
-                        logger.LogDebug(level.name);
+                        var lInfo = level.GetDawnInfo();
+                        if (lInfo == null) { continue; }
+                        logger.LogDebug($"{lInfo.TypedKey.ToString()} | {level.name}");
                     }
                     break;
                 case "/dungeon":
-                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.GetDawnInfo(). RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
+                    var dInfo = RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.GetDawnInfo();
+                    logger.LogDebug($"{dInfo.TypedKey.ToString()} | {RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name}");
                     break;
                 case "/dungeons":
                     foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
                     {
-                        logger.LogDebug(dungeon.dungeonFlow.name);
+                        if (dungeon == null || dungeon.dungeonFlow == null) { continue; }
+                        var dInfo2 = dungeon.dungeonFlow.GetDawnInfo();
+                        if (dInfo2 == null) { continue; }
+                        logger.LogDebug($"{dInfo2.TypedKey.ToString()} | {dungeon.dungeonFlow.name}");
                     }
                     break;
                 case "/animations":
