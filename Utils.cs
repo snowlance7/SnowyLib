@@ -71,6 +71,15 @@ namespace SnowyLib
         public static UnityEvent OnFinishGeneratingLevel = new();
         public static UnityEvent OnShipLanded = new();
 
+        public const ulong RodrigoSteamID = 76561198164429786;
+        public const ulong LizzieSteamID = 76561199094139351;
+        public const ulong GlitchSteamID = 76561198984467725;
+        public const ulong RatSteamID = 76561199182474292;
+        public const ulong XuSteamID = 76561198399127090;
+        public const ulong SlayerSteamID = 76561198077184650;
+        public const ulong SnowySteamID = 76561198253760639;
+        public const ulong FunoSteamID = 76561198993437314;
+
         public enum ContentType
         {
             Item,
