@@ -3,15 +3,15 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using GameNetcodeStuff;
 using HarmonyLib;
-using System.IO;
 using System.Linq;
 using Unity.Netcode;
-using UnityEngine;
+using static BepInEx.BepInDependency;
 
 namespace SnowyLib
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency(Dawn.DawnLib.PLUGIN_GUID)]
+    [BepInDependency(StaticNetcodeLib.MyPluginInfo.PLUGIN_GUID, DependencyFlags.HardDependency)]
     internal class Plugin : BaseUnityPlugin
     {
 #pragma warning disable CS8618

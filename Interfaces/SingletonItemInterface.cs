@@ -38,7 +38,7 @@ namespace SnowyLib
                     spawnedReplacementItem.startFallingPosition = vector;
                     spawnedReplacementItem.targetFloorPosition = spawnedReplacementItem.GetItemFloorPosition(__instance.transform.position);
                     spawnedReplacementItem.NetworkObject.Spawn();
-                    NetworkHandler.Instance.SetScrapValueServerRpc(spawnedReplacementItem.NetworkObject, replacementItemValue);
+                    NetworkHandler.SetScrapValueServerRpc(spawnedReplacementItem.NetworkObject, replacementItemValue);
 
                     __instance.NetworkObject.Despawn(destroy: true);
                 }
