@@ -54,8 +54,8 @@ namespace SnowyLib
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnNetworkDespawn))]
-        private static void GrabbableObject_OnNetworkDespawn_Prefix(GrabbableObject __instance)
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnDestroy))]
+        private static void GrabbableObject_OnDestroy_Prefix(GrabbableObject __instance)
         {
             try
             {
