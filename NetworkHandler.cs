@@ -97,5 +97,37 @@ namespace SnowyLib
             logger.LogDebug($"Setting scrap value of {grabObj.name} to {value}");
             grabObj.SetScrapValue(value);
         }
+
+        [ServerRpc]
+        public static void SpawnEnemyServerRpc(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
+        {
+            if (!IsServer) { return; }
+            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation, parentTo);
+            EnemyAI enemy = obj.GetComponent<EnemyAI>();
+            enemy.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
+            RoundManager.Instance.SpawnedEnemies.Add(enemy);
+            return;
+        }
+
+        [ServerRpc]
+        public static void SpawnItemServerRpc(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
+        {
+            if (!IsServer) { return; }
+            GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
+            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
+            grabObj.fallTime = fallTime;
+            grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
+            return;
+        }
+
+        [ServerRpc]
+        public static void SpawnMapObjectServerRpc(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
+        {
+            if (!IsServer) { return; }
+            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].GetMapObjectPrefab(), position, rotation, parentTo);
+            var mapObj = obj.GetComponent<SpawnableMapObject>();
+            obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
+            return;
+        }
     }
 }
