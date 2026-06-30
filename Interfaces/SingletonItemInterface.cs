@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Dawn;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +34,7 @@ namespace SnowyLib
                     int replacementItemValue = (int)(UnityEngine.Random.Range(replacementItem.minValue, replacementItem.maxValue) * RoundManager.Instance.scrapValueMultiplier);
 
                     var vector = __instance.transform.position + Vector3.up * 0.25f;
-                    var spawnedReplacementObj = GameObject.Instantiate(replacementItem.spawnPrefab, vector, quaternion.identity);
-                    GrabbableObject spawnedReplacementItem = spawnedReplacementObj.GetComponent<GrabbableObject>();
+                    GrabbableObject spawnedReplacementItem = Utils.SpawnItem(__instance.itemProperties.GetDawnInfo().TypedKey, vector)!;
                     spawnedReplacementItem.startFallingPosition = vector;
                     spawnedReplacementItem.targetFloorPosition = spawnedReplacementItem.GetItemFloorPosition(__instance.transform.position);
                     spawnedReplacementItem.NetworkObject.Spawn();

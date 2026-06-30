@@ -490,7 +490,7 @@ namespace SnowyLib
             return enemy;
         }
 
-        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = true)
+        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
         {
             if (!IsServerOrHost) { return null; }
             GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
@@ -666,8 +666,13 @@ namespace SnowyLib
 
         public static Collider? GetLargestCollider(Collider[] colliders)
         {
-            Collider? largest = null;
-            float largestVolume = 0f;
+            if (colliders.Length == 0)
+                return null;
+
+            Collider largest = colliders[0];
+            float largestVolume = largest.bounds.size.x *
+                                  largest.bounds.size.y *
+                                  largest.bounds.size.z;
 
             foreach (Collider col in colliders)
             {
@@ -677,6 +682,8 @@ namespace SnowyLib
                     bounds.size.x *
                     bounds.size.y *
                     bounds.size.z;
+
+                logger.LogDebug($"{col.name} | Enabled: {col.enabled} | Size: {bounds.size} | Volume: {volume}");
 
                 if (volume > largestVolume)
                 {
