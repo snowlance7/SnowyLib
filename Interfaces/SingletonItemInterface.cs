@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using HarmonyLib;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -38,7 +39,15 @@ namespace SnowyLib
                     spawnedReplacementItem.startFallingPosition = vector;
                     spawnedReplacementItem.targetFloorPosition = spawnedReplacementItem.GetItemFloorPosition(__instance.transform.position);
                     spawnedReplacementItem.NetworkObject.Spawn();
-                    NetworkHandler.SetScrapValueServerRpc(spawnedReplacementItem.NetworkObject, replacementItemValue);
+
+                    IEnumerator SetScrapSpawnOnNetworkSpawn(GrabbableObject grabbableObject, int value)
+                    {
+                        yield return null;
+                        yield return new WaitUntil(() => grabbableObject.NetworkObject != null && grabbableObject.NetworkObject.IsSpawned);
+                        NetworkHandler.SetScrapValueServerRpc(grabbableObject.NetworkObject, value);
+                    }
+
+                    Plugin.Instance.StartCoroutine(SetScrapSpawnOnNetworkSpawn(spawnedReplacementItem, replacementItemValue));
 
                     __instance.NetworkObject.Despawn(destroy: true);
                 }
