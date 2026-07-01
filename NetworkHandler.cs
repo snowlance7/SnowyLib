@@ -13,7 +13,7 @@ using static SnowyLib.Plugin;
 namespace SnowyLib
 {
     [StaticNetcode]
-    internal static class NetworkHandler
+    public static class NetworkHandler
     {
         static bool IsServer => IsServerOrHost; // TODO: Test this
 
