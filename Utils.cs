@@ -179,6 +179,20 @@ namespace SnowyLib
                     StartOfRound.Instance.currentLevel.planetHasTime = !DEBUG_disableTime;
                     HUDManager.Instance.DisplayTip("Snowylib", "disableTime: " + DEBUG_disableTime);
                     break;
+                case "/playanim":
+                    if (args.Length > 3 && float.TryParse(args[3], out float time))
+                    {
+                        PlayPlayerAnimation(args[1], args[2], time);
+                    }
+                    else if (args.Length > 2)
+                    {
+                        PlayPlayerAnimation(args[1], args[2], 3f);
+                    }
+                    else if (args.Length > 1)
+                    {
+                        PlayPlayerAnimation(args[1]);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -313,6 +327,34 @@ namespace SnowyLib
                     default:
                         break;
                 }
+            }
+        }
+
+        public static void PlayPlayerAnimation(string animName, string animValue = "", float time = 1f)
+        {
+            var param = localPlayer.playerBodyAnimator.parameters.Where(x => x.name == animName).FirstOrDefault();
+
+            localPlayer.PlayQuickSpecialAnimation(time);
+
+            switch (param.type)
+            {
+                case AnimatorControllerParameterType.Float:
+                    if (!float.TryParse(animValue, out float value1)) { return; }
+                    localPlayer.playerBodyAnimator.SetFloat(animName, value1);
+                    break;
+                case AnimatorControllerParameterType.Int:
+                    if (!int.TryParse(animValue, out int value2)) { return; }
+                    localPlayer.playerBodyAnimator.SetInteger(animName, value2);
+                    break;
+                case AnimatorControllerParameterType.Bool:
+                    if (!bool.TryParse(animValue, out bool value3)) { return; }
+                    localPlayer.playerBodyAnimator.SetBool(animName, value3);
+                    break;
+                case AnimatorControllerParameterType.Trigger:
+                    localPlayer.playerBodyAnimator.SetTrigger(animName);
+                    break;
+                default:
+                    break;
             }
         }
 
