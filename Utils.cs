@@ -167,10 +167,20 @@ namespace SnowyLib
                             break;
                     }
                     break;
-                //case "/vignette":
-                //    VignetteOverlay.Instance.SetIntensity(float.Parse(args[1]));
-                //    HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {args[1]}");
-                //    break;
+                case "/vignette":
+                    if (args.Length > 2)
+                    {
+                        if (!float.TryParse(args[1], out float intensity) || !float.TryParse(args[2], out float decrease)) { return; }
+                        VignetteOverlay.SetIntensity(intensity, decrease);
+                        HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {intensity} and insanity decrease per second is set to {decrease}");
+                    }
+                    else
+                    {
+                        if (!float.TryParse(args[1], out float intensity)) { return; }
+                        VignetteOverlay.SetIntensity(intensity);
+                        HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {intensity}");
+                    }
+                    break;
                 case "/spawnanim":
                     localPlayer.SpawnPlayerAnimation();
                     break;

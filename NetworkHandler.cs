@@ -1,31 +1,44 @@
 ﻿using Dawn;
 using GameNetcodeStuff;
 using HarmonyLib;
-using SnowyLib;
-using StaticNetcodeLib;
-using System;
-using System.Security.Cryptography;
-using System.Text;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
-    [StaticNetcode]
-    public static class NetworkHandler
+    public class NetworkHandler : NetworkBehaviour
     {
-        static bool IsServer => IsServerOrHost; // TODO: Test this
+        public static NetworkHandler Instance { get; private set; } = null!;
 
-        [ServerRpc]
-        public static void ShakePlayerCamerasServerRpc(ScreenShakeType type, Vector3 position, float range)
+        public override void OnNetworkSpawn()
         {
-            if (!IsServer) { return; }
-            ShakePlayerCamerasClientRpc(type, position, range);
+            if (IsServer)
+            {
+                if (Instance != null && Instance != this)
+                {
+                    Instance.GetComponent<NetworkObject>().Despawn(destroy: true);
+                }
+            }
+
+            hideFlags = HideFlags.HideAndDontSave;
+            Instance = this;
+
+            logger.LogDebug("NetworkHandler spawned");
+            base.OnNetworkSpawn();
         }
 
-        [ClientRpc]
-        private static void ShakePlayerCamerasClientRpc(ScreenShakeType type, Vector3 position, float range)
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            if (Instance == this)
+                Instance = null;
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void ShakePlayerCamerasRpc(ScreenShakeType type, Vector3 position, float range)
         {
             float num = Vector3.Distance(localPlayer.transform.position, position);
             if (num < range)
@@ -38,59 +51,38 @@ namespace SnowyLib
             }
         }
 
-        [ServerRpc]
-        public static void ChangePlayerSizeServerRpc(ulong clientId, float size)
-        {
-            if (!IsServer) { return; }
-            ChangePlayerSizeClientRpc(clientId, size);
-        }
-
-        [ClientRpc]
-        private static void ChangePlayerSizeClientRpc(ulong clientId, float size)
+        [Rpc(SendTo.Everyone)]
+        public void ChangePlayerSizeRpc(ulong clientId, float size)
         {
             PlayerControllerB? playerHeldBy = PlayerFromId(clientId);
             if (playerHeldBy == null) { return; }
             playerHeldBy.thisPlayerBody.localScale = new Vector3(size, size, size);
         }
 
-        [ServerRpc]
-        public static void MufflePlayerServerRpc(ulong clientId, bool value)
-        {
-            if (!IsServer) { return; }
-            MufflePlayerClientRpc(clientId, value);
-        }
-
-        [ClientRpc]
-        private static void MufflePlayerClientRpc(ulong clientId, bool value)
+        [Rpc(SendTo.Everyone)]
+        public void MufflePlayerRpc(ulong clientId, bool value)
         {
             PlayerControllerB? player = PlayerFromId(clientId);
             if (player == null) { return; }
             player.MufflePlayer(value);
         }
 
-        [ServerRpc]
-        public static void KillPlayerServerRpc(ulong clientId)
-        {
-            if (!IsServer) { return; }
-            KillPlayerClientRpc(clientId);
-        }
-
-        [ClientRpc]
-        private static void KillPlayerClientRpc(ulong clientId)
+        [Rpc(SendTo.Everyone)]
+        public void KillPlayerRpc(ulong clientId)
         {
             if (localPlayer.actualClientId != clientId) { return; }
             localPlayer.KillPlayer(Vector3.zero);
         }
 
-        [ServerRpc]
-        public static void SetScrapValueServerRpc(NetworkObjectReference netRef, int value)
+        internal IEnumerator SetScrapSpawnOnNetworkSpawn(GrabbableObject grabbableObject, int value)
         {
-            if (!IsServer) { return; }
-            SetScrapValueClientRpc(netRef, value);
+            yield return null;
+            yield return new WaitUntil(() => grabbableObject.NetworkObject != null && grabbableObject.NetworkObject.IsSpawned);
+            NetworkHandler.Instance.SetScrapValueRpc(grabbableObject.NetworkObject, value);
         }
 
-        [ClientRpc]
-        private static void SetScrapValueClientRpc(NetworkObjectReference netRef, int value)
+        [Rpc(SendTo.Everyone)]
+        public void SetScrapValueRpc(NetworkObjectReference netRef, int value)
         {
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }
             if (!netObj.TryGetComponent(out GrabbableObject grabObj)) { return; }
@@ -98,36 +90,63 @@ namespace SnowyLib
             grabObj.SetScrapValue(value);
         }
 
-        [ServerRpc]
-        public static void SpawnEnemyServerRpc(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
+        [Rpc(SendTo.Server)]
+        public void SpawnEnemyRpc(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, bool destroyWithScene = true)
         {
             if (!IsServer) { return; }
-            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation, parentTo);
+            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation);
             EnemyAI enemy = obj.GetComponent<EnemyAI>();
             enemy.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             RoundManager.Instance.SpawnedEnemies.Add(enemy);
             return;
         }
 
-        [ServerRpc]
-        public static void SpawnItemServerRpc(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
+        [Rpc(SendTo.Server)]
+        public void SpawnItemRpc(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, float fallTime = 0f, bool destroyWithScene = false)
         {
             if (!IsServer) { return; }
-            GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
+            GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation);
             GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
             grabObj.fallTime = fallTime;
             grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             return;
         }
 
-        [ServerRpc]
-        public static void SpawnMapObjectServerRpc(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
+        [Rpc(SendTo.Server)]
+        public void SpawnMapObjectRpc(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, bool destroyWithScene = true)
         {
             if (!IsServer) { return; }
-            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].GetMapObjectPrefab(), position, rotation, parentTo);
+            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].GetMapObjectPrefab(), position, rotation);
             var mapObj = obj.GetComponent<SpawnableMapObject>();
             obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
             return;
+        }
+    }
+
+    [HarmonyPatch]
+    public static class NetworkHandlerPatches
+    {
+        public static GameObject? networkPrefab;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Start))]
+        public static void GameNetworkManager_Start_Postfix()
+        {
+            if (networkPrefab != null)
+                return;
+
+            if (ModAssets == null) { logger.LogError("Couldnt get ModAssets to create network handler"); return; }
+            networkPrefab = (GameObject)ModAssets.LoadAsset("Assets/ModAssets/NetworkHandler.prefab");
+
+            NetworkManager.Singleton.AddNetworkPrefab(networkPrefab);
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.Awake))]
+        static void StartOfRound_Awake_Postfix()
+        {
+            if (!IsServerOrHost) { return; }
+
+            GameObject networkHandlerHost = UnityEngine.Object.Instantiate(networkPrefab!, Vector3.zero, Quaternion.identity);
+            networkHandlerHost!.GetComponent<NetworkObject>().Spawn();
         }
     }
 }

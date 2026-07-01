@@ -1,109 +1,68 @@
-﻿//using GameNetcodeStuff;
-//using HarmonyLib;
-//using UnityEngine;
-//using UnityEngine.UI;
-//using static SnowyLib.Plugin;
+﻿using GameNetcodeStuff;
+using HarmonyLib;
+using UnityEngine;
+using UnityEngine.UI;
+using static SnowyLib.Plugin;
 
-//namespace SnowyLib
-//{
-//    public class VignetteOverlay : MonoBehaviour // TODO: Figure this out later
-//    {
-//        public static VignetteOverlay Instance { get; private set; } = null!;
+namespace SnowyLib
+{
+    public class VignetteOverlay : MonoBehaviour
+    {
+        public static VignetteOverlay Instance { get; private set; } = null!;
 
-//        Image image = null!;
-//        RectTransform rt = null!;
+        [SerializeField] Image image = null!;
 
-//        Texture2D? vignetteTexture;
+        Material material = null!;
 
-//        public float intensityDecreasePerSecond { get; private set; } = 0.01f;
+        static readonly int InsetId = Shader.PropertyToID("_Inset");
 
-//        public float currentIntensity { get; private set; }
+        float intensityDecreasePerSecond = 0.01f;
 
-//        void Awake()
-//        {
-//            logger.LogWarning("VignetteOverlay Awake running");
+        float currentIntensity;
 
-//            gameObject.layer = LayerMask.NameToLayer("UI");
+        void Awake()
+        {
+            material = image.material;
+        }
 
-//            Canvas canvas = gameObject.AddComponent<Canvas>();
-//            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-//            //canvas.sortingOrder = 9999;
-//            canvas.sortingOrder = 0;
-//            canvas.pixelPerfect = true;
+        void Update()
+        {
+            if (currentIntensity <= 0f) return;
 
-//            CanvasScaler canvasScaler = gameObject.AddComponent<CanvasScaler>();
-//            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-//            gameObject.AddComponent<GraphicRaycaster>();
+            currentIntensity = Mathf.Max(0f,
+                currentIntensity - intensityDecreasePerSecond * Time.deltaTime);
 
-//            GameObject vignetteObj = new GameObject("Vignette");
-//            vignetteObj.layer = LayerMask.NameToLayer("UI");
-//            vignetteObj.transform.SetParent(gameObject.transform, false);
-//            image = vignetteObj.AddComponent<Image>(); 
-            
-//            rt = vignetteObj.GetComponent<RectTransform>();
+            material.SetFloat(InsetId, currentIntensity);
+        }
 
-//            rt.anchorMin = Vector2.zero;
-//            rt.anchorMax = Vector2.one;
+        public static void SetIntensity(float intensity, float intensityDecreasePerSecond = 0.01f)
+        {
+            Instance.intensityDecreasePerSecond = intensityDecreasePerSecond;
+            Instance.currentIntensity = Mathf.Clamp01(intensity);
+            Instance.material.SetFloat(InsetId, Instance.currentIntensity);
+        }
 
-//            rt.offsetMin = Vector2.zero;
-//            rt.offsetMax = Vector2.zero;
+        public static void Init(PlayerControllerB player)
+        {
+            GameObject prefab = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/VignetteOverlay.prefab");
+            Instance = Instantiate(prefab, player.transform).GetComponent<VignetteOverlay>();
+        }
+    }
 
-//            image.raycastTarget = false;
-//            //rt.localScale = Vector3.one;
-
-//            vignetteTexture = Utils.LoadEmbeddedTexture("SnowyLib.Embedded.vignette.png");
-//            if (vignetteTexture == null) { logger.LogError("vignetteTexture is null"); return; }
-//            image.sprite = Sprite.Create(vignetteTexture, new Rect(0, 0, vignetteTexture.width, vignetteTexture.height), new Vector2(0.5f, 0.5f));
-//        }
-
-//        void Update()
-//        {
-//            if (currentIntensity <= 0f) return;
-
-//            currentIntensity = Mathf.Max(
-//                0f,
-//                currentIntensity - intensityDecreasePerSecond * Time.deltaTime);
-
-//            Apply(currentIntensity);
-//        }
-
-//        public void SetIntensity(float intensity, float intensityDecreasePerSecond = 0.01f)
-//        {
-//            this.intensityDecreasePerSecond = intensityDecreasePerSecond;
-//            currentIntensity = Mathf.Clamp01(intensity);
-//            logger.LogDebug("Setting intensity");
-//            Apply(currentIntensity);
-//        }
-
-//        void Apply(float t)
-//        {
-//            image.color = new Color(1f, 1f, 1f, t);
-
-//            float scale = Mathf.Lerp(1f, 2.5f, t);
-//            rt.localScale = Vector3.one * scale;
-//        }
-
-//        internal static void Init()
-//        {
-//            logger.LogDebug("Initiating VignetteOverlay");
-//            Instance = Instantiate(new GameObject("VignetteOverlay")).AddComponent<VignetteOverlay>();
-//        }
-//    }
-
-//    [HarmonyPatch]
-//    internal class VignetteOverlayPatches
-//    {
-//        [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
-//        public static void ConnectClientToPlayerObjectPostfix()
-//        {
-//            try
-//            {
-//                //VignetteOverlay.Init();
-//            }
-//            catch
-//            {
-//                return;
-//            }
-//        }
-//    }
-//}
+    [HarmonyPatch]
+    public class VignetteOverlayPatches
+    {
+        [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
+        public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)
+        {
+            try
+            {
+                VignetteOverlay.Init(__instance);
+            }
+            catch
+            {
+                return;
+            }
+        }
+    }
+}

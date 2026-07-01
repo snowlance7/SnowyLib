@@ -10,7 +10,7 @@ using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
-    public interface ISingletonItem { } // TODO: Test this
+    public interface ISingletonItem { }
 
     [HarmonyPatch]
     internal static class ISingletonItemPatch
@@ -40,17 +40,8 @@ namespace SnowyLib
 
                     var spawnPos = __instance.transform.position + Vector3.up * 0.25f;
                     GrabbableObject spawnedReplacementItem = Utils.SpawnItem(replacementItem.GetDawnInfo().TypedKey, spawnPos)!;
-                    //spawnedReplacementItem.startFallingPosition = spawnPos;
-                    //spawnedReplacementItem.targetFloorPosition = spawnedReplacementItem.GetItemFloorPosition(spawnedReplacementItem.transform.position);
 
-                    IEnumerator SetScrapSpawnOnNetworkSpawn(GrabbableObject grabbableObject, int value)
-                    {
-                        yield return null;
-                        yield return new WaitUntil(() => grabbableObject.NetworkObject != null && grabbableObject.NetworkObject.IsSpawned);
-                        NetworkHandler.SetScrapValueServerRpc(grabbableObject.NetworkObject, value);
-                    }
-
-                    Plugin.Instance.StartCoroutine(SetScrapSpawnOnNetworkSpawn(spawnedReplacementItem, replacementItemValue));
+                    NetworkHandler.Instance.StartCoroutine(NetworkHandler.Instance.SetScrapSpawnOnNetworkSpawn(spawnedReplacementItem, replacementItemValue));
 
                     despawningDuplicate = __instance;
                     __instance.NetworkObject.Despawn(destroy: true);

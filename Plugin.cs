@@ -3,15 +3,16 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System.IO;
 using System.Linq;
 using Unity.Netcode;
+using UnityEngine;
 using static BepInEx.BepInDependency;
 
 namespace SnowyLib
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency(Dawn.DawnLib.PLUGIN_GUID)]
-    [BepInDependency(StaticNetcodeLib.MyPluginInfo.PLUGIN_GUID, DependencyFlags.HardDependency)]
     internal class Plugin : BaseUnityPlugin
     {
 #pragma warning disable CS8618
@@ -23,6 +24,8 @@ namespace SnowyLib
         public static PlayerControllerB localPlayer { get { return StartOfRound.Instance.localPlayerController; } }
         public static PlayerControllerB? PlayerFromId(ulong id) { return StartOfRound.Instance.allPlayerScripts.Where(x => x.actualClientId == id).FirstOrDefault(); }
         public static bool IsServerOrHost { get { return NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost; } }
+        
+        public static AssetBundle ModAssets = null!;
 
         public static ConfigEntry<bool> cfgTesting = null!;
 
@@ -38,6 +41,8 @@ namespace SnowyLib
             logger = Instance.Logger;
 
             harmony.PatchAll();
+
+            ModAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowylib_assets"));
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
