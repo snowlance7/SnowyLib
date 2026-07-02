@@ -19,8 +19,8 @@ namespace SnowyLib
         private static GrabbableObject? despawningDuplicate;
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.InitializeAfterPositioning))]
-        private static void GrabbableObject_InitializeAfterPositioning_Postfix(GrabbableObject __instance)
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
+        private static void GrabbableObject_Start_Postfix(GrabbableObject __instance)
         {
             try
             {
