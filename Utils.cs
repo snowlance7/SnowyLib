@@ -148,6 +148,15 @@ namespace SnowyLib
                         logger.LogDebug($"{dInfo2.TypedKey.ToString()} | {dungeon.dungeonFlow.name}");
                     }
                     break;
+                case "/interiors":
+                    foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
+                    {
+                        if (dungeon == null || dungeon.dungeonFlow == null) { continue; }
+                        var dInfo2 = dungeon.dungeonFlow.GetDawnInfo();
+                        if (dInfo2 == null) { continue; }
+                        logger.LogDebug($"{dInfo2.TypedKey.ToString()} | {dungeon.dungeonFlow.name}");
+                    }
+                    break;
                 case "/animations":
                     LogAnimatorParameters(localPlayer.playerBodyAnimator);
                     break;
@@ -745,6 +754,45 @@ namespace SnowyLib
             }
 
             return largest;
+        }
+        public static GameObject Ping(Vector3 position, string headerText, string subText, int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = -1)
+        {
+            GameObject ping = GameObject.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
+
+            ping.tag = "DoNotSet";
+            ping.layer = LayerMask.NameToLayer("ScanNode");
+
+            ping.AddComponent<BoxCollider>();
+
+            ScanNodeProperties scanNode = ping.AddComponent<ScanNodeProperties>();
+            scanNode.maxRange = maxRange;
+            scanNode.minRange = minRange;
+            scanNode.headerText = headerText;
+            scanNode.subText = subText;
+            scanNode.nodeType = nodeType;
+            scanNode.requiresLineOfSight = requiresLineOfSight;
+
+            if (destroyTime > 0)
+                GameObject.Destroy(ping, destroyTime);
+
+            HUDManager h = HUDManager.Instance;
+
+            if (!h.nodesOnScreen.Contains(scanNode))
+            {
+                h.nodesOnScreen.Add(scanNode);
+            }
+
+            if (h.scanNodes.ContainsValue(scanNode)) { return ping; }
+
+            for (int i = 0; i < h.scanElements.Length; i++)
+            {
+                if (h.scanNodes.TryAdd(h.scanElements[i], scanNode))
+                {
+                    break;
+                }
+            }
+
+            return ping;
         }
     }
 
