@@ -48,5 +48,10 @@ namespace SnowyLib
 
             return players.ToArray();
         }
+
+        public static bool IsOutside(this Vector3 position)
+        {
+            return position.y > -80f;
+        }
     }
 }

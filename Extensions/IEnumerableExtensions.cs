@@ -35,7 +35,7 @@ namespace SnowyLib
             return array[UnityEngine.Random.Range(0, array.Length)];
         }
 
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float closestDistance, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
+        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float closestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
         {
             T? closest = null;
             closestDistance = Mathf.Infinity;
@@ -45,7 +45,7 @@ namespace SnowyLib
             {
                 if (item == null || excluded.Contains(item)) continue;
 
-                float distance = skipSqrt ? (position - positionSelector(item)).sqrMagnitude : Vector3.Distance(position, positionSelector(item));
+                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
                 if (distance >= closestDistance) continue;
 
                 closest = item;
@@ -55,7 +55,7 @@ namespace SnowyLib
             return closest;
         }
 
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
+        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
         {
             T? closest = null;
             float closestDistance = Mathf.Infinity;
@@ -65,7 +65,7 @@ namespace SnowyLib
             {
                 if (item == null || excluded.Contains(item)) continue;
 
-                float distance = skipSqrt ? (position - positionSelector(item)).sqrMagnitude : Vector3.Distance(position, positionSelector(item));
+                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
                 if (distance >= closestDistance) continue;
 
                 closest = item;
@@ -75,7 +75,7 @@ namespace SnowyLib
             return closest;
         }
 
-        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
+        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
         {
             T? farthest = null;
             farthestDistance = 0f;
@@ -85,7 +85,7 @@ namespace SnowyLib
             {
                 if (item == null || excluded.Contains(item)) continue;
 
-                float distance = skipSqrt ? (position - positionSelector(item)).sqrMagnitude : Vector3.Distance(position, positionSelector(item));
+                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
                 if (distance <= farthestDistance) continue;
 
                 farthest = item;
@@ -95,7 +95,7 @@ namespace SnowyLib
             return farthest;
         }
 
-        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool skipSqrt = false, IEnumerable<T>? excluded = null) where T : class
+        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
         {
             T? farthest = null;
             float farthestDistance = 0f;
@@ -105,7 +105,7 @@ namespace SnowyLib
             {
                 if (item == null || excluded.Contains(item)) continue;
 
-                float distance = skipSqrt ? (position - positionSelector(item)).sqrMagnitude : Vector3.Distance(position, positionSelector(item));
+                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
                 if (distance <= farthestDistance) continue;
 
                 farthest = item;

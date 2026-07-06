@@ -663,31 +663,60 @@ namespace SnowyLib
             HUDManager.Instance.AddChatMessage(msg, nameOfUserWhoTyped);
         }
 
-        public static float SmartDistance(PositionInfo position1, PositionInfo position2)
+        public static float SmartDistance(Vector3 position1, Vector3 position2, bool fastDistanceCheck = false)
         {
-            if (position1.isOutside == position2.isOutside)
+            if (position1.IsOutside() == position2.IsOutside())
+                return Vector3.Distance(position1, position2);
+
+            float closestDistance = Mathf.Infinity;
+            EntranceTeleport bestEntrance = null;
+
+            foreach (var entrance in Utils.entrances)
             {
-                return Vector3.Distance(position1.position, position2.position);
-            }
-            else
-            {
-                float closestDistance = Mathf.Infinity;
-                foreach (var entrance in Utils.entrances)
+                if (entrance == null)
+                    continue;
+
+                if (entrance.isEntranceToBuilding != position1.IsOutside())
+                    continue;
+
+                if (entrance.exitScript == null &&
+                    (entrance.exitPointDoesntExist || !entrance.FindExitPoint()))
+                    continue;
+
+                if (entrance.exitScript == null)
+                    continue;
+
+                if (fastDistanceCheck)
                 {
-                    if (entrance == null) { continue; }
-                    if (entrance.isEntranceToBuilding != position1.isOutside) { continue; }
-                    if (entrance.exitScript == null && (entrance.exitPointDoesntExist || !entrance.FindExitPoint())) { continue; }
-                    if (entrance.exitScript == null) { continue; }
+                    float distance =
+                        (position1 - entrance.transform.position).sqrMagnitude +
+                        (entrance.exitScript.transform.position - position2).sqrMagnitude;
 
-                    float position1ToEntrance = Vector3.Distance(position1.position, entrance.transform.position);
-                    float exitToPosition2 = Vector3.Distance(entrance.exitScript.transform.position, position2.position);
-                    float totalDistance = position1ToEntrance + exitToPosition2;
-                    if (totalDistance > closestDistance) { continue; }
-                    closestDistance = totalDistance;
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        bestEntrance = entrance;
+                    }
                 }
+                else
+                {
+                    float distance =
+                        Vector3.Distance(position1, entrance.transform.position) +
+                        Vector3.Distance(entrance.exitScript.transform.position, position2);
 
-                return closestDistance;
+                    closestDistance = Mathf.Min(closestDistance, distance);
+                }
             }
+
+            if (!fastDistanceCheck)
+                return closestDistance;
+
+            if (bestEntrance == null)
+                return Mathf.Infinity;
+
+            return
+                Vector3.Distance(position1, bestEntrance.transform.position) +
+                Vector3.Distance(bestEntrance.exitScript.transform.position, position2);
         }
 
         public static Texture2D? LoadEmbeddedTexture(string resourceName)
@@ -755,7 +784,8 @@ namespace SnowyLib
 
             return largest;
         }
-        public static GameObject Ping(Vector3 position, string headerText, string subText, int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = -1)
+
+        public static GameObject Ping(Vector3 position, string headerText = "Ping", string subText = "", int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = 10)
         {
             GameObject ping = GameObject.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
 
@@ -849,7 +879,7 @@ namespace SnowyLib
                 Utils.elevator = null;
                 Utils.entrances.Clear();
 
-                Utils.entrances = GameObject.FindObjectsOfType<EntranceTeleport>(includeInactive: false).ToList();
+                Utils.entrances = GameObject.FindObjectsOfType<EntranceTeleport>().ToList();
                 Utils.elevator = GameObject.FindObjectOfType<MineshaftElevatorController>();
 
                 Utils.SetRandoms();
