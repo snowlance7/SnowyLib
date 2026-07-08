@@ -674,7 +674,7 @@ namespace SnowyLib
                 return Vector3.Distance(position1, position2);
 
             float closestDistance = Mathf.Infinity;
-            EntranceTeleport bestEntrance = null;
+            EntranceTeleport? bestEntrance = null;
 
             foreach (var entrance in Utils.entrances)
             {
@@ -717,7 +717,7 @@ namespace SnowyLib
                 return closestDistance;
 
             if (bestEntrance == null)
-                return Mathf.Infinity;
+                return -1;
 
             return
                 Vector3.Distance(position1, bestEntrance.transform.position) +
