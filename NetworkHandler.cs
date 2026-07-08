@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyLib.Plugin;
@@ -38,17 +39,17 @@ namespace SnowyLib
         }
 
         [Rpc(SendTo.Everyone)]
-        public void ShakePlayerCamerasRpc(ScreenShakeType type, Vector3 position, float range)
+        public void ShakeCameraRpc(ulong clientId, ScreenShakeType screenShakeType)
         {
-            float num = Vector3.Distance(localPlayer.transform.position, position);
-            if (num < range)
-            {
-                HUDManager.Instance.ShakeCamera(type);
-            }
-            else if (num < range * 2f)
-            {
-                if ((int)type - 1 >= 0) { HUDManager.Instance.ShakeCamera((ScreenShakeType)((int)type - 1)); }
-            }
+            if (localPlayer.actualClientId != clientId) { return; }
+            HUDManager.Instance.ShakeCamera(screenShakeType);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void ShakeCameraRpc(ulong[] clientId, ScreenShakeType screenShakeType)
+        {
+            if (!clientId.Contains(localPlayer.actualClientId)) { return; }
+            HUDManager.Instance.ShakeCamera(screenShakeType);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -120,6 +121,40 @@ namespace SnowyLib
             var mapObj = obj.GetComponent<SpawnableMapObject>();
             obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
             return;
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void SpawnExplosionRpc(Vector3 explosionPosition, bool spawnExplosionEffect = false, float killRange = 1f, float damageRange = 1f, int nonLethalDamage = 50, float physicsForce = 0f, bool goThroughCar = false)
+        {
+            Landmine.SpawnExplosion(explosionPosition: explosionPosition, spawnExplosionEffect: spawnExplosionEffect, killRange: killRange, damageRange: damageRange, nonLethalDamage: nonLethalDamage, physicsForce: physicsForce, goThroughCar: goThroughCar);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void SetEarsRingingRpc(ulong clientId, float time)
+        {
+            if (localPlayer.actualClientId != clientId) { return; }
+            SoundManager.Instance.earsRingingTimer = time;
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void SetEarsRingingRpc(ulong[] clientId, float time)
+        {
+            if (!clientId.Contains(localPlayer.actualClientId)) { return; }
+            SoundManager.Instance.earsRingingTimer = time;
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void DisplayStatusEffectRpc(ulong clientId, string statusEffectString)
+        {
+            if (localPlayer.actualClientId != clientId) { return; }
+            HUDManager.Instance.DisplayStatusEffect(statusEffectString);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void DisplayStatusEffectRpc(ulong[] clientId, string statusEffectString)
+        {
+            if (!clientId.Contains(localPlayer.actualClientId)) { return; }
+            HUDManager.Instance.DisplayStatusEffect(statusEffectString);
         }
     }
 
