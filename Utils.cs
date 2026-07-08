@@ -15,6 +15,7 @@ using UnityEngine.Animations.Rigging;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.Utilities;
 using static SnowyLib.Plugin;
+using static UnityEngine.InputSystem.InputRemoting;
 
 namespace SnowyLib
 {
@@ -823,6 +824,14 @@ namespace SnowyLib
             }
 
             return ping;
+        }
+
+        public static void SetShipLeaveEarly(float timeToLeaveEarly, DialogueSegment[] shipLeavingEarlyDialogue)
+        {
+            TimeOfDay.Instance.shipLeaveAutomaticallyTime = timeToLeaveEarly;
+            TimeOfDay.Instance.shipLeavingAlertCalled = true;
+            HUDManager.Instance.ReadDialogue(shipLeavingEarlyDialogue);
+            HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
         }
     }
 

@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
@@ -155,6 +156,16 @@ namespace SnowyLib
         {
             if (!clientId.Contains(localPlayer.actualClientId)) { return; }
             HUDManager.Instance.DisplayStatusEffect(statusEffectString);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void SetShipLeaveEarlyServerRpc(float timeToLeaveEarly, string message, string speakerText = "SAFETY COMPUTER", float waitTime = 4f)
+        {
+            DialogueSegment dialogueSegment = new DialogueSegment();
+            dialogueSegment.speakerText = speakerText;
+            dialogueSegment.bodyText = message;
+            dialogueSegment.waitTime = waitTime;
+            Utils.SetShipLeaveEarly(timeToLeaveEarly, [dialogueSegment]);
         }
     }
 
