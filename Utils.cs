@@ -213,6 +213,10 @@ namespace SnowyLib
                         PlayPlayerAnimation(args[1]);
                     }
                     break;
+                case "/drunkness":
+                    if (args.Length == 1 || !float.TryParse(args[1], out float drunkness)) { return; }
+                    localPlayer.drunkness = drunkness;
+                    break;
                 default:
                     break;
             }

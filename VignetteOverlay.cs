@@ -16,9 +16,9 @@ namespace SnowyLib
 
         static readonly int InsetId = Shader.PropertyToID("_Inset");
 
-        float intensityDecreasePerSecond = 0.01f;
+        public static float currentIntensityDecreasePerSecond { get; private set; } = 0.01f;
 
-        float currentIntensity;
+        public static float currentIntensity { get; private set; }
 
         void Awake()
         {
@@ -30,16 +30,16 @@ namespace SnowyLib
             if (currentIntensity <= 0f) return;
 
             currentIntensity = Mathf.Max(0f,
-                currentIntensity - intensityDecreasePerSecond * Time.deltaTime);
+                currentIntensity - currentIntensityDecreasePerSecond * Time.deltaTime);
 
             material.SetFloat(InsetId, currentIntensity);
         }
 
         public static void SetIntensity(float intensity, float intensityDecreasePerSecond = 0.01f)
         {
-            Instance.intensityDecreasePerSecond = intensityDecreasePerSecond;
-            Instance.currentIntensity = Mathf.Clamp01(intensity);
-            Instance.material.SetFloat(InsetId, Instance.currentIntensity);
+            currentIntensityDecreasePerSecond = intensityDecreasePerSecond;
+            currentIntensity = Mathf.Clamp01(intensity);
+            Instance.material.SetFloat(InsetId, currentIntensity);
         }
 
         public static void Init(PlayerControllerB player)
