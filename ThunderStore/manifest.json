@@ -1,10 +1,10 @@
 {
   "name": "SnowyLib",
-  "version_number": "1.6.5",
+  "version_number": "1.7.0",
   "website_url": "https://github.com/snowlance7/SnowyLib",
   "description": "Personal library for my mods",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305",
-    "TeamXiaolan-DawnLib-0.9.24"
+    "TeamXiaolan-DawnLib-0.9.25"
   ]
 }

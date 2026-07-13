@@ -1,62 +1,74 @@
-﻿/*using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
-    internal class TestingHUDOverlay : MonoBehaviour
+    public class TestingHUDOverlay : MonoBehaviour
     {
-        public static TestingHUDOverlay? Instance { get; private set; }
-
-#pragma warning disable CS8618
-        [SerializeField] GameObject toggle1Obj;
-        [SerializeField] Text toggle1Label;
-        [SerializeField] Toggle toggle1;
-
-        [SerializeField] GameObject toggle2Obj;
-        [SerializeField] Text toggle2Label;
-        [SerializeField] Toggle toggle2;
-
-
-        [SerializeField] Text label1;
-        [SerializeField] Text label2;
-        [SerializeField] Text label3;
-#pragma warning restore CS8618
-
-        public static void Init(GameObject prefab)
+        private static TestingHUDOverlay? _instance;
+        private static TestingHUDOverlay Instance
         {
-            Instance = Instantiate(prefab).GetComponent<TestingHUDOverlay>();
-        }
-
-        public void Start()
-        {
-            if (Instance != null && Instance != this)
+            get
             {
-                Destroy(gameObject);
-                return;
+                if (_instance == null)
+                    _instance = Init();
+
+                return _instance;
             }
-            Instance = this;
         }
 
-        public void Update()
+        [SerializeField] Transform canvasTransform = null!;
+        [SerializeField] GameObject textElementPrefab = null!;
+
+        private static Dictionary<string, TestingHUDEntry> entries = new Dictionary<string, TestingHUDEntry>();
+
+        private static TestingHUDOverlay Init()
         {
-            toggle1Obj.SetActive(toggle1Label.text != "");
-            toggle2Obj.SetActive(toggle2Label.text != "");
+            GameObject prefab = (GameObject)ModAssets.LoadAsset("Assets/ModAssets/TestingHUDOverlay.prefab");
+            return Instantiate(prefab, localPlayer.transform).GetComponent<TestingHUDOverlay>();
         }
 
-        public void SetToggle1(string label, bool value)
+        private void Update()
         {
-            toggle1Label.text = label;
-            toggle1.isOn = value;
+            foreach (var pair in entries.ToList())
+            {
+                if (Time.unscaledTime >= pair.Value.ExpireTime)
+                {
+                    Destroy(pair.Value.Text.gameObject);
+                    entries.Remove(pair.Key);
+                }
+            }
         }
 
-        public void SetToggle2(string label, bool value)
+        public static void SetValue(string key, string value, float expireTime = 5f)
         {
-            toggle2Label.text = label;
-            toggle2.isOn = value;
+            _ = Instance;
+
+            if (!entries.TryGetValue(key, out TestingHUDEntry entry))
+            {
+                entry = CreateEntry();
+                entries.Add(key, entry);
+            }
+
+            entry.Text.text = $"{key}: {value}";
+            entry.ExpireTime = Time.unscaledTime + expireTime;
         }
 
-        public void SetLabel1(string value) => label1.text = value;
-        public void SetLabel2(string value) => label2.text = value;
-        public void SetLabel3(string value) => label3.text = value;
+        private static TestingHUDEntry CreateEntry()
+        {
+            TestingHUDEntry entry = new TestingHUDEntry();
+            entry.Text = Instantiate(Instance.textElementPrefab, Instance.canvasTransform).GetComponent<TMP_Text>();
+            return entry;
+        }
     }
-}*/
+
+    internal class TestingHUDEntry
+    {
+        public TMP_Text Text = null!;
+        public float ExpireTime;
+    }
+}
