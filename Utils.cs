@@ -1,9 +1,8 @@
-﻿using BepInEx.Logging;
-using Dawn;
+﻿using Dawn;
 using Dawn.Utils;
+using Dissonance;
 using GameNetcodeStuff;
 using HarmonyLib;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,11 +10,9 @@ using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Animations.Rigging;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.Utilities;
 using static SnowyLib.Plugin;
-using static UnityEngine.InputSystem.InputRemoting;
 
 namespace SnowyLib
 {
@@ -893,6 +890,37 @@ namespace SnowyLib
                 hm.StopCoroutine(hm.displayAdCoroutine);
             }
             hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
+        }
+
+        public static bool IsLocalPlayerSpeaking(float aplitudeThreshold = 0.1f, bool useAverageVoiceAmplitude = false)
+        {
+            if (IsLocalPlayerMuted()) return false;
+            return useAverageVoiceAmplitude ? GetLocalPlayerVoiceRelativeAmplitude() > aplitudeThreshold : GetLocalPlayerVoiceAmplitude() > aplitudeThreshold;
+        }
+
+        public static bool IsLocalPlayerMuted()
+        {
+            return StartOfRound.Instance.voiceChatModule.IsMuted;
+        }
+
+        public static float GetLocalPlayerVoiceRelativeAmplitude()
+        {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null || GameNetworkManager.Instance.localPlayerController.isPlayerDead || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled || StartOfRound.Instance.voiceChatModule == null)
+            {
+                return 0;
+            }
+            VoicePlayerState voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
+            return voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f);
+        }
+
+        public static float GetLocalPlayerVoiceAmplitude()
+        {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null || GameNetworkManager.Instance.localPlayerController.isPlayerDead || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled || StartOfRound.Instance.voiceChatModule == null)
+            {
+                return 0;
+            }
+            VoicePlayerState voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
+            return voicePlayerState.Amplitude;
         }
     }
 
