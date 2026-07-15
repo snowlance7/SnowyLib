@@ -261,7 +261,7 @@ namespace SnowyLib
                         continue;
 
                     Vector3 from = entrance.entrancePoint.position;
-                    Vector3 to = entrance.exitScript!.entrancePoint.position; // TODO: Test this
+                    Vector3 to = entrance.exitScript!.entrancePoint.position;
 
                     // start -> entrance -> exit -> end
                     if (CanPathToPoint(startPos, from) && CanPathToPoint(to, endPos))
@@ -836,6 +836,63 @@ namespace SnowyLib
             TimeOfDay.Instance.shipLeavingAlertCalled = true;
             HUDManager.Instance.ReadDialogue(shipLeavingEarlyDialogue);
             HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
+        }
+
+        public static void ShowItemAd(Item item, string top, string bottom)
+        {
+            if (item == null)
+            {
+                logger.LogWarning("Show Item Ad: Item is Null");
+                return;
+            }
+            if (item.spawnPrefab == null)
+            {
+                logger.LogWarning("Show Item Ad: Item spawn prefab is null");
+                return;
+            }
+            HUDManager.Instance.CreateToolAdModel(-100, item);
+            DoAdStuff(top, bottom);
+        }
+
+        public static void ShowItemAd(string itemName, string top, string bottom)
+        {
+            var item = StartOfRound.Instance.allItemsList.itemsList.Find(x => x.itemName == itemName);
+            ShowItemAd(item, top, bottom);
+        }
+
+        public static void ShowUnlockableAd(UnlockableItem unlockable, string top, string bottom)
+        {
+            if (unlockable == null)
+            {
+                logger.LogWarning("Show Unlockable Ad: Unlockable is Null. Huh");
+                return;
+            }
+            if (unlockable.prefabObject == null)
+            {
+                logger.LogWarning("Show Unlockable Ad: Unlockable prefabObject is Null. Huh");
+                return;
+            }
+            HUDManager.Instance.CreateFurnitureAdModel(unlockable);
+            DoAdStuff(top, bottom);
+        }
+
+        public static void ShowUnlockableAd(string unlockableName, string top, string bottom)
+        {
+            var unlockable = StartOfRound.Instance.unlockablesList.unlockables.Find(x => x.unlockableName == unlockableName);
+            ShowUnlockableAd(unlockable, top, bottom);
+        }
+
+        private static void DoAdStuff(string top, string bottom)
+        {
+            logger.LogDebug($"Do Ad Stuff: {top} {bottom}");
+            var hm = HUDManager.Instance;
+            hm.advertTopText.text = top;
+            hm.advertBottomText.text = bottom;
+            if (hm.displayAdCoroutine != null)
+            {
+                hm.StopCoroutine(hm.displayAdCoroutine);
+            }
+            hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
         }
     }
 
