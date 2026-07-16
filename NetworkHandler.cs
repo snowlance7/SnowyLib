@@ -148,14 +148,14 @@ namespace SnowyLib
         public void DisplayStatusEffectRpc(ulong clientId, string statusEffectString)
         {
             if (localPlayer.actualClientId != clientId) { return; }
-            HUDManager.Instance.DisplayStatusEffect(statusEffectString);
+            Utils.DisplayStatusEffect(statusEffectString);
         }
 
         [Rpc(SendTo.Everyone)]
         public void DisplayStatusEffectRpc(ulong[] clientId, string statusEffectString)
         {
             if (!clientId.Contains(localPlayer.actualClientId)) { return; }
-            HUDManager.Instance.DisplayStatusEffect(statusEffectString);
+            Utils.DisplayStatusEffect(statusEffectString);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -166,6 +166,12 @@ namespace SnowyLib
             dialogueSegment.bodyText = message;
             dialogueSegment.waitTime = waitTime;
             Utils.SetShipLeaveEarly(timeToLeaveEarly, [dialogueSegment]);
+        }
+
+        [Rpc(SendTo.Server)]
+        public void DisplayAdRpc()
+        {
+            HUDManager.Instance.ChooseAdItem();
         }
     }
 

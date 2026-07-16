@@ -835,48 +835,56 @@ namespace SnowyLib
             HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
         }
 
-        public static void ShowItemAd(Item item, string top, string bottom)
+        public static void DisplayStatusEffect(string message)
+        {
+            HUDManager.Instance.DisplayStatusEffect(message);
+        }
+
+        public static void DisplayDialogue(DialogueSegment[] dialogues)
+        {
+            HUDManager.Instance.ReadDialogue(dialogues);
+        }
+
+        public static void DisplaySignalTranslatorMessage(string message)
+        {
+            HUDManager.Instance.UseSignalTranslatorServerRpc(message);
+        }
+
+        public static void DisplayAd()
+        {
+            HUDManager.Instance.ChooseAdItem();
+        }
+
+        public static void DisplayAd(Item item, string top, string bottom)
         {
             if (item == null)
             {
-                logger.LogWarning("Show Item Ad: Item is Null");
+                logger.LogWarning("Display Item Ad: Item is Null");
                 return;
             }
             if (item.spawnPrefab == null)
             {
-                logger.LogWarning("Show Item Ad: Item spawn prefab is null");
+                logger.LogWarning("Display Item Ad: Item spawn prefab is null");
                 return;
             }
             HUDManager.Instance.CreateToolAdModel(-100, item);
             DoAdStuff(top, bottom);
         }
 
-        public static void ShowItemAd(string itemName, string top, string bottom)
-        {
-            var item = StartOfRound.Instance.allItemsList.itemsList.Find(x => x.itemName == itemName);
-            ShowItemAd(item, top, bottom);
-        }
-
-        public static void ShowUnlockableAd(UnlockableItem unlockable, string top, string bottom)
+        public static void DisplayAd(UnlockableItem unlockable, string top, string bottom)
         {
             if (unlockable == null)
             {
-                logger.LogWarning("Show Unlockable Ad: Unlockable is Null. Huh");
+                logger.LogWarning("Display Unlockable Ad: Unlockable is Null");
                 return;
             }
             if (unlockable.prefabObject == null)
             {
-                logger.LogWarning("Show Unlockable Ad: Unlockable prefabObject is Null. Huh");
+                logger.LogWarning("Display Unlockable Ad: Unlockable prefabObject is Null");
                 return;
             }
             HUDManager.Instance.CreateFurnitureAdModel(unlockable);
             DoAdStuff(top, bottom);
-        }
-
-        public static void ShowUnlockableAd(string unlockableName, string top, string bottom)
-        {
-            var unlockable = StartOfRound.Instance.unlockablesList.unlockables.Find(x => x.unlockableName == unlockableName);
-            ShowUnlockableAd(unlockable, top, bottom);
         }
 
         private static void DoAdStuff(string top, string bottom)
