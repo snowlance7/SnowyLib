@@ -1,4 +1,5 @@
 ﻿using GameNetcodeStuff;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -13,6 +14,12 @@ namespace SnowyLib
             return player.gameObject.TryGetComponent(out StatusEffectController controller) ? controller : player.gameObject.AddComponent<StatusEffectController>();
         }
 
+        /// <summary>
+        /// Attempts to grab the specified grabbable object if the player meets all requirements.
+        /// </summary>
+        /// <param name="player">The player attempting to grab the object.</param>
+        /// <param name="grabbableObject">The object to be grabbed.</param>
+        /// <returns>true if the object was successfully grabbed; otherwise, false.</returns>
         public static bool GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
         {
             if (player.twoHanded || player.sinkingValue > 0.73f) { return false; }
@@ -64,6 +71,11 @@ namespace SnowyLib
             return true;
         }
 
+        /// <summary>
+        /// Enables or disables player interaction, look input, and movement.
+        /// </summary>
+        /// <param name="player">The player controller to modify.</param>
+        /// <param name="value">true to freeze the player; false to unfreeze.</param>
         public static void FreezePlayer(this PlayerControllerB player, bool value)
         {
             Utils.localPlayerFrozen = value;
@@ -72,6 +84,11 @@ namespace SnowyLib
             player.disableMoveInput = value;
         }
 
+        /// <summary>
+        /// Sets the visibility of the player's scavenger model and related components.
+        /// </summary>
+        /// <param name="player">The player controller whose scavenger model visibility is being changed.</param>
+        /// <param name="value">true to make the scavenger model invisible; false to make it visible.</param>
         public static void MakePlayerInvisible(this PlayerControllerB player, bool value)
         {
             GameObject scavengerModel = player.gameObject.transform.Find("ScavengerModel").gameObject;
@@ -85,6 +102,10 @@ namespace SnowyLib
 
         }
 
+        /// <summary>
+        /// Rebuilds the animation rig for the specified player controller.
+        /// </summary>
+        /// <param name="player">The player controller whose animation rig is rebuilt.</param>
         public static void RebuildRig(this PlayerControllerB player)
         {
             if (player != null && player.playerBodyAnimator != null)
@@ -94,6 +115,11 @@ namespace SnowyLib
             }
         }
 
+        /// <summary>
+        /// Applies or removes a muffling effect to the player's voice chat audio.
+        /// </summary>
+        /// <param name="player">The player controller to modify.</param>
+        /// <param name="muffle">true to enable the muffling effect; false to disable it.</param>
         public static void MufflePlayer(this PlayerControllerB player, bool muffle)
         {
             if (player.currentVoiceChatAudioSource == null)
@@ -108,6 +134,22 @@ namespace SnowyLib
                 component.lowPassOverride = muffle ? 500f : 20000f;
                 player.voiceMuffledByEnemy = muffle;
             }
+        }
+
+        /// <summary>
+        /// Revives the specified player at the given position or at the default spawn location if no position is
+        /// provided.
+        /// </summary>
+        /// <remarks>
+        /// Calls RPC
+        /// </remarks>
+        /// <param name="player">The player to revive.</param>
+        /// <param name="position">The world position where the player will be revived. If not specified, the default spawn position is used.</param>
+        public static void RevivePlayer(this PlayerControllerB player, Vector3 position = default)
+        {
+            if (position == default)
+                position = StartOfRound.Instance.GetPlayerSpawnPosition(Array.IndexOf(StartOfRound.Instance.allPlayerScripts, player));
+            NetworkHandler.Instance.RevivePlayerRpc(player.actualClientId, position);
         }
     }
 }

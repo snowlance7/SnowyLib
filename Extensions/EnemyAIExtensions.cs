@@ -14,6 +14,21 @@ namespace SnowyLib
             return enemy.gameObject.TryGetComponent(out StatusEffectController controller) ? controller : enemy.gameObject.AddComponent<StatusEffectController>();
         }
 
+        /// <summary>
+        /// Finds and targets the closest enemy that meets specified criteria, optionally retaining the previous target
+        /// if within a buffer distance.
+        /// </summary>
+        /// <param name="thisEnemy">The enemy AI instance performing the targeting operation.</param>
+        /// <param name="targetEnemy">When this method returns, contains the closest targetable enemy if found; otherwise, null.</param>
+        /// <param name="previousTargetEnemy">The previously targeted enemy to consider for retention based on buffer distance.</param>
+        /// <param name="enemyIsTargetable">A function that determines whether an enemy can be targeted.</param>
+        /// <param name="bufferDistance">The maximum distance difference to retain the previous target instead of switching to a new one.</param>
+        /// <param name="requireLineOfSight">true to require line of sight to the target; otherwise, false.</param>
+        /// <param name="viewWidth">The field of view angle, in degrees, used for line of sight checks.</param>
+        /// <param name="doGroundCast">true to perform a ground cast to check for obstacles beneath the enemy; otherwise, false.</param>
+        /// <param name="requirePath">true to require a valid path to the target; otherwise, false.</param>
+        /// <param name="checkForMineshaftStartTile">true to check for the mineshaft start tile during targeting; otherwise, false.</param>
+        /// <returns>true if a targetable enemy is found; otherwise, false.</returns>
         public static bool TargetClosestEnemy(this EnemyAI thisEnemy, out EnemyAI? targetEnemy, EnemyAI? previousTargetEnemy, Func<EnemyAI, bool> enemyIsTargetable, float bufferDistance = 1.5f, bool requireLineOfSight = false, float viewWidth = 70f, bool doGroundCast = false, bool requirePath = false, bool checkForMineshaftStartTile = true)
         {
             targetEnemy = previousTargetEnemy;
@@ -54,6 +69,17 @@ namespace SnowyLib
             return targetEnemy != null;
         }
 
+        /// <summary>
+        /// Finds the closest enemy in line of sight within the specified field of view and range.
+        /// </summary>
+        /// <param name="thisEnemy">The enemy performing the line of sight check.</param>
+        /// <param name="targetEnemy">When this method returns, contains the currently targeted enemy, if any.</param>
+        /// <param name="previousTargetEnemy">The previously targeted enemy.</param>
+        /// <param name="width">The width of the field of view in degrees.</param>
+        /// <param name="range">The maximum distance to check for enemies.</param>
+        /// <param name="proximityAwareness">The distance within which the enemy is aware of others, regardless of field of view.</param>
+        /// <param name="bufferDistance">The minimum distance change required to switch targets.</param>
+        /// <returns>The closest enemy in line of sight, or null if none is found.</returns>
         public static EnemyAI? CheckLineOfSightForClosestEnemy(this EnemyAI thisEnemy, out EnemyAI? targetEnemy, EnemyAI? previousTargetEnemy, float width = 45f, int range = 60, int proximityAwareness = -1, float bufferDistance = 0f)
         {
             targetEnemy = previousTargetEnemy;

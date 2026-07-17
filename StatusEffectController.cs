@@ -8,6 +8,11 @@ using static SnowyLib.StatusEffectController;
 
 namespace SnowyLib
 {
+    /// <summary>
+    /// Manages and applies status effects to a player or enemy.
+    /// </summary>
+    /// <remarks>Handles the application, removal, and updating of status effects, ensuring proper conflict
+    /// resolution and cleanup on destruction.</remarks>
     public class StatusEffectController : MonoBehaviour
     {
         public List<StatusEffect> effects { get; private set; } = new List<StatusEffect>();

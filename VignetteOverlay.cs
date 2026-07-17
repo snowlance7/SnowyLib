@@ -42,7 +42,7 @@ namespace SnowyLib
             Instance.material.SetFloat(InsetId, currentIntensity);
         }
 
-        public static void Init(PlayerControllerB player)
+        internal static void Init(PlayerControllerB player)
         {
             GameObject prefab = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/VignetteOverlay.prefab");
             Instance = Instantiate(prefab, player.transform).GetComponent<VignetteOverlay>();
@@ -50,7 +50,7 @@ namespace SnowyLib
     }
 
     [HarmonyPatch]
-    public class VignetteOverlayPatches
+    internal static class VignetteOverlayPatches
     {
         [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
         public static void ConnectClientToPlayerObjectPostfix(PlayerControllerB __instance)

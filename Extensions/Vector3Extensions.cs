@@ -15,6 +15,12 @@ namespace SnowyLib
             return position;
         }
 
+        /// <summary>
+        /// Finds the closest component of the specified type to the given position.
+        /// </summary>
+        /// <typeparam name="T">The type of Unity component to search for.</typeparam>
+        /// <param name="position">The position from which to measure distance.</param>
+        /// <returns>The closest component of type T, or null if none are found.</returns>
         public static T? GetClosestGameObjectOfType<T>(this Vector3 position) where T : Component
         {
             T[] objects = UnityEngine.Object.FindObjectsOfType<T>();
@@ -34,6 +40,14 @@ namespace SnowyLib
             return closest;
         }
 
+        /// <summary>
+        /// Retrieves all player controllers within a specified distance from a position, excluding any specified
+        /// players.
+        /// </summary>
+        /// <param name="position">The origin position from which to search for nearby players.</param>
+        /// <param name="distance">The maximum distance from the position to include players. Defaults to 10 units.</param>
+        /// <param name="ignoredPlayers">A list of players to exclude from the search, or null to include all players.</param>
+        /// <returns>An array of PlayerControllerB instances representing players within the specified distance.</returns>
         public static PlayerControllerB[] GetNearbyPlayers(this Vector3 position, float distance = 10f, List<PlayerControllerB>? ignoredPlayers = null)
         {
             List<PlayerControllerB> players = [];
@@ -49,6 +63,11 @@ namespace SnowyLib
             return players.ToArray();
         }
 
+        /// <summary>
+        /// Determines whether the vector is outside the defined vertical bounds.
+        /// </summary>
+        /// <param name="position">The vector to evaluate.</param>
+        /// <returns>true if the y-component of the vector is greater than -80; otherwise, false.</returns>
         public static bool IsOutside(this Vector3 position)
         {
             return position.y > -80f;

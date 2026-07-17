@@ -3,6 +3,7 @@ using Dawn.Utils;
 using Dissonance;
 using GameNetcodeStuff;
 using HarmonyLib;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.Utilities;
+using UnityEngine.SocialPlatforms;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib
@@ -91,7 +93,7 @@ namespace SnowyLib
             Utils.randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
         }
 
-        public static void ChatCommand(string[] args)
+        internal static void ChatCommand(string[] args)
         {
             if (!testing) { return; }
 
@@ -219,6 +221,14 @@ namespace SnowyLib
             }
         }
 
+        /// <summary>
+        /// Determines whether a navigable path exists between two positions, considering entrances and elevator
+        /// transitions.
+        /// </summary>
+        /// <param name="startPos">The starting position in world coordinates.</param>
+        /// <param name="endPos">The destination position in world coordinates.</param>
+        /// <param name="isOutside">true if the starting position is outside the building; otherwise, false.</param>
+        /// <returns>true if a valid path exists; otherwise, false.</returns>
         public static bool SmartCanPathToPoint(Vector3 startPos, Vector3 endPos, bool isOutside)
         {
             bool inside = !isOutside;
@@ -300,6 +310,12 @@ namespace SnowyLib
             return false;
         }
 
+        /// <summary>
+        /// Determines whether a valid navigable path exists between two positions on the NavMesh.
+        /// </summary>
+        /// <param name="startPos">The starting position in world coordinates.</param>
+        /// <param name="endPos">The target position in world coordinates.</param>
+        /// <returns>true if a valid path exists; otherwise, false.</returns>
         public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
         {
             NavMeshPath path = new NavMeshPath();
@@ -318,7 +334,7 @@ namespace SnowyLib
             return pathDistance > 0;
         }
 
-        public static void LogRarities(ContentType contentType)
+        internal static void LogRarities(ContentType contentType)
         {
             foreach (var level in StartOfRound.Instance.levels)
             {
@@ -351,6 +367,13 @@ namespace SnowyLib
             }
         }
 
+        /// <summary>
+        /// Plays an animation on the local player's animator using the specified parameter and value for a given
+        /// duration.
+        /// </summary>
+        /// <param name="animName">The name of the animation parameter to modify.</param>
+        /// <param name="animValue">The value to assign to the animation parameter, interpreted according to its type.</param>
+        /// <param name="time">The duration in seconds for which the animation should play.</param>
         public static void PlayPlayerAnimation(string animName, string animValue = "", float time = 1f)
         {
             var param = localPlayer.playerBodyAnimator.parameters.Where(x => x.name == animName).FirstOrDefault();
@@ -379,7 +402,7 @@ namespace SnowyLib
             }
         }
 
-        public static void LogAnimatorParameters(Animator animator)
+        internal static void LogAnimatorParameters(Animator animator)
         {
             foreach (var param in animator.parameters)
             {
@@ -404,11 +427,16 @@ namespace SnowyLib
             }
         }
 
-        public static bool FastInRange(Vector3 posA, Vector3 posB, float maxDistance)
-        {
-            return (posA - posB).sqrMagnitude <= (maxDistance * maxDistance);
-        }
-
+        /// <summary>
+        /// Calculates the optimal direction to throw an object by performing multiple raycasts around the forward
+        /// vector and selecting the direction with the farthest unobstructed path.
+        /// </summary>
+        /// <param name="origin">The starting position for the raycasts.</param>
+        /// <param name="forward">The initial forward direction to base the search around.</param>
+        /// <param name="rayCount">The number of directions to sample around the forward vector.</param>
+        /// <param name="maxDistance">The maximum distance each raycast can reach.</param>
+        /// <param name="layerMask">The layer mask used to filter raycast collisions.</param>
+        /// <returns>The direction vector that allows for the farthest throw from the origin.</returns>
         public static Vector3 GetBestThrowDirection(Vector3 origin, Vector3 forward, int rayCount, float maxDistance, LayerMask layerMask)
         {
             Vector3 bestDirection = forward;
@@ -438,6 +466,10 @@ namespace SnowyLib
             return bestDirection;
         }
 
+        /// <summary>
+        /// Retrieves a list of unique spawnable enemies from the game's catalog, including their associated rarity.
+        /// </summary>
+        /// <returns>A list of unique spawnable enemies with their rarity information.</returns>
         public static List<SpawnableEnemyWithRarity> GetEnemies()
         {
             List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
@@ -452,6 +484,10 @@ namespace SnowyLib
             return enemies;
         }
 
+        /// <summary>
+        /// Retrieves a dictionary containing all unique hazard prefabs present in the current level.
+        /// </summary>
+        /// <returns>A dictionary mapping hazard prefab names to their corresponding GameObject instances.</returns>
         public static Dictionary<string, GameObject> GetAllHazards()
         {
             Dictionary<string, GameObject> hazards = new Dictionary<string, GameObject>();
@@ -465,6 +501,16 @@ namespace SnowyLib
             return hazards;
         }
 
+        /// <summary>
+        /// Generates a random position on the NavMesh within an annular region defined by minimum and maximum radii
+        /// from a center point.
+        /// </summary>
+        /// <param name="center">The center point around which to sample the NavMesh.</param>
+        /// <param name="minRadius">The minimum distance from the center point for the annulus.</param>
+        /// <param name="maxRadius">The maximum distance from the center point for the annulus.</param>
+        /// <param name="sampleCount">The number of attempts to find a valid NavMesh position.</param>
+        /// <returns>A valid position on the NavMesh within the specified annulus, or the original center position if none is
+        /// found.</returns>
         public static Vector3 GetRandomNavMeshPositionInAnnulus(Vector3 center, float minRadius, float maxRadius, int sampleCount = 10)
         {
             Vector3 randomDirection;
@@ -503,6 +549,14 @@ namespace SnowyLib
             return center;
         }
 
+        /// <summary>
+        /// Generates a list of evenly spaced positions on the NavMesh around a specified center point.
+        /// </summary>
+        /// <param name="center">The center point around which to generate positions.</param>
+        /// <param name="count">The number of positions to generate.</param>
+        /// <param name="minRadius">The minimum distance from the center for generated positions.</param>
+        /// <param name="maxRadius">The maximum distance from the center for generated positions.</param>
+        /// <returns>A list of valid positions on the NavMesh.</returns>
         public static List<Vector3> GetEvenlySpacedNavMeshPositions(Vector3 center, int count, float minRadius, float maxRadius)
         {
             List<Vector3> positions = new List<Vector3>();
@@ -543,6 +597,18 @@ namespace SnowyLib
             return positions;
         }
 
+        /// <summary>
+        /// Spawns an enemy of the specified type at the given position and rotation.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Server
+        /// </remarks>
+        /// <param name="key">The key identifying the enemy type to spawn.</param>
+        /// <param name="position">The world position where the enemy is spawned.</param>
+        /// <param name="rotation">The rotation to apply to the spawned enemy.</param>
+        /// <param name="parentTo">The optional parent transform for the spawned enemy.</param>
+        /// <param name="destroyWithScene">true to destroy the enemy when the scene is unloaded; otherwise, false.</param>
+        /// <returns>The spawned EnemyAI instance, or null if not executed on the server.</returns>
         public static EnemyAI? SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
@@ -553,6 +619,19 @@ namespace SnowyLib
             return enemy;
         }
 
+        /// <summary>
+        /// Instantiates a grabbable item at the specified position and rotation.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Server
+        /// </remarks>
+        /// <param name="key">The key identifying the item to instantiate.</param>
+        /// <param name="position">The world position where the item will be spawned.</param>
+        /// <param name="rotation">The rotation to apply to the spawned item.</param>
+        /// <param name="parentTo">The optional parent transform for the spawned item.</param>
+        /// <param name="fallTime">The duration for the item to fall after spawning.</param>
+        /// <param name="destroyWithScene">true to destroy the item when the scene unloads; otherwise, false.</param>
+        /// <returns>The spawned grabbable object, or null if not executed on the server.</returns>
         public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
         {
             if (!IsServerOrHost) { return null; }
@@ -563,6 +642,18 @@ namespace SnowyLib
             return grabObj;
         }
 
+        /// <summary>
+        /// Instantiates a map object prefab at the specified position and rotation.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Server
+        /// </remarks>
+        /// <param name="key">The key identifying the map object to instantiate.</param>
+        /// <param name="position">The world position for the instantiated map object.</param>
+        /// <param name="rotation">The rotation to apply to the instantiated map object.</param>
+        /// <param name="parentTo">The optional parent transform for the instantiated map object.</param>
+        /// <param name="destroyWithScene">true to destroy the map object when the scene is unloaded; otherwise, false.</param>
+        /// <returns>The spawned map object, or null if not executed on the server or host.</returns>
         public static SpawnableMapObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
@@ -572,6 +663,24 @@ namespace SnowyLib
             return mapObj;
         }
 
+        /// <summary>
+        /// Plays an audio clip at a specified world position with optional pitch randomization, 3D spatialization,
+        /// distance attenuation, and low-pass filtering.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Local
+        /// Destroys the temporary sound object after playback and transmits audio to
+        /// walkie-talkies. Registers the sound as audible noise if spatial3D is enabled and audibleNoiseID is
+        /// non-negative.</remarks>
+        /// <param name="pos">The transform representing the world position where the sound is played.</param>
+        /// <param name="clip">The audio clip to play.</param>
+        /// <param name="volume">The playback volume, from 0.0 (silent) to 1.0 (full volume).</param>
+        /// <param name="randomizePitch">true to randomize the pitch of the sound; otherwise, false.</param>
+        /// <param name="spatial3D">true to spatialize the sound in 3D space; otherwise, false.</param>
+        /// <param name="min3DDistance">The minimum distance at which the sound is audible.</param>
+        /// <param name="max3DDistance">The maximum distance at which the sound can be heard.</param>
+        /// <param name="cutoffFrequency">The cutoff frequency for the low-pass filter applied to the sound.</param>
+        /// <param name="audibleNoiseID">The identifier for registering the sound as audible noise, or a negative value to disable.</param>
         public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
             GameObject soundObj = GameObject.Instantiate(new GameObject("TempSoundEffectObj"), pos);
@@ -601,6 +710,23 @@ namespace SnowyLib
                 RoundManager.Instance.PlayAudibleNoise(source.transform.position, 4f * volume, volume / 2f, 0, noiseIsInsideClosedShip: true, audibleNoiseID);
         }
 
+        /// <summary>
+        /// Plays an audio clip at a specified world position with configurable volume, pitch, spatialization, distance
+        /// attenuation, and low-pass filtering. Optionally registers the sound as an audible noise event.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
+        /// <param name="pos">The world position where the audio clip is played.</param>
+        /// <param name="clip">The audio clip to play.</param>
+        /// <param name="volume">The playback volume, from 0 (silent) to 1 (full volume).</param>
+        /// <param name="randomizePitch">true to randomize the pitch slightly; otherwise, false.</param>
+        /// <param name="spatial3D">true to spatialize the sound in 3D space; otherwise, false.</param>
+        /// <param name="min3DDistance">The minimum distance at which the sound is heard at full volume.</param>
+        /// <param name="max3DDistance">The maximum distance at which the sound can be heard.</param>
+        /// <param name="cutoffFrequency">The cutoff frequency for the low-pass filter applied to the audio.</param>
+        /// <param name="audibleNoiseID">The identifier for registering the sound as an audible noise event, or a negative value to skip
+        /// registration.</param>
         public static void PlaySoundAtPosition(Vector3 pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
             GameObject soundObj = GameObject.Instantiate(new GameObject("TempSoundEffectObj"), pos, Quaternion.identity);
@@ -630,12 +756,44 @@ namespace SnowyLib
                 RoundManager.Instance.PlayAudibleNoise(source.transform.position, 4f * volume, volume / 2f, 0, noiseIsInsideClosedShip: true, audibleNoiseID);
         }
 
+        /// <summary>
+        /// Plays a random audio clip from the specified array at the given position with optional pitch randomization,
+        /// 3D spatialization, distance settings, and cutoff frequency.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
+        /// <param name="pos">The transform representing the position in world space where the sound is played.</param>
+        /// <param name="clips">The array of audio clips to select from for playback.</param>
+        /// <param name="volume">The playback volume, where 1.0 is full volume.</param>
+        /// <param name="randomizePitch">true to randomize the pitch of the audio clip; otherwise, false.</param>
+        /// <param name="spatial3D">true to enable 3D spatialization of the sound; otherwise, false.</param>
+        /// <param name="min3DDistance">The minimum distance at which the sound is audible.</param>
+        /// <param name="max3DDistance">The maximum distance at which the sound is audible.</param>
+        /// <param name="cutoffFrequency">The cutoff frequency applied to the audio playback.</param>
+        /// <param name="audibleNoiseID">The identifier for the audible noise event.</param>
         public static void PlaySoundAtPosition(Transform pos, AudioClip[] clips, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
             int index = UnityEngine.Random.Range(0, clips.Length);
             PlaySoundAtPosition(pos, clips[index], volume, randomizePitch, spatial3D, min3DDistance, max3DDistance, cutoffFrequency, audibleNoiseID);
         }
 
+        /// <summary>
+        /// Plays a random audio clip from the specified array at the given 3D position with optional pitch
+        /// randomization, spatialization, distance attenuation, and frequency cutoff.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
+        /// <param name="pos">The position in world space where the sound is played.</param>
+        /// <param name="clips">An array of audio clips to select from for playback.</param>
+        /// <param name="volume">The playback volume, ranging from 0.0 (silent) to 1.0 (full volume).</param>
+        /// <param name="randomizePitch">true to randomize the pitch of the audio clip; otherwise, false.</param>
+        /// <param name="spatial3D">true to enable 3D spatialization of the sound; otherwise, false.</param>
+        /// <param name="min3DDistance">The minimum distance from the source at which the sound is audible.</param>
+        /// <param name="max3DDistance">The maximum distance from the source at which the sound is audible.</param>
+        /// <param name="cutoffFrequency">The cutoff frequency applied to the audio playback in hertz.</param>
+        /// <param name="audibleNoiseID">The identifier for the audible noise event.</param>
         public static void PlaySoundAtPosition(Vector3 pos, AudioClip[] clips, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
             int index = UnityEngine.Random.Range(0, clips.Length);
@@ -654,17 +812,20 @@ namespace SnowyLib
             return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[UnityEngine.Random.Range(0, StartOfRound.Instance.allPlayerScripts.Length)] : players[UnityEngine.Random.Range(0, players.Length)];
         }
 
-        public static void DespawnItemInSlotOnClient(int itemSlot)
-        {
-            HUDManager.Instance.itemSlotIcons[itemSlot].enabled = false;
-            localPlayer.DestroyItemInSlotAndSync(itemSlot);
-        }
-
         public static void LogChat(string msg, string nameOfUserWhoTyped = "Server")
         {
             HUDManager.Instance.AddChatMessage(msg, nameOfUserWhoTyped);
         }
 
+        /// <summary>
+        /// Calculates the shortest distance between two positions, accounting for building entrances and exits when
+        /// transitioning between inside and outside areas.
+        /// </summary>
+        /// <param name="position1">The starting position.</param>
+        /// <param name="position2">The target position.</param>
+        /// <param name="fastDistanceCheck">If true, uses a faster, less accurate calculation based on squared distances.</param>
+        /// <returns>The shortest distance between the two positions, or -1 if no valid entrance is found during a fast distance
+        /// check.</returns>
         public static float SmartDistance(Vector3 position1, Vector3 position2, bool fastDistanceCheck = false)
         {
             if (position1.IsOutside() == position2.IsOutside())
@@ -721,27 +882,11 @@ namespace SnowyLib
                 Vector3.Distance(bestEntrance.exitScript.transform.position, position2);
         }
 
-        public static Texture2D? LoadEmbeddedTexture(string resourceName)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-
-            using Stream stream = assembly.GetManifestResourceStream(resourceName);
-
-            if (stream == null)
-            {
-                logger.LogError($"Resource not found: {resourceName}");
-                return null;
-            }
-
-            byte[] data = new byte[stream.Length];
-            stream.Read(data, 0, data.Length);
-
-            Texture2D texture = new Texture2D(2, 2);
-            texture.LoadImage(data);
-
-            return texture;
-        }
-
+        /// <summary>
+        /// Creates a LayerMask that includes the specified layers by name.
+        /// </summary>
+        /// <param name="layerNames">An array of layer names to include in the mask.</param>
+        /// <returns>A LayerMask representing the combined layers.</returns>
         public static LayerMask CreateMask(params string[] layerNames)
         {
             LayerMask mask = 0;
@@ -787,6 +932,22 @@ namespace SnowyLib
             return largest;
         }
 
+        /// <summary>
+        /// Creates and initializes a ping GameObject at the specified world position with customizable display text,
+        /// node type, range, and lifetime.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
+        /// <param name="position">The world position where the ping is instantiated.</param>
+        /// <param name="headerText">The main text displayed on the ping.</param>
+        /// <param name="subText">The secondary text displayed on the ping.</param>
+        /// <param name="nodeType">The type of node represented by the ping.</param>
+        /// <param name="requiresLineOfSight">true if line of sight is required for the ping; otherwise, false.</param>
+        /// <param name="minRange">The minimum effective range of the ping.</param>
+        /// <param name="maxRange">The maximum effective range of the ping.</param>
+        /// <param name="destroyTime">The time in seconds before the ping is destroyed. Set to 0 or less to persist indefinitely.</param>
+        /// <returns>The instantiated ping GameObject.</returns>
         public static GameObject Ping(Vector3 position, string headerText = "Ping", string subText = "", int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = 10)
         {
             GameObject ping = GameObject.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
@@ -827,6 +988,15 @@ namespace SnowyLib
             return ping;
         }
 
+        /// <summary>
+        /// Sets the ship to leave early at the specified time, displays the provided dialogue, and triggers the ship
+        /// leaving alert.
+        /// </summary>
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
+        /// <param name="timeToLeaveEarly">The time, in hours, when the ship should leave early.</param>
+        /// <param name="shipLeavingEarlyDialogue">The dialogue segments to display when the ship is leaving early.</param>
         public static void SetShipLeaveEarly(float timeToLeaveEarly, DialogueSegment[] shipLeavingEarlyDialogue)
         {
             TimeOfDay.Instance.shipLeaveAutomaticallyTime = timeToLeaveEarly;
@@ -835,26 +1005,45 @@ namespace SnowyLib
             HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
         }
 
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
         public static void DisplayStatusEffect(string message)
         {
             HUDManager.Instance.DisplayStatusEffect(message);
         }
 
+        /// <remarks>
+        /// Execution: Local
+        /// </remarks>
         public static void DisplayDialogue(DialogueSegment[] dialogues)
         {
             HUDManager.Instance.ReadDialogue(dialogues);
         }
 
+
+        /// <remarks>
+        /// Requires spawned signal translator to work
+        /// </remarks>
         public static void DisplaySignalTranslatorMessage(string message)
         {
             HUDManager.Instance.UseSignalTranslatorServerRpc(message);
         }
 
+        /// <summary>
+        /// Displays a random ad
+        /// </summary>
         public static void DisplayAd()
         {
             HUDManager.Instance.ChooseAdItem();
         }
 
+        /// <summary>
+        /// Displays an advertisement for the specified item with optional top and bottom text.
+        /// </summary>
+        /// <param name="item">The item to advertise.</param>
+        /// <param name="top">The text displayed at the top of the advertisement.</param>
+        /// <param name="bottom">The text displayed at the bottom of the advertisement.</param>
         public static void DisplayAd(Item item, string top, string bottom)
         {
             if (item == null)
@@ -871,6 +1060,12 @@ namespace SnowyLib
             DoAdStuff(top, bottom);
         }
 
+        /// <summary>
+        /// Displays an advertisement for the specified unlockable with optional top and bottom text.
+        /// </summary>
+        /// <param name="unlockable">The unlockable to advertise.</param>
+        /// <param name="top">The text displayed at the top of the advertisement.</param>
+        /// <param name="bottom">The text displayed at the bottom of the advertisement.</param>
         public static void DisplayAd(UnlockableItem unlockable, string top, string bottom)
         {
             if (unlockable == null)
@@ -911,6 +1106,10 @@ namespace SnowyLib
             return StartOfRound.Instance.voiceChatModule.IsMuted;
         }
 
+        /// <summary>
+        /// Calculates the relative amplitude of the local player's voice for voice chat.
+        /// </summary>
+        /// <returns>A float representing the relative amplitude, or 0 if the player is unavailable or voice chat is disabled.</returns>
         public static float GetLocalPlayerVoiceRelativeAmplitude()
         {
             if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null || GameNetworkManager.Instance.localPlayerController.isPlayerDead || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled || StartOfRound.Instance.voiceChatModule == null)
@@ -921,6 +1120,10 @@ namespace SnowyLib
             return voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f);
         }
 
+        /// <summary>
+        /// Retrieves the current amplitude of the local player's voice.
+        /// </summary>
+        /// <returns>The amplitude of the local player's voice, or 0 if the player is inactive or voice chat is unavailable.</returns>
         public static float GetLocalPlayerVoiceAmplitude()
         {
             if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null || GameNetworkManager.Instance.localPlayerController.isPlayerDead || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled || StartOfRound.Instance.voiceChatModule == null)
