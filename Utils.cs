@@ -1095,10 +1095,10 @@ namespace SnowyLib
             hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
         }
 
-        public static bool IsPlayerSpeaking(float aplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
+        public static bool IsPlayerSpeaking(float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true) // TODO: Improve this by getting how the walkie talkie gets the players voice
         {
             if (IsPlayerMuted()) return false;
-            return GetPlayerVoiceAmplitude(useRelativeAmplitude) > aplitudeThreshold;
+            return GetPlayerVoiceAmplitude(useRelativeAmplitude) > amplitudeThreshold;
         }
 
         public static bool IsPlayerMuted()
@@ -1116,9 +1116,9 @@ namespace SnowyLib
             return getRelativeAmplitude ? voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : voicePlayerState.Amplitude;
         }
 
-        public static bool IsPlayerSpeaking(string playerVoiceId, float aplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
+        public static bool IsPlayerSpeaking(string playerVoiceId, float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
         {
-            return GetPlayerVoiceAmplitude(playerVoiceId, useRelativeAmplitude) > aplitudeThreshold;
+            return GetPlayerVoiceAmplitude(playerVoiceId, useRelativeAmplitude) > amplitudeThreshold;
         }
 
         public static float GetPlayerVoiceAmplitude(string playerVoiceId, bool getRelativeAmplitude = false)
