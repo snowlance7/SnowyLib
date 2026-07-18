@@ -28,6 +28,7 @@ namespace SnowyLib
 
         private static TestingHUDOverlay Init()
         {
+            logger.LogDebug("Initiating TestingHUDOverlay");
             GameObject prefab = (GameObject)ModAssets.LoadAsset("Assets/ModAssets/TestingHUDOverlay.prefab");
             return Instantiate(prefab, localPlayer.transform).GetComponent<TestingHUDOverlay>();
         }
