@@ -7,7 +7,7 @@ using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
-    public class TestingHUDOverlay : MonoBehaviour
+    public class TestingHUDOverlay : MonoBehaviour // TODO: Fix this later
     {
         private static TestingHUDOverlay? _instance;
         private static TestingHUDOverlay Instance
