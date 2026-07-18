@@ -1095,43 +1095,37 @@ namespace SnowyLib
             hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
         }
 
-        public static bool IsLocalPlayerSpeaking(float aplitudeThreshold = 0.1f, bool useAverageVoiceAmplitude = false)
+        public static bool IsPlayerSpeaking(float aplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
         {
-            if (IsLocalPlayerMuted()) return false;
-            return useAverageVoiceAmplitude ? GetLocalPlayerVoiceRelativeAmplitude() > aplitudeThreshold : GetLocalPlayerVoiceAmplitude() > aplitudeThreshold;
+            if (IsPlayerMuted()) return false;
+            return GetPlayerVoiceAmplitude(useRelativeAmplitude) > aplitudeThreshold;
         }
 
-        public static bool IsLocalPlayerMuted()
+        public static bool IsPlayerMuted()
         {
-            return StartOfRound.Instance.voiceChatModule.IsMuted;
+            return StartOfRound.Instance.voiceChatModule == null || StartOfRound.Instance.voiceChatModule.IsMuted;
         }
 
-        /// <summary>
-        /// Calculates the relative amplitude of the local player's voice for voice chat.
-        /// </summary>
-        /// <returns>A float representing the relative amplitude, or 0 if the player is unavailable or voice chat is disabled.</returns>
-        public static float GetLocalPlayerVoiceRelativeAmplitude()
+        public static float GetPlayerVoiceAmplitude(bool getRelativeAmplitude = false)
         {
-            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null || GameNetworkManager.Instance.localPlayerController.isPlayerDead || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled || StartOfRound.Instance.voiceChatModule == null)
+            if (StartOfRound.Instance.voiceChatModule == null || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled)
             {
                 return 0;
             }
             VoicePlayerState voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
-            return voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f);
+            return getRelativeAmplitude ? voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : voicePlayerState.Amplitude;
         }
 
-        /// <summary>
-        /// Retrieves the current amplitude of the local player's voice.
-        /// </summary>
-        /// <returns>The amplitude of the local player's voice, or 0 if the player is inactive or voice chat is unavailable.</returns>
-        public static float GetLocalPlayerVoiceAmplitude()
+        public static bool IsPlayerSpeaking(string playerVoiceId, float aplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
         {
-            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null || GameNetworkManager.Instance.localPlayerController.isPlayerDead || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled || StartOfRound.Instance.voiceChatModule == null)
-            {
-                return 0;
-            }
-            VoicePlayerState voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
-            return voicePlayerState.Amplitude;
+            return GetPlayerVoiceAmplitude(playerVoiceId, useRelativeAmplitude) > aplitudeThreshold;
+        }
+
+        public static float GetPlayerVoiceAmplitude(string playerVoiceId, bool getRelativeAmplitude = false)
+        {
+            VoicePlayerState? voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(playerVoiceId);
+            if (voicePlayerState == null) { return -1; }
+            return getRelativeAmplitude ? voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : voicePlayerState.Amplitude;
         }
     }
 
