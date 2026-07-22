@@ -1,4 +1,5 @@
-﻿using GameNetcodeStuff;
+﻿using Dissonance;
+using GameNetcodeStuff;
 using System;
 using Unity.Netcode;
 using UnityEngine;
@@ -150,6 +151,23 @@ namespace SnowyLib
             if (position == default)
                 position = StartOfRound.Instance.GetPlayerSpawnPosition(Array.IndexOf(StartOfRound.Instance.allPlayerScripts, player));
             NetworkHandler.Instance.RevivePlayerRpc(player.actualClientId, position);
+        }
+
+        public static bool IsPlayerSpeaking(this PlayerControllerB player, float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
+        {
+            return GetPlayerVoiceAmplitude(player, useRelativeAmplitude) > amplitudeThreshold;
+        }
+
+        public static bool IsPlayerMuted(this PlayerControllerB player)
+        {
+            StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
+            return player.voicePlayerState == null || !player.voicePlayerState.IsConnected;
+        }
+
+        public static float GetPlayerVoiceAmplitude(this PlayerControllerB player, bool getRelativeAmplitude = false)
+        {
+            if (player.voicePlayerState == null || !player.voicePlayerState.IsConnected) { return 0f; }
+            return getRelativeAmplitude ? player.voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : player.voicePlayerState.Amplitude;
         }
     }
 }

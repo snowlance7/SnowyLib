@@ -1094,39 +1094,6 @@ namespace SnowyLib
             }
             hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
         }
-
-        public static bool IsPlayerSpeaking(float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true) // TODO: Improve this by getting how the walkie talkie gets the players voice
-        {
-            if (IsPlayerMuted()) return false;
-            return GetPlayerVoiceAmplitude(useRelativeAmplitude) > amplitudeThreshold;
-        }
-
-        public static bool IsPlayerMuted()
-        {
-            return StartOfRound.Instance.voiceChatModule == null || StartOfRound.Instance.voiceChatModule.IsMuted;
-        }
-
-        public static float GetPlayerVoiceAmplitude(bool getRelativeAmplitude = false)
-        {
-            if (StartOfRound.Instance.voiceChatModule == null || StartOfRound.Instance.voiceChatModule.IsMuted || !StartOfRound.Instance.voiceChatModule.enabled)
-            {
-                return 0;
-            }
-            VoicePlayerState voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
-            return getRelativeAmplitude ? voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : voicePlayerState.Amplitude;
-        }
-
-        public static bool IsPlayerSpeaking(string playerVoiceId, float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
-        {
-            return GetPlayerVoiceAmplitude(playerVoiceId, useRelativeAmplitude) > amplitudeThreshold;
-        }
-
-        public static float GetPlayerVoiceAmplitude(string playerVoiceId, bool getRelativeAmplitude = false)
-        {
-            VoicePlayerState? voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(playerVoiceId);
-            if (voicePlayerState == null) { return -1; }
-            return getRelativeAmplitude ? voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : voicePlayerState.Amplitude;
-        }
     }
 
     [HarmonyPatch]
