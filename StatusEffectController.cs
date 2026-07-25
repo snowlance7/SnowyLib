@@ -285,13 +285,13 @@ namespace SnowyLib
     /// <param name="removeOnDeath">true to remove the effect when the target dies; otherwise, false.</param>
     /// <param name="pauseInOrbit">true to pause the effect when the target is in orbit; otherwise, false.</param>
     /// <param name="curable">true if the effect can be cured; otherwise, false.</param>
-    public class OnRemoveActionEffect(Action action, string source, string id = "", float duration = 0, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, bool removeOnDeath = true, bool pauseInOrbit = true, bool curable = true) : StatusEffect(source, id, duration, onConflict, null, removeOnDeath, pauseInOrbit, curable)
+    public class OnRemoveActionEffect(Action<StatusEffect> action, string source, string id = "", float duration = 0, Func<StatusEffect, StatusEffect, StatusEffectController.ConflictResult>? onConflict = null, bool removeOnDeath = true, bool pauseInOrbit = true, bool curable = true) : StatusEffect(source, id, duration, onConflict, null, removeOnDeath, pauseInOrbit, curable)
     {
-        Action action = action;
+        Action<StatusEffect> action = action;
 
         public override void OnRemove()
         {
-            action.Invoke();
+            action.Invoke(this);
         }
     }
 
