@@ -103,78 +103,112 @@ namespace SnowyLib
                     DEBUG_disableSpawning = !DEBUG_disableSpawning;
                     HUDManager.Instance.DisplayTip("Disable Spawning", DEBUG_disableSpawning.ToString());
                     break;
-                case "/hazards":
-                    Dictionary<string, GameObject> hazards = Utils.GetAllHazards();
-
-                    foreach (var hazard in hazards)
+                case "/log":
+                    if (args.Length == 1)
                     {
-                        logger.LogDebug(hazard);
+                        logger.LogDebug("- rarities");
+                        logger.LogDebug("- archetypes");
+                        logger.LogDebug("- dungeons");
+                        logger.LogDebug("- enemies");
+                        logger.LogDebug("- items");
+                        logger.LogDebug("- mapobjects");
+                        logger.LogDebug("- moons");
+                        logger.LogDebug("- storylogs");
+                        logger.LogDebug("- surfaces");
+                        logger.LogDebug("- terminalcommands");
+                        logger.LogDebug("- tilesets");
+                        logger.LogDebug("- unlockables");
+                        logger.LogDebug("- weathers");
+                        logger.LogDebug("- animations");
+                        logger.LogDebug("- footstepsurfaces");
                     }
-                    break;
-                case "/surfaces":
-                    foreach (var surface in StartOfRound.Instance.footstepSurfaces)
+                    switch (args[1])
                     {
-                        logger.LogDebug(surface.surfaceTag);
-                    }
-                    break;
-                case "/enemies":
-                    foreach (var enemy in Utils.GetEnemies())
-                    {
-                        logger.LogDebug(enemy.enemyType.name);
+                        case "rarities":
+                            if (args.Length == 2) { return; }
+                            switch (args[2])
+                            {
+                                case "item":
+                                    LogRarities(ContentType.Item);
+                                    break;
+                                case "enemy":
+                                    LogRarities(ContentType.Enemy);
+                                    break;
+                                case "mapobject":
+                                    LogRarities(ContentType.MapObject);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case "archetypes":
+                            foreach (var item in LethalContent.Archetypes.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "dungeons":
+                            foreach (var item in LethalContent.Dungeons.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "enemies":
+                            foreach (var item in LethalContent.Enemies.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "items":
+                            foreach (var item in LethalContent.Items.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "mapobjects":
+                            foreach (var item in LethalContent.MapObjects.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "moons":
+                            foreach (var item in LethalContent.Moons.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "storylogs":
+                            foreach (var item in LethalContent.StoryLogs.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "surfaces":
+                            foreach (var item in LethalContent.Surfaces.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "terminalcommands":
+                            foreach (var item in LethalContent.TerminalCommands.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "tilesets":
+                            foreach (var item in LethalContent.TileSets.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "unlockables":
+                            foreach (var item in LethalContent.Unlockables.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "weathers":
+                            foreach (var item in LethalContent.Weathers.Values)
+                                logger.LogDebug(item.TypedKey.ToString());
+                            break;
+                        case "animations":
+                            LogAnimatorParameters(localPlayer.playerBodyAnimator);
+                            break;
+                        case "footstepsurfaces":
+                            foreach (var surface in StartOfRound.Instance.footstepSurfaces)
+                            {
+                                logger.LogDebug(surface.surfaceTag);
+                            }
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 case "/refresh":
                     RoundManager.Instance.RefreshEnemiesList();
                     HoarderBugAI.RefreshGrabbableObjectsInMapList();
                     break;
-                case "/levels":
-                    foreach (var level in StartOfRound.Instance.levels)
-                    {
-                        var lInfo = level.GetDawnInfo();
-                        if (lInfo == null) { continue; }
-                        logger.LogDebug($"{lInfo.TypedKey.ToString()} | {level.name}");
-                    }
-                    break;
                 case "/dungeon":
                     var dInfo = RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.GetDawnInfo();
                     logger.LogDebug($"{dInfo.TypedKey.ToString()} | {RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name}");
-                    break;
-                case "/dungeons":
-                    foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
-                    {
-                        if (dungeon == null || dungeon.dungeonFlow == null) { continue; }
-                        var dInfo2 = dungeon.dungeonFlow.GetDawnInfo();
-                        if (dInfo2 == null) { continue; }
-                        logger.LogDebug($"{dInfo2.TypedKey.ToString()} | {dungeon.dungeonFlow.name}");
-                    }
-                    break;
-                case "/interiors":
-                    foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
-                    {
-                        if (dungeon == null || dungeon.dungeonFlow == null) { continue; }
-                        var dInfo2 = dungeon.dungeonFlow.GetDawnInfo();
-                        if (dInfo2 == null) { continue; }
-                        logger.LogDebug($"{dInfo2.TypedKey.ToString()} | {dungeon.dungeonFlow.name}");
-                    }
-                    break;
-                case "/animations":
-                    LogAnimatorParameters(localPlayer.playerBodyAnimator);
-                    break;
-                case "/rarities":
-                    switch (args[1])
-                    {
-                        case "item":
-                            LogRarities(ContentType.Item);
-                            break;
-                        case "enemy":
-                            LogRarities(ContentType.Enemy);
-                            break;
-                        case "mapobject":
-                            LogRarities(ContentType.MapObject);
-                            break;
-                        default:
-                            break;
-                    }
                     break;
                 case "/vignette":
                     if (args.Length > 2)
@@ -467,41 +501,6 @@ namespace SnowyLib
         }
 
         /// <summary>
-        /// Retrieves a list of unique spawnable enemies from the game's catalog, including their associated rarity.
-        /// </summary>
-        /// <returns>A list of unique spawnable enemies with their rarity information.</returns>
-        public static List<SpawnableEnemyWithRarity> GetEnemies()
-        {
-            List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
-            enemies = GameObject.Find("Terminal")
-                .GetComponentInChildren<Terminal>()
-                .moonsCatalogueList
-                .SelectMany(x => x.Enemies.Concat(x.DaytimeEnemies).Concat(x.OutsideEnemies))
-                .Where(x => x != null && x.enemyType != null && x.enemyType.name != null)
-                .GroupBy(x => x.enemyType.name, (k, v) => v.First())
-                .ToList();
-
-            return enemies;
-        }
-
-        /// <summary>
-        /// Retrieves a dictionary containing all unique hazard prefabs present in the current level.
-        /// </summary>
-        /// <returns>A dictionary mapping hazard prefab names to their corresponding GameObject instances.</returns>
-        public static Dictionary<string, GameObject> GetAllHazards()
-        {
-            Dictionary<string, GameObject> hazards = new Dictionary<string, GameObject>();
-            List<SpawnableMapObject> spawnableMapObjects = (from x in StartOfRound.Instance.levels.SelectMany((SelectableLevel level) => level.spawnableMapObjects)
-                                                            group x by ((UnityEngine.Object)x.prefabToSpawn).name into g
-                                                            select g.First()).ToList();
-            foreach (SpawnableMapObject item in spawnableMapObjects)
-            {
-                hazards.Add(item.prefabToSpawn.name, item.prefabToSpawn);
-            }
-            return hazards;
-        }
-
-        /// <summary>
         /// Generates a random position on the NavMesh within an annular region defined by minimum and maximum radii
         /// from a center point.
         /// </summary>
@@ -657,7 +656,9 @@ namespace SnowyLib
         public static SpawnableMapObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(LethalContent.MapObjects[key].GetMapObjectPrefab(), position, rotation, parentTo);
+            var prefab = LethalContent.MapObjects[key].GetMapObjectPrefab();
+            if (prefab == null) { logger.LogError($"Couldnt find prefab for {key}"); return null; }
+            GameObject obj = GameObject.Instantiate(prefab, position, rotation, parentTo);
             var mapObj = obj.GetComponent<SpawnableMapObject>();
             obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
             return mapObj;

@@ -8,6 +8,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using static SnowyLib.Plugin;
 
+// UPDATE: Do singleton or maxSpawned using transpiler on spawnscrapinlevel
+
 namespace SnowyLib
 {
     public interface ISingletonItem { }
