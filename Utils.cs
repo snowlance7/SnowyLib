@@ -103,6 +103,11 @@ namespace SnowyLib
                     DEBUG_disableSpawning = !DEBUG_disableSpawning;
                     HUDManager.Instance.DisplayTip("Disable Spawning", DEBUG_disableSpawning.ToString());
                     break;
+                case "/time":
+                    DEBUG_disableTime = !DEBUG_disableTime;
+                    StartOfRound.Instance.currentLevel.planetHasTime = !DEBUG_disableTime;
+                    HUDManager.Instance.DisplayTip("Snowylib", "disableTime: " + DEBUG_disableTime);
+                    break;
                 case "/log":
                     if (args.Length == 1)
                     {
@@ -121,6 +126,7 @@ namespace SnowyLib
                         logger.LogDebug("- weathers");
                         logger.LogDebug("- animations");
                         logger.LogDebug("- footstepsurfaces");
+                        logger.LogDebug("- canvasSortingOrder");
                     }
                     switch (args[1])
                     {
@@ -198,6 +204,12 @@ namespace SnowyLib
                                 logger.LogDebug(surface.surfaceTag);
                             }
                             break;
+                        case "canvasSortingOrder":
+                            foreach (Canvas canvas in GameObject.FindObjectsOfType<Canvas>())
+                            {
+                                logger.LogDebug($"{canvas.name} | Sorting Order: {canvas.sortingOrder} | Render Order: {canvas.renderOrder}");
+                            }
+                            break;
                         default:
                             break;
                     }
@@ -226,11 +238,6 @@ namespace SnowyLib
                     break;
                 case "/spawnanim":
                     localPlayer.SpawnPlayerAnimation();
-                    break;
-                case "/time":
-                    DEBUG_disableTime = !DEBUG_disableTime;
-                    StartOfRound.Instance.currentLevel.planetHasTime = !DEBUG_disableTime;
-                    HUDManager.Instance.DisplayTip("Snowylib", "disableTime: " + DEBUG_disableTime);
                     break;
                 case "/playanim":
                     if (args.Length > 3 && float.TryParse(args[3], out float time))
