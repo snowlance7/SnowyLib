@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using static SnowyLib.Plugin;
+using static UnityEngine.InputSystem.InputRemoting;
 
 namespace SnowyLib
 {
@@ -137,22 +138,6 @@ namespace SnowyLib
             }
         }
 
-        /// <summary>
-        /// Revives the specified player at the given position or at the default spawn location if no position is
-        /// provided.
-        /// </summary>
-        /// <remarks>
-        /// Calls RPC
-        /// </remarks>
-        /// <param name="player">The player to revive.</param>
-        /// <param name="position">The world position where the player will be revived. If not specified, the default spawn position is used.</param>
-        public static void RevivePlayer(this PlayerControllerB player, Vector3 position = default)
-        {
-            if (position == default)
-                position = StartOfRound.Instance.GetPlayerSpawnPosition(Array.IndexOf(StartOfRound.Instance.allPlayerScripts, player));
-            NetworkHandler.Instance.RevivePlayerRpc(player.actualClientId, position);
-        }
-
         public static bool IsPlayerSpeaking(this PlayerControllerB player, float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
         {
             return GetPlayerVoiceAmplitude(player, useRelativeAmplitude) > amplitudeThreshold;
@@ -168,6 +153,20 @@ namespace SnowyLib
         {
             if (player.voicePlayerState == null || !player.voicePlayerState.IsConnected) { return 0f; }
             return getRelativeAmplitude ? player.voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : player.voicePlayerState.Amplitude;
+        }
+
+        public static void DiscardItemInSlot(this PlayerControllerB player, int slot, bool placeObject = false, NetworkObject? parentObjectTo = null, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
+        {
+            if (player.currentItemSlot == slot)
+            {
+                player.DiscardHeldObject(placeObject: placeObject, parentObjectTo: parentObjectTo, placePosition: placePosition, matchRotationOfParent: matchRotationOfParent);
+                return;
+            }
+            GrabbableObject? item = player.ItemSlots[slot];
+            if (item == null) { return; }
+            player.DropHeldItem(item, itemsFall: true, disconnecting: false, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation, setInShip, setInElevator);
+            if (player.IsOwner)
+                HUDManager.Instance.itemSlotIcons[slot].enabled = false;
         }
     }
 }

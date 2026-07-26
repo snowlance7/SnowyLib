@@ -1095,6 +1095,25 @@ namespace SnowyLib
             }
             hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
         }
+
+        public static Vector3 GetTopOfObjectRender(GameObject obj, bool includeDisabled = false)
+        {
+            Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+
+            Bounds combinedBounds = renderers[0].bounds;
+
+            foreach (Renderer renderer in renderers)
+            {
+                if (!renderer.enabled && !includeDisabled) { continue; }
+                combinedBounds.Encapsulate(renderer.bounds);
+            }
+
+            return new Vector3(
+                combinedBounds.center.x,
+                combinedBounds.max.y,
+                combinedBounds.center.z
+            );
+        }
     }
 
     [HarmonyPatch]

@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using GameNetcodeStuff;
 using HarmonyLib;
+using Mono.Cecil;
 using System;
 using System.Collections;
 using System.Linq;
@@ -155,10 +156,13 @@ namespace SnowyLib
         }
 
         [Rpc(SendTo.Everyone)]
-        public void RevivePlayerRpc(ulong clientId, Vector3 position)
+        public void RevivePlayerRpc(ulong clientId, Vector3 position = default(Vector3))
         {
             PlayerControllerB? player = PlayerFromId(clientId);
             if (player == null) { return; }
+
+            if (position == default)
+                position = StartOfRound.Instance.GetPlayerSpawnPosition(Array.IndexOf(StartOfRound.Instance.allPlayerScripts, player));
 
             player.isInsideFactory = false;
             player.isInElevator = true;
@@ -270,6 +274,32 @@ namespace SnowyLib
             StartOfRound instance = StartOfRound.Instance;
             instance.livingPlayers++;
             StartOfRound.Instance.UpdatePlayerVoiceEffects();
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void DropHeldItemRpc(ulong clientId, int dropItemSlot, bool itemsFall, bool disconnecting, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3), bool setInShip = false, bool setInElevator = false)
+        {
+            PlayerControllerB? player = PlayerFromId(clientId);
+            if (player == null) { return; }
+            GrabbableObject? item = player.ItemSlots[dropItemSlot];
+            if (item == null) { return; }
+            player.DropHeldItem(item, itemsFall, disconnecting, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation, setInShip, setInElevator);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void DiscardItemInSlotRpc(ulong clientId, int slot, NetworkObjectReference parentObjectTo, bool placeObject = false, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
+        {
+            PlayerControllerB? player = PlayerFromId(clientId);
+            if (player == null) { return; }
+            player.DiscardItemInSlot(slot, placeObject, parentObjectTo, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        public void DiscardItemInSlotRpc(ulong clientId, int slot, bool placeObject = false, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
+        {
+            PlayerControllerB? player = PlayerFromId(clientId);
+            if (player == null) { return; }
+            player.DiscardItemInSlot(slot, placeObject, null, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
         }
     }
 
