@@ -1,19 +1,14 @@
 ﻿using Dawn;
 using Dawn.Utils;
-using Dissonance;
 using GameNetcodeStuff;
 using HarmonyLib;
-using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.Utilities;
-using UnityEngine.SocialPlatforms;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib
@@ -125,8 +120,8 @@ namespace SnowyLib
                         logger.LogDebug("- unlockables");
                         logger.LogDebug("- weathers");
                         logger.LogDebug("- animations");
-                        logger.LogDebug("- footstepsurfaces");
-                        logger.LogDebug("- canvasSortingOrder");
+                        logger.LogDebug("- canvas");
+                        return;
                     }
                     switch (args[1])
                     {
@@ -198,16 +193,10 @@ namespace SnowyLib
                         case "animations":
                             LogAnimatorParameters(localPlayer.playerBodyAnimator);
                             break;
-                        case "footstepsurfaces":
-                            foreach (var surface in StartOfRound.Instance.footstepSurfaces)
-                            {
-                                logger.LogDebug(surface.surfaceTag);
-                            }
-                            break;
-                        case "canvasSortingOrder":
+                        case "canvas":
                             foreach (Canvas canvas in GameObject.FindObjectsOfType<Canvas>())
                             {
-                                logger.LogDebug($"{canvas.name} | Sorting Order: {canvas.sortingOrder} | Render Order: {canvas.renderOrder}");
+                                logger.LogDebug($"{(canvas.transform.parent != null ? canvas.transform.parent.name + "/" : "")}{canvas.name} | Sorting Order: {canvas.sortingOrder} | Render Order: {canvas.renderOrder}");
                             }
                             break;
                         default:

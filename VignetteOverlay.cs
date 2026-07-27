@@ -8,7 +8,7 @@ namespace SnowyLib
 {
     public class VignetteOverlay : MonoBehaviour
     {
-        public static VignetteOverlay Instance { get; private set; } = null!;
+        public static VignetteOverlay? Instance { get; private set; }
 
         [SerializeField] Image image = null!;
 
@@ -23,6 +23,8 @@ namespace SnowyLib
         void Awake()
         {
             material = image.material;
+            image.canvas.overrideSorting = true;
+            image.canvas.sortingOrder = -1;
         }
 
         void Update()
@@ -39,13 +41,13 @@ namespace SnowyLib
         {
             currentIntensityDecreasePerSecond = intensityDecreasePerSecond;
             currentIntensity = Mathf.Clamp01(intensity);
-            Instance.material.SetFloat(InsetId, currentIntensity);
+            Instance?.material.SetFloat(InsetId, currentIntensity);
         }
 
         internal static void Init(PlayerControllerB player)
         {
             GameObject prefab = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/VignetteOverlay.prefab");
-            Instance = Instantiate(prefab, player.transform).GetComponent<VignetteOverlay>();
+            Instance = Instantiate(prefab).GetComponent<VignetteOverlay>();
         }
     }
 

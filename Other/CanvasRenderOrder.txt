@@ -1,0 +1,8 @@
+WearableItemsUI(Clone)/Canvas			  | Sorting Order: 0 | Render Order: 0
+Player/VignetteOverlay(Clone)			  | Sorting Order: 0 | Render Order: 1
+AchievementGetUICanvas(Clone)			  | Sorting Order: 0 | Render Order: 2
+UI/Canvas								  | Sorting Order: 0 | Render Order: 3
+ItemSystems/MapScreenUI					  | Sorting Order: 0 | Render Order: 4
+HangarDoorButtonPanel/ElevatorPanelScreen | Sorting Order: 0 | Render Order: 5
+ItemSystems/MapScreenUIWorldSpace		  | Sorting Order: 2 | Render Order: 6
+Cube/Canvas (1)							  | Sorting Order: 0 | Render Order: 7

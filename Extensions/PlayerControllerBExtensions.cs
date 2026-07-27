@@ -145,7 +145,6 @@ namespace SnowyLib
 
         public static bool IsPlayerMuted(this PlayerControllerB player)
         {
-            StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
             return player.voicePlayerState == null || !player.voicePlayerState.IsConnected;
         }
 
