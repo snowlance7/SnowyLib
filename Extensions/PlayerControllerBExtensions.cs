@@ -1,9 +1,11 @@
-﻿using Dissonance;
+﻿using Dawn.Utils;
+using Dissonance;
 using GameNetcodeStuff;
 using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.SceneManagement;
 using static SnowyLib.Plugin;
 using static UnityEngine.InputSystem.InputRemoting;
 
@@ -138,20 +140,35 @@ namespace SnowyLib
             }
         }
 
-        public static bool IsPlayerSpeaking(this PlayerControllerB player, float amplitudeThreshold = 0.3f, bool useRelativeAmplitude = true)
+        public static bool IsPlayerSpeaking(this PlayerControllerB player, float amplitudeThreshold = 0.005f, bool useRelativeAmplitude = true)
         {
-            return GetPlayerVoiceAmplitude(player, useRelativeAmplitude) > amplitudeThreshold;
+            VoicePlayerState? voicePlayerState = player.GetVoicePlayerState();
+            if (player.voicePlayerState == null) { return false; }
+            return player.voicePlayerState.IsSpeaking && GetPlayerVoiceAmplitude(player, useRelativeAmplitude) > amplitudeThreshold;
         }
 
         public static bool IsPlayerMuted(this PlayerControllerB player)
         {
-            return player.voicePlayerState == null || !player.voicePlayerState.IsConnected;
+            VoicePlayerState? voicePlayerState = player.GetVoicePlayerState();
+            return voicePlayerState == null || !voicePlayerState.IsConnected;
         }
 
         public static float GetPlayerVoiceAmplitude(this PlayerControllerB player, bool getRelativeAmplitude = false)
         {
-            if (player.voicePlayerState == null || !player.voicePlayerState.IsConnected) { return 0f; }
-            return getRelativeAmplitude ? player.voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : player.voicePlayerState.Amplitude;
+            VoicePlayerState? voicePlayerState = player.GetVoicePlayerState();
+            if (voicePlayerState == null || !voicePlayerState.IsConnected) { return 0f; }
+            return getRelativeAmplitude ? voicePlayerState.Amplitude / Mathf.Clamp(StartOfRound.Instance.averageVoiceAmplitude, 0.008f, 0.5f) : voicePlayerState.Amplitude;
+        }
+
+        public static VoicePlayerState? GetVoicePlayerState(this PlayerControllerB player)
+        {
+            VoicePlayerState voicePlayerState = player.voicePlayerState;
+            if (voicePlayerState == null && player.IsLocalPlayer() && !string.IsNullOrEmpty(StartOfRound.Instance.voiceChatModule.LocalPlayerName))
+                voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
+            if (voicePlayerState == null)
+                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
+            voicePlayerState = player.voicePlayerState;
+            return voicePlayerState;
         }
 
         public static void DiscardItemInSlot(this PlayerControllerB player, int slot, bool placeObject = false, NetworkObject? parentObjectTo = null, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
@@ -166,6 +183,30 @@ namespace SnowyLib
             player.DropHeldItem(item, itemsFall: true, disconnecting: false, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation, setInShip, setInElevator);
             if (player.IsOwner)
                 HUDManager.Instance.itemSlotIcons[slot].enabled = false;
+        }
+
+        public static bool IsPlayerWithinShipBounds(this PlayerControllerB player)
+        {
+            int sceneCount = SceneManager.sceneCount;
+            Scene[] array = new Scene[sceneCount];
+            int num = 0;
+            for (int i = 0; i < sceneCount; i++)
+            {
+                array[i] = SceneManager.GetSceneAt(i);
+                if (array[i].name == "CompanyBuilding")
+                {
+                    num++;
+                }
+            }
+            if (num == 1)
+            {
+                return true;
+            }
+            if (GameNetworkManager.Instance.localPlayerController.isPlayerDead)
+            {
+                return false;
+            }
+            return StartOfRound.Instance.shipBounds.bounds.Contains(player.transform.position);
         }
     }
 }

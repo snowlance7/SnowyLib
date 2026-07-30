@@ -17,10 +17,8 @@ namespace SnowyLib
     [BepInDependency(Dawn.DawnLib.PLUGIN_GUID)]
     internal class Plugin : BaseUnityPlugin
     {
-#pragma warning disable CS8618
-        public static Plugin Instance { get; private set; }
-        public static ManualLogSource logger { get; private set; }
-#pragma warning restore CS8618
+        public static Plugin Instance { get; private set; } = null!;
+        public static ManualLogSource logger { get; private set; } = null!;
 
         private readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         public static PlayerControllerB localPlayer { get { return StartOfRound.Instance.localPlayerController; } }
