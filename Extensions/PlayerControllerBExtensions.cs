@@ -143,8 +143,8 @@ namespace SnowyLib
         public static bool IsPlayerSpeaking(this PlayerControllerB player, float amplitudeThreshold = 0.005f, bool useRelativeAmplitude = true)
         {
             VoicePlayerState? voicePlayerState = player.GetVoicePlayerState();
-            if (player.voicePlayerState == null) { return false; }
-            return player.voicePlayerState.IsSpeaking && GetPlayerVoiceAmplitude(player, useRelativeAmplitude) > amplitudeThreshold;
+            if (voicePlayerState == null) { return false; }
+            return voicePlayerState.IsSpeaking && GetPlayerVoiceAmplitude(player, useRelativeAmplitude) > amplitudeThreshold;
         }
 
         public static bool IsPlayerMuted(this PlayerControllerB player)
@@ -162,12 +162,12 @@ namespace SnowyLib
 
         public static VoicePlayerState? GetVoicePlayerState(this PlayerControllerB player)
         {
-            VoicePlayerState voicePlayerState = player.voicePlayerState;
-            if (voicePlayerState == null && player.IsLocalPlayer() && !string.IsNullOrEmpty(StartOfRound.Instance.voiceChatModule.LocalPlayerName))
+            VoicePlayerState? voicePlayerState = player.voicePlayerState;
+            if (player.IsLocalPlayer() && !string.IsNullOrEmpty(StartOfRound.Instance.voiceChatModule.LocalPlayerName))
                 voicePlayerState = StartOfRound.Instance.voiceChatModule.FindPlayer(StartOfRound.Instance.voiceChatModule.LocalPlayerName);
             if (voicePlayerState == null)
                 StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
-            voicePlayerState = player.voicePlayerState;
+            voicePlayerState ??= player.voicePlayerState;
             return voicePlayerState;
         }
 
