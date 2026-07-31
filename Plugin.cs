@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using static BepInEx.BepInDependency;
 
 // UPDATE: A specialized map object type that can appear on company moons, like venders (vending machines, washing machine, etc) or even big ones like the casino or pet center or something. and could even be like a market of sorts, where different shops could appear going down each side of the walking area with little paths
 

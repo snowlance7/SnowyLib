@@ -42,6 +42,7 @@ namespace SnowyLib
 
         public void Start()
         {
+            InitConfigManager.Initialize();
             StaticUpdateManager.Initialize();
         }
 
