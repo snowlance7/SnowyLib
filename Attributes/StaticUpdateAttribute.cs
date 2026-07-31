@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SnowyLib
@@ -15,28 +16,53 @@ namespace SnowyLib
         {
             updates.Clear();
 
+            Assembly snowyLibAssembly = typeof(StaticUpdateManager).Assembly;
+            string snowyLibName = snowyLibAssembly.GetName().Name;
+
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (Type type in assembly.GetTypes())
+                if (assembly == snowyLibAssembly)
                 {
-                    foreach (MethodInfo method in type.GetMethods(
-                        BindingFlags.Static |
-                        BindingFlags.Public |
-                        BindingFlags.NonPublic))
-                    {
-                        if (!method.IsDefined(typeof(StaticUpdateAttribute), false))
-                            continue;
-
-                        // Validate signature
-                        if (method.ReturnType != typeof(void))
-                            throw new Exception($"{type.FullName}.{method.Name} must return void.");
-
-                        if (method.GetParameters().Length != 0)
-                            throw new Exception($"{type.FullName}.{method.Name} cannot have parameters.");
-
-                        updates.Add((Action)Delegate.CreateDelegate(typeof(Action), method));
-                    }
+                    ScanAssembly(assembly);
+                    continue;
                 }
+
+                if (!assembly.GetReferencedAssemblies().Any(a => a.Name == snowyLibName))
+                    continue;
+
+                ScanAssembly(assembly);
+            }
+        }
+
+        private static void ScanAssembly(Assembly assembly)
+        {
+            foreach (Type type in GetLoadableTypes(assembly))
+            {
+                foreach (MethodInfo method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    if (!method.IsDefined(typeof(StaticUpdateAttribute), false))
+                        continue;
+
+                    if (method.ReturnType != typeof(void))
+                        throw new Exception($"{method.DeclaringType.FullName}.{method.Name} must return void.");
+
+                    if (method.GetParameters().Length != 0)
+                        throw new Exception($"{method.DeclaringType.FullName}.{method.Name} cannot have parameters.");
+
+                    updates.Add((Action)Delegate.CreateDelegate(typeof(Action), method));
+                }
+            }
+        }
+
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null)!;
             }
         }
 

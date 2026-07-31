@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.SnowyLib</AssemblyName>
         <Product>SnowyLib</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.8.0</Version>
+        <Version>1.8.1</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
