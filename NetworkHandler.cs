@@ -40,6 +40,16 @@ namespace SnowyLib
                 Instance = null;
         }
 
+        public void Start()
+        {
+            StaticUpdateManager.Initialize();
+        }
+
+        public void Update()
+        {
+            StaticUpdateManager.Update();
+        }
+
         [Rpc(SendTo.SpecifiedInParams)]
         public void ShakeCameraRpc(ScreenShakeType screenShakeType, RpcParams rpcParams)
         {
