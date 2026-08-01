@@ -53,18 +53,18 @@ namespace SnowyLib
             }
         }
 
-        public static List<GrabbableObject> spawnedItems = new List<GrabbableObject>();
+        public static List<GrabbableObject> spawnedItems { get; internal set; } = new List<GrabbableObject>();
 
-        public static List<EntranceTeleport> entrances = [];
-        public static MineshaftElevatorController? elevator;
-        public static Terminal? terminal;
+        public static List<EntranceTeleport> entrances { get; internal set; } = [];
+        public static MineshaftElevatorController? elevator { get; internal set; }
+        public static Terminal? terminal { get; internal set; }
 
         public static BoundedRange randomPercentage = new BoundedRange(0f, 1f);
-        public static System.Random randomLocal { get; private set; } = new();
-        public static System.Random randomGlobal { get; private set; } = new();
+        public static System.Random randomLocal { get; internal set; } = new();
+        public static System.Random randomGlobal { get; internal set; } = new();
 
-        public static UnityEvent OnFinishGeneratingLevel = new();
-        public static UnityEvent OnShipLanded = new();
+        public static UnityEvent OnFinishGeneratingLevel { get; internal set; } = new();
+        public static UnityEvent OnShipLanded { get; internal set; } = new();
 
         public const ulong RodrigoSteamID = 76561198164429786;
         public const ulong LizzieSteamID = 76561199094139351;
