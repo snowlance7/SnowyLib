@@ -2,6 +2,7 @@
 using Dawn.Utils;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -106,21 +107,21 @@ namespace SnowyLib
                 case "/log":
                     if (args.Length == 1)
                     {
-                        logger.LogDebug("- rarities");
-                        logger.LogDebug("- archetypes");
-                        logger.LogDebug("- dungeons");
-                        logger.LogDebug("- enemies");
-                        logger.LogDebug("- items");
-                        logger.LogDebug("- mapobjects");
-                        logger.LogDebug("- moons");
-                        logger.LogDebug("- storylogs");
-                        logger.LogDebug("- surfaces");
-                        logger.LogDebug("- terminalcommands");
-                        logger.LogDebug("- tilesets");
-                        logger.LogDebug("- unlockables");
-                        logger.LogDebug("- weathers");
-                        logger.LogDebug("- animations");
-                        logger.LogDebug("- canvas");
+                        logger.LogInfo("- rarities");
+                        logger.LogInfo("- archetypes");
+                        logger.LogInfo("- dungeons");
+                        logger.LogInfo("- enemies");
+                        logger.LogInfo("- items");
+                        logger.LogInfo("- mapobjects");
+                        logger.LogInfo("- moons");
+                        logger.LogInfo("- storylogs");
+                        logger.LogInfo("- surfaces");
+                        logger.LogInfo("- terminalcommands");
+                        logger.LogInfo("- tilesets");
+                        logger.LogInfo("- unlockables");
+                        logger.LogInfo("- weathers");
+                        logger.LogInfo("- animations");
+                        logger.LogInfo("- canvas");
                         return;
                     }
                     switch (args[1])
@@ -144,51 +145,51 @@ namespace SnowyLib
                             break;
                         case "archetypes":
                             foreach (var item in LethalContent.Archetypes.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "dungeons":
                             foreach (var item in LethalContent.Dungeons.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "enemies":
                             foreach (var item in LethalContent.Enemies.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "items":
                             foreach (var item in LethalContent.Items.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "mapobjects":
                             foreach (var item in LethalContent.MapObjects.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "moons":
                             foreach (var item in LethalContent.Moons.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "storylogs":
                             foreach (var item in LethalContent.StoryLogs.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "surfaces":
                             foreach (var item in LethalContent.Surfaces.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "terminalcommands":
                             foreach (var item in LethalContent.TerminalCommands.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "tilesets":
                             foreach (var item in LethalContent.TileSets.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "unlockables":
                             foreach (var item in LethalContent.Unlockables.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "weathers":
                             foreach (var item in LethalContent.Weathers.Values)
-                                logger.LogDebug(item.TypedKey.ToString());
+                                logger.LogInfo(item.TypedKey.ToString());
                             break;
                         case "animations":
                             LogAnimatorParameters(localPlayer.playerBodyAnimator);
@@ -196,20 +197,31 @@ namespace SnowyLib
                         case "canvas":
                             foreach (Canvas canvas in GameObject.FindObjectsOfType<Canvas>())
                             {
-                                logger.LogDebug($"{(canvas.transform.parent != null ? canvas.transform.parent.name + "/" : "")}{canvas.name} | Sorting Order: {canvas.sortingOrder} | Render Order: {canvas.renderOrder}");
+                                logger.LogInfo($"{(canvas.transform.parent != null ? canvas.transform.parent.name + "/" : "")}{canvas.name} | Sorting Order: {canvas.sortingOrder} | Render Order: {canvas.renderOrder}");
                             }
                             break;
                         default:
                             break;
                     }
                     break;
+                case "/spawnenemy":
+                    if (args.Length == 1) { return; }
+                    var enemy = LethalContent.Enemies.Where(x => x.Value.Key.Key.ToLower() == args[1].ToLower()).FirstOrDefault();
+                    EnemyVent? vent = RoundManager.Instance.allEnemyVents.GetClosestToPosition(localPlayer.transform.position, (x) => x.transform.position);
+
+                    if (args.Length > 2 && float.TryParse(args[2], out float ventDelay))
+                        Utils.SpawnEnemy(enemy.Key, vent, ventDelay);
+                    else
+                        SpawnEnemy(enemy.Key, vent);
+
+                        break;
                 case "/refresh":
                     RoundManager.Instance.RefreshEnemiesList();
                     HoarderBugAI.RefreshGrabbableObjectsInMapList();
                     break;
                 case "/dungeon":
                     var dInfo = RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.GetDawnInfo();
-                    logger.LogDebug($"{dInfo.TypedKey.ToString()} | {RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name}");
+                    logger.LogInfo($"{dInfo.TypedKey.ToString()} | {RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name}");
                     break;
                 case "/vignette":
                     if (args.Length > 2)
@@ -368,26 +380,26 @@ namespace SnowyLib
         {
             foreach (var level in StartOfRound.Instance.levels)
             {
-                logger.LogDebug($"- {level.name}:");
+                logger.LogInfo($"- {level.name}:");
 
                 switch (contentType)
                 {
                     case ContentType.Item:
                         foreach (var item in level.spawnableScrap)
                         {
-                            logger.LogDebug($"-- {item.spawnableItem.itemName}: {item.rarity}");
+                            logger.LogInfo($"-- {item.spawnableItem.itemName}: {item.rarity}");
                         }
                         break;
                     case ContentType.Enemy:
                         foreach (var enemy in level.Enemies)
                         {
-                            logger.LogDebug($"-- {enemy.enemyType.name}: {enemy.rarity}");
+                            logger.LogInfo($"-- {enemy.enemyType.name}: {enemy.rarity}");
                         }
                         break;
                     case ContentType.MapObject:
                         foreach (var mapObject in level.spawnableMapObjects)
                         {
-                            logger.LogDebug($"-- {mapObject.prefabToSpawn.name}:");
+                            logger.LogInfo($"-- {mapObject.prefabToSpawn.name}:");
                             Debug.Log(string.Join("\n", mapObject.numberToSpawn.keys.Select(k => $"--- ({k.time}, {k.value})")));
                         }
                         break;
@@ -439,19 +451,19 @@ namespace SnowyLib
                 switch (param.type)
                 {
                     case AnimatorControllerParameterType.Bool:
-                        logger.LogDebug($"{param.name} (Bool) = {animator.GetBool(param.name)}");
+                        logger.LogInfo($"{param.name} (Bool) = {animator.GetBool(param.name)}");
                         break;
 
                     case AnimatorControllerParameterType.Float:
-                        logger.LogDebug($"{param.name} (Float) = {animator.GetFloat(param.name)}");
+                        logger.LogInfo($"{param.name} (Float) = {animator.GetFloat(param.name)}");
                         break;
 
                     case AnimatorControllerParameterType.Int:
-                        logger.LogDebug($"{param.name} (Int) = {animator.GetInteger(param.name)}");
+                        logger.LogInfo($"{param.name} (Int) = {animator.GetInteger(param.name)}");
                         break;
 
                     case AnimatorControllerParameterType.Trigger:
-                        logger.LogDebug($"{param.name} (Trigger)");
+                        logger.LogInfo($"{param.name} (Trigger)");
                         break;
                 }
             }
@@ -612,6 +624,31 @@ namespace SnowyLib
             enemy.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             RoundManager.Instance.SpawnedEnemies.Add(enemy);
             return enemy;
+        }
+
+        public static void SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, EnemyVent? vent = null, float spawnDelay = 0f)
+        {
+            if (!IsServerOrHost) { return; }
+            if (vent == null)
+                vent = RoundManager.Instance.allEnemyVents.GetRandom();
+
+            if (vent == null) { return; }
+
+            var enemy = LethalContent.Enemies[key];
+            int enemyIndex = Array.IndexOf(RoundManager.Instance.currentLevel.Enemies.Select(x => x.enemyType).ToArray(), enemy.EnemyType);
+            vent.enemyType = enemy.EnemyType;
+            vent.enemyTypeIndex = enemyIndex;
+            vent.occupied = true;
+            vent.spawnTime = TimeOfDay.Instance.currentDayTime + spawnDelay;
+
+            if (spawnDelay <= 0)
+            {
+                RoundManager.Instance.SpawnEnemyFromVent(vent);
+            }
+            else
+            {
+                vent.SyncVentSpawnTimeClientRpc((int)vent.spawnTime, enemyIndex);
+            }
         }
 
         /// <summary>
@@ -917,14 +954,14 @@ namespace SnowyLib
                     bounds.size.y *
                     bounds.size.z;
 
-                logger.LogDebug($"{col.name} | Enabled: {col.enabled} | Size: {bounds.size} | Volume: {volume}");
-
                 if (volume > largestVolume)
                 {
                     largestVolume = volume;
                     largest = col;
                 }
             }
+
+            logger.LogDebug($"Got largest collider: {largest.name} | Enabled: {largest.enabled} | Size: {largest.bounds.size} | Volume: {largestVolume}");
 
             return largest;
         }
