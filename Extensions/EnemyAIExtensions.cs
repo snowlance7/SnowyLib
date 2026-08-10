@@ -136,5 +136,10 @@ namespace SnowyLib
             thisEnemy.mostOptimalDistance = num2;
             return enemy3;
         }
+
+        public static int GetMaxHealth(this EnemyAI enemy)
+        {
+            return enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
+        }
     }
 }
