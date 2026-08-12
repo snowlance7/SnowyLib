@@ -16,7 +16,7 @@ namespace SnowyLib
     [BepInDependency(Dawn.DawnLib.PLUGIN_GUID)]
     internal class Plugin : BaseUnityPlugin
     {
-        public static Plugin Instance { get; private set; } = null!;
+        public static Plugin PluginInstance { get; private set; } = null!;
         public static ManualLogSource logger { get; private set; } = null!;
 
         private readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
@@ -30,14 +30,14 @@ namespace SnowyLib
 
         private void Awake()
         {
-            if (Instance == null)
+            if (PluginInstance == null)
             {
-                Instance = this;
+                PluginInstance = this;
             }
 
             cfgTesting = Config.Bind("Debugging", "Testing", false, "For debugging purposes");
 
-            logger = Instance.Logger;
+            logger = PluginInstance.Logger;
 
             harmony.PatchAll();
 

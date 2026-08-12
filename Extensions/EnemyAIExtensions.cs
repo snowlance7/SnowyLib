@@ -1,9 +1,5 @@
-﻿using GameNetcodeStuff;
-using System;
-using System.Linq;
+﻿using System;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.Rendering.HighDefinition;
 
 namespace SnowyLib
 {
@@ -140,6 +136,11 @@ namespace SnowyLib
         public static int GetMaxHealth(this EnemyAI enemy)
         {
             return enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
+        }
+
+        public static bool IsOutside(this EnemyAI enemy)
+        {
+            return enemy.transform.position.y > -80f;
         }
     }
 }

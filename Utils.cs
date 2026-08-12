@@ -3,6 +3,7 @@ using Dawn.Utils;
 using GameNetcodeStuff;
 using HarmonyLib;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -66,6 +67,8 @@ namespace SnowyLib
 
         public static UnityEvent OnFinishGeneratingLevel { get; internal set; } = new();
         public static UnityEvent OnShipLanded { get; internal set; } = new();
+
+        public static bool isOnCompanyMoon => StartOfRound.Instance?.currentLevel.levelID == 3;
 
         public const ulong RodrigoSteamID = 76561198164429786;
         public const ulong LizzieSteamID = 76561199094139351;
@@ -257,6 +260,12 @@ namespace SnowyLib
                 case "/drunkness":
                     if (args.Length == 1 || !float.TryParse(args[1], out float drunkness)) { return; }
                     localPlayer.drunkness = drunkness;
+                    break;
+                case "/debug":
+                    if (args.Length == 1) { return; }
+                    string text = string.Join(" ", args);
+                    text = text.Substring(8);
+                    HUDManager.Instance.SetDebugText(text);
                     break;
                 default:
                     break;
@@ -1146,6 +1155,19 @@ namespace SnowyLib
                 combinedBounds.max.y,
                 combinedBounds.center.z
             );
+        }
+
+        public static void DespawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy = true)
+        {
+            IEnumerator despawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy)
+            {
+                yield return null;
+                yield return new WaitUntil(() => networkObject.IsSpawned);
+                yield return null;
+                networkObject.Despawn(destroy: destroy);
+            }
+
+            PluginInstance.StartCoroutine(despawnNetworkObjectWhenSpawned(networkObject, destroy));
         }
     }
 

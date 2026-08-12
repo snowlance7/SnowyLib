@@ -1,13 +1,11 @@
 ﻿using Dawn.Utils;
 using Dissonance;
 using GameNetcodeStuff;
-using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.SceneManagement;
 using static SnowyLib.Plugin;
-using static UnityEngine.InputSystem.InputRemoting;
 
 namespace SnowyLib
 {
