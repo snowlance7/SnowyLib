@@ -1,4 +1,6 @@
+using BepInEx.Logging;
 using HarmonyLib;
+using static SnowyLib.Plugin;
 
 /* bodyparts
  * 0 head

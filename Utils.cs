@@ -695,15 +695,14 @@ namespace SnowyLib
         /// <param name="parentTo">The optional parent transform for the instantiated map object.</param>
         /// <param name="destroyWithScene">true to destroy the map object when the scene is unloaded; otherwise, false.</param>
         /// <returns>The spawned map object, or null if not executed on the server or host.</returns>
-        public static SpawnableMapObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
+        public static GameObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
             var prefab = LethalContent.MapObjects[key].GetMapObjectPrefab();
             if (prefab == null) { logger.LogError($"Couldnt find prefab for {key}"); return null; }
             GameObject obj = GameObject.Instantiate(prefab, position, rotation, parentTo);
-            var mapObj = obj.GetComponent<SpawnableMapObject>();
             obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
-            return mapObj;
+            return obj;
         }
 
         /// <summary>
