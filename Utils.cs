@@ -1137,6 +1137,13 @@ namespace SnowyLib
             hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
         }
 
+        /// <summary>
+        /// Calculates the topmost point of the renderable bounds of a GameObject, optionally including disabled
+        /// renderers.
+        /// </summary>
+        /// <param name="obj">The GameObject whose renderable bounds are evaluated.</param>
+        /// <param name="includeDisabled">true to include disabled renderers; otherwise, false.</param>
+        /// <returns>A Vector3 representing the topmost point of the object's renderable bounds.</returns>
         public static Vector3 GetTopOfObjectRender(GameObject obj, bool includeDisabled = false)
         {
             Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
@@ -1156,6 +1163,11 @@ namespace SnowyLib
             );
         }
 
+        /// <summary>
+        /// Despawns the specified network object after it has been spawned.
+        /// </summary>
+        /// <param name="networkObject">The network object to despawn.</param>
+        /// <param name="destroy">true to destroy the network object after despawning; otherwise, false.</param>
         public static void DespawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy = true)
         {
             IEnumerator despawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy)
@@ -1167,6 +1179,92 @@ namespace SnowyLib
             }
 
             PluginInstance.StartCoroutine(despawnNetworkObjectWhenSpawned(networkObject, destroy));
+        }
+
+        /// <summary>
+        /// Creates a new readable Texture2D containing the pixel data from the specified source texture.
+        /// </summary>
+        /// <param name="source">The texture to convert to a readable Texture2D.</param>
+        /// <returns>A Texture2D that is readable and contains the pixel data from the source texture.</returns>
+        public static Texture2D MakeTextureReadable(Texture source)
+        {
+            RenderTexture renderTexture = RenderTexture.GetTemporary(
+                source.width,
+                source.height,
+                0,
+                RenderTextureFormat.ARGB32
+            );
+
+            Graphics.Blit(source, renderTexture);
+
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = renderTexture;
+
+            Texture2D readableTexture = new Texture2D(
+                source.width,
+                source.height,
+                TextureFormat.RGBA32,
+                false
+            );
+
+            readableTexture.ReadPixels(
+                new Rect(0, 0, source.width, source.height),
+                0,
+                0
+            );
+
+            readableTexture.Apply();
+
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(renderTexture);
+
+            return readableTexture;
+        }
+
+        /// <summary>
+        /// Calculates the dominant color in a texture by grouping similar colors and selecting the most frequent one.
+        /// </summary>
+        /// <param name="texture">The texture from which to determine the dominant color.</param>
+        /// <returns>The most frequent color in the texture, or white if the texture is null.</returns>
+        public static Color GetDominantColor(Texture2D texture)
+        {
+            if (texture == null)
+                return Color.white;
+
+            Color[] pixels = texture.GetPixels();
+
+            Dictionary<Color32, int> colorCounts = new();
+
+            foreach (Color pixel in pixels)
+            {
+                Color32 color = pixel;
+
+                color.r = (byte)(color.r / 16 * 16);
+                color.g = (byte)(color.g / 16 * 16);
+                color.b = (byte)(color.b / 16 * 16);
+
+                if (color.a < 20)
+                    continue;
+
+                if (colorCounts.ContainsKey(color))
+                    colorCounts[color]++;
+                else
+                    colorCounts[color] = 1;
+            }
+
+            Color32 dominantColor = Color.white;
+            int highestCount = 0;
+
+            foreach (var pair in colorCounts)
+            {
+                if (pair.Value > highestCount)
+                {
+                    highestCount = pair.Value;
+                    dominantColor = pair.Key;
+                }
+            }
+
+            return dominantColor;
         }
     }
 
