@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib
@@ -29,7 +30,7 @@ namespace SnowyLib
                 if (spawned.Contains(type))
                 {
                     despawningDuplicate = __instance;
-                    Utils.DespawnNetworkObjectWhenSpawned(__instance.NetworkObject, destroy: true);
+                    Utils.DespawnNetworkObjectWhenSpawned(__instance.GetComponent<NetworkObject>(), destroy: true);
                     RoundManager.Instance.SpawnedEnemies.Remove(__instance);
                 }
                 else

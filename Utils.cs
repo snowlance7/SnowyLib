@@ -68,6 +68,8 @@ namespace SnowyLib
         public static UnityEvent OnFinishGeneratingLevel { get; internal set; } = new();
         public static UnityEvent OnShipLanded { get; internal set; } = new();
 
+        public static Light? localPlayerNightVision;
+
         public static bool isOnCompanyMoon => StartOfRound.Instance?.currentLevel.levelID == 3;
 
         public const ulong RodrigoSteamID = 76561198164429786;
@@ -100,12 +102,12 @@ namespace SnowyLib
             {
                 case "/spawning":
                     DEBUG_disableSpawning = !DEBUG_disableSpawning;
-                    HUDManager.Instance.DisplayTip("Disable Spawning", DEBUG_disableSpawning.ToString());
+                    HUDManager.Instance.DisplayTip("SnowyLib", $"Spawning {(DEBUG_disableSpawning ? "disabled" : "enabled")}");
                     break;
                 case "/time":
                     DEBUG_disableTime = !DEBUG_disableTime;
                     StartOfRound.Instance.currentLevel.planetHasTime = !DEBUG_disableTime;
-                    HUDManager.Instance.DisplayTip("Snowylib", "disableTime: " + DEBUG_disableTime);
+                    HUDManager.Instance.DisplayTip("Snowylib", $"Time {(DEBUG_disableTime ? "disabled" : "enabled")}");
                     break;
                 case "/log":
                     if (args.Length == 1)
@@ -267,9 +269,43 @@ namespace SnowyLib
                     text = text.Substring(8);
                     HUDManager.Instance.SetDebugText(text);
                     break;
+                case "/unlock":
+                    HUDManager.Instance.DisplayTip("SnowyLib", "Unlocking doors");
+                    foreach (var tao in GameObject.FindObjectsOfType<TerminalAccessibleObject>())
+                    {
+                        if (!tao.isBigDoor) { continue; }
+                        tao.SetDoorLocalClient(open: true);
+                    }
+                    foreach (var doorLock in GameObject.FindObjectsOfType<DoorLock>())
+                    {
+                        if (!doorLock.isLocked) { continue; }
+                        doorLock.UnlockDoorSyncWithServer();
+                    }
+                    break;
+                case "/nv":
+                    if (localPlayerNightVision == null)
+                        SetNightVisionEnabled(true);
+                    else
+                        SetNightVisionEnabled(!localPlayerNightVision.enabled);
+                    HUDManager.Instance.DisplayTip("SnowyLib", $"Night vision {(localPlayerNightVision!.enabled ? "enabled" : "disabled")}");
+                        break;
                 default:
                     break;
             }
+        }
+
+        public static void SetNightVisionEnabled(bool enable)
+        {
+            if (localPlayerNightVision == null)
+            {
+                GameObject prefab = localPlayer.nightVision.gameObject;
+                GameObject obj = GameObject.Instantiate(prefab, localPlayer.nightVision.gameObject.transform.parent);
+                localPlayerNightVision = obj.GetComponent<Light>();
+                localPlayerNightVision.intensity = 4311f;
+                localPlayerNightVision.range = 15;
+            }
+
+            localPlayerNightVision.enabled = enable;
         }
 
         /// <summary>
