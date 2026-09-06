@@ -707,47 +707,30 @@ namespace SnowyLib
             }
         }
 
-        /// <summary>
-        /// Instantiates a grabbable item at the specified position and rotation.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Server
-        /// </remarks>
-        /// <param name="key">The key identifying the item to instantiate.</param>
-        /// <param name="position">The world position where the item will be spawned.</param>
-        /// <param name="rotation">The rotation to apply to the spawned item.</param>
-        /// <param name="parentTo">The optional parent transform for the spawned item.</param>
-        /// <param name="fallTime">The duration for the item to fall after spawning.</param>
-        /// <param name="destroyWithScene">true to destroy the item when the scene unloads; otherwise, false.</param>
-        /// <returns>The spawned grabbable object, or null if not executed on the server.</returns>
-        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
+        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = false)
         {
             if (!IsServerOrHost) { return null; }
-            return SpawnItem(LethalContent.Items[key].Item, position, rotation, parentTo, fallTime, destroyWithScene);
+            return SpawnItem(LethalContent.Items[key].Item, position, rotation, parentTo, destroyWithScene);
         }
 
-        public static GrabbableObject? SpawnItem(Item item, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
+        public static GrabbableObject? SpawnItem(Item item, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = false)
         {
             if (!IsServerOrHost) { return null; }
             GameObject obj = GameObject.Instantiate(item.spawnPrefab, position, rotation, parentTo);
             GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
-            grabObj.fallTime = fallTime;
             grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             return grabObj;
         }
 
-        /// <summary>
-        /// Instantiates a map object prefab at the specified position and rotation.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Server
-        /// </remarks>
-        /// <param name="key">The key identifying the map object to instantiate.</param>
-        /// <param name="position">The world position for the instantiated map object.</param>
-        /// <param name="rotation">The rotation to apply to the instantiated map object.</param>
-        /// <param name="parentTo">The optional parent transform for the instantiated map object.</param>
-        /// <param name="destroyWithScene">true to destroy the map object when the scene is unloaded; otherwise, false.</param>
-        /// <returns>The spawned map object, or null if not executed on the server or host.</returns>
+        public static GrabbableObject? SpawnItem(Item item, Transform parentTo, bool worldPositionStays = false, bool destroyWithScene = false)
+        {
+            if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(item.spawnPrefab, parentTo, worldPositionStays);
+            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
+            grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
+            return grabObj;
+        }
+
         public static GameObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
