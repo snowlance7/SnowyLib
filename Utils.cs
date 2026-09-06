@@ -664,7 +664,13 @@ namespace SnowyLib
         public static EnemyAI? SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
         {
             if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(LethalContent.Enemies[key].EnemyType.enemyPrefab, position, rotation, parentTo);
+            return SpawnEnemy(LethalContent.Enemies[key].EnemyType, position, rotation, parentTo, destroyWithScene);
+        }
+
+        public static EnemyAI? SpawnEnemy(EnemyType enemyType, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
+        {
+            if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(enemyType.enemyPrefab, position, rotation, parentTo);
             EnemyAI enemy = obj.GetComponent<EnemyAI>();
             enemy.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
             RoundManager.Instance.SpawnedEnemies.Add(enemy);
@@ -674,14 +680,19 @@ namespace SnowyLib
         public static void SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, EnemyVent? vent = null, float spawnDelay = 0f)
         {
             if (!IsServerOrHost) { return; }
+            SpawnEnemy(LethalContent.Enemies[key].EnemyType, vent, spawnDelay);
+        }
+
+        public static void SpawnEnemy(EnemyType enemyType, EnemyVent? vent = null, float spawnDelay = 0f)
+        {
+            if (!IsServerOrHost) { return; }
             if (vent == null)
                 vent = RoundManager.Instance.allEnemyVents.GetRandom();
 
             if (vent == null) { return; }
 
-            var enemy = LethalContent.Enemies[key];
-            int enemyIndex = Array.IndexOf(RoundManager.Instance.currentLevel.Enemies.Select(x => x.enemyType).ToArray(), enemy.EnemyType);
-            vent.enemyType = enemy.EnemyType;
+            int enemyIndex = Array.IndexOf(RoundManager.Instance.currentLevel.Enemies.Select(x => x.enemyType).ToArray(), enemyType);
+            vent.enemyType = enemyType;
             vent.enemyTypeIndex = enemyIndex;
             vent.occupied = true;
             vent.spawnTime = TimeOfDay.Instance.currentDayTime + spawnDelay;
@@ -712,7 +723,13 @@ namespace SnowyLib
         public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
         {
             if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(LethalContent.Items[key].Item.spawnPrefab, position, rotation, parentTo);
+            return SpawnItem(LethalContent.Items[key].Item, position, rotation, parentTo, fallTime, destroyWithScene);
+        }
+
+        public static GrabbableObject? SpawnItem(Item item, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, float fallTime = 0f, bool destroyWithScene = false)
+        {
+            if (!IsServerOrHost) { return null; }
+            GameObject obj = GameObject.Instantiate(item.spawnPrefab, position, rotation, parentTo);
             GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
             grabObj.fallTime = fallTime;
             grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
