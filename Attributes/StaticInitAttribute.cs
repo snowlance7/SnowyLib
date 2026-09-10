@@ -6,15 +6,11 @@ using System.Reflection;
 namespace SnowyLib
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class StaticUpdateAttribute : Attribute
+    public sealed class StaticInitAttribute : Attribute
     {
-        private static readonly List<Action> updates = new();
-
         internal static void Initialize()
         {
-            updates.Clear();
-
-            Assembly snowyLibAssembly = typeof(StaticUpdateAttribute).Assembly;
+            Assembly snowyLibAssembly = typeof(StaticInitAttribute).Assembly;
             string snowyLibName = snowyLibAssembly.GetName().Name;
 
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -38,7 +34,7 @@ namespace SnowyLib
             {
                 foreach (MethodInfo method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (!method.IsDefined(typeof(StaticUpdateAttribute), false))
+                    if (!method.IsDefined(typeof(StaticInitAttribute), false))
                         continue;
 
                     if (method.ReturnType != typeof(void))
@@ -47,7 +43,7 @@ namespace SnowyLib
                     if (method.GetParameters().Length != 0)
                         throw new Exception($"{method.DeclaringType.FullName}.{method.Name} cannot have parameters.");
 
-                    updates.Add((Action)Delegate.CreateDelegate(typeof(Action), method));
+                    method.Invoke(null, null);
                 }
             }
         }
@@ -62,12 +58,6 @@ namespace SnowyLib
             {
                 return ex.Types.Where(t => t != null)!;
             }
-        }
-
-        internal static void Update()
-        {
-            foreach (Action update in updates)
-                update();
         }
     }
 }

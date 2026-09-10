@@ -40,13 +40,13 @@ namespace SnowyLib
 
         public void Start()
         {
-            InitConfigManager.Initialize();
-            StaticUpdateManager.Initialize();
+            StaticInitAttribute.Initialize();
+            StaticUpdateAttribute.Initialize();
         }
 
         public void Update()
         {
-            StaticUpdateManager.Update();
+            StaticUpdateAttribute.Update();
         }
 
         [Rpc(SendTo.SpecifiedInParams)]
@@ -61,6 +61,7 @@ namespace SnowyLib
             PlayerControllerB? playerHeldBy = PlayerFromId(clientId);
             if (playerHeldBy == null) { return; }
             playerHeldBy.thisPlayerBody.localScale = new Vector3(size, size, size);
+            playerHeldBy.RebuildRig();
         }
 
         [Rpc(SendTo.Everyone)]

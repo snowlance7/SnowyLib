@@ -5,12 +5,12 @@ using System.Reflection;
 
 namespace SnowyLib
 {
+    [Obsolete("Use StaticInitAttribute instead", true)]
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class InitConfigAttribute : Attribute { }
-
-    internal static class InitConfigManager
+    public sealed class InitConfigAttribute : Attribute
     {
-        public static void Initialize()
+        [StaticInit]
+        internal static void Initialize()
         {
             Assembly snowyLibAssembly = typeof(InitConfigAttribute).Assembly;
             string snowyLibName = snowyLibAssembly.GetName().Name;

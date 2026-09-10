@@ -1302,6 +1302,16 @@ namespace SnowyLib
 
             return dominantColor;
         }
+
+        public static void LogShaderProperties(Shader shader)
+        {
+            for (int i = 0; i < shader.GetPropertyCount(); i++)
+            {
+                Debug.Log(
+                    $"{i}: {shader.GetPropertyName(i)} - {shader.GetPropertyType(i)}"
+                );
+            }
+        }
     }
 
     [HarmonyPatch]
