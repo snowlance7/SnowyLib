@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BepInEx;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,8 @@ namespace SnowyLib
             this.operation = args =>
             {
                 string output = operation(args);
+
+                if (string.IsNullOrWhiteSpace(output)) { return null; }
 
                 TerminalNode node = new TerminalNode
                 {
