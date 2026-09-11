@@ -1,5 +1,4 @@
-﻿using BepInEx;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,9 +32,27 @@ namespace SnowyLib
 
         public static void RemoveTerminalCommand(string command)
         {
-            TerminalCommand? terminalCommand = registeredTerminalCommands.Where(x => x.command == command).FirstOrDefault();
+            TerminalCommand? terminalCommand = registeredTerminalCommands.FirstOrDefault(x => x.command == command);
             if (terminalCommand == null) { return; }
             registeredTerminalCommands.Remove(terminalCommand);
+        }
+
+        internal static void SetCategories(Terminal terminal)
+        {
+            foreach (var terminalCommand in registeredTerminalCommands)
+            {
+                if (string.IsNullOrWhiteSpace(terminalCommand.category)) { continue; }
+                TerminalKeyword? categoryKeyword = terminal.terminalNodes.allKeywords.FirstOrDefault(x => x.word.ToLower() == terminalCommand.category.ToLower());
+                if (categoryKeyword == null || categoryKeyword.specialKeywordResult == null) { continue; }
+
+                string text = $"\n>{(string.IsNullOrWhiteSpace(terminalCommand.title) ? terminalCommand.command.ToUpper() : terminalCommand.title)}";
+                
+                if (!string.IsNullOrWhiteSpace(terminalCommand.description))
+                    text += $"\n{terminalCommand.description}";
+
+                text += "\n\n";
+                categoryKeyword.specialKeywordResult.displayText = categoryKeyword.specialKeywordResult.displayText.Trim() + "\n" + text;
+            }
         }
     }
 
@@ -43,14 +60,20 @@ namespace SnowyLib
     {
         public string command;
         public Func<string[], TerminalNode> operation;
+        public string category;
+        public string title;
+        public string description;
 
-        public TerminalCommand(string command, Func<string[], TerminalNode> operation)
+        public TerminalCommand(string command, Func<string[], TerminalNode> operation, string category = "", string title = "", string description = "")
         {
             this.command = command;
             this.operation = operation;
+            this.category = category;
+            this.title = title;
+            this.description = description;
         }
 
-        public TerminalCommand(string command, Func<string[], string> operation)
+        public TerminalCommand(string command, Func<string[], string> operation, string category = "", string title = "", string description = "")
         {
             this.command = command;
 
@@ -68,6 +91,10 @@ namespace SnowyLib
 
                 return node;
             };
+
+            this.category = category;
+            this.title = title;
+            this.description = description;
         }
     }
 
@@ -92,6 +119,20 @@ namespace SnowyLib
             {
                 logger.LogError(e);
                 return true;
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(Terminal), nameof(Terminal.Start))]
+        public static void Terminal_Start_PostFix(Terminal __instance)
+        {
+            try
+            {
+                TerminalAPI.SetCategories(__instance);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e);
+                return;
             }
         }
     }

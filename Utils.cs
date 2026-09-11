@@ -1394,12 +1394,12 @@ namespace SnowyLib
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
-        public static void PlayerControllerB_ConnectClientToPlayerObject_Postfix(PlayerControllerB __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(Terminal), nameof(Terminal.Start))]
+        public static void Terminal_Start_Prefix(Terminal __instance)
         {
             try
             {
-                Utils.terminal = GameObject.FindObjectOfType<Terminal>();
+                Utils.terminal = __instance;
             }
             catch
             {
