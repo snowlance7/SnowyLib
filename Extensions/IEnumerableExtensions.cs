@@ -197,5 +197,19 @@ namespace SnowyLib
 
             return inRange;
         }
+
+        public static Vector3 GetCenter(this IEnumerable<Vector3> positions)
+        {
+            Vector3 center = Vector3.zero;
+            int count = 0;
+
+            foreach (Vector3 position in positions)
+            {
+                center += position;
+                count++;
+            }
+
+            return count > 0 ? center / count : Vector3.zero;
+        }
     }
 }
