@@ -1,4 +1,5 @@
-﻿using Dawn.Utils;
+﻿using Dawn;
+using Dawn.Utils;
 using Dissonance;
 using GameNetcodeStuff;
 using Unity.Netcode;
@@ -205,6 +206,11 @@ namespace SnowyLib
                 return false;
             }
             return StartOfRound.Instance.shipBounds.bounds.Contains(player.transform.position);
+        }
+
+        public static void SpawnAndGrabItem(this PlayerControllerB player, NamespacedKey<DawnItemInfo> key)
+        {
+            NetworkHandler.Instance.SpawnAndGrabItemRpc(player.actualClientId, key);
         }
     }
 }

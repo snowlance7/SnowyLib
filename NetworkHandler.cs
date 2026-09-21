@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using static Netcode.Transports.Facepunch.FacepunchTransport;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib
@@ -49,13 +50,13 @@ namespace SnowyLib
             StaticUpdateAttribute.Update();
         }
 
-        [Rpc(SendTo.SpecifiedInParams)]
+        [Rpc(SendTo.SpecifiedInParams, RequireOwnership = false)]
         public void ShakeCameraRpc(ScreenShakeType screenShakeType, RpcParams rpcParams)
         {
             HUDManager.Instance.ShakeCamera(screenShakeType);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void ChangePlayerSizeRpc(ulong clientId, float size)
         {
             PlayerControllerB? playerHeldBy = PlayerFromId(clientId);
@@ -64,7 +65,7 @@ namespace SnowyLib
             playerHeldBy.RebuildRig();
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void MufflePlayerRpc(ulong clientId, bool value)
         {
             PlayerControllerB? player = PlayerFromId(clientId);
@@ -72,7 +73,7 @@ namespace SnowyLib
             player.MufflePlayer(value);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void KillPlayerRpc(ulong clientId)
         {
             if (localPlayer.actualClientId != clientId) { return; }
@@ -86,7 +87,7 @@ namespace SnowyLib
             NetworkHandler.Instance.SetScrapValueRpc(grabbableObject.NetworkObject, value);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void SetScrapValueRpc(NetworkObjectReference netRef, int value)
         {
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }
@@ -95,7 +96,7 @@ namespace SnowyLib
             grabObj.SetScrapValue(value);
         }
 
-        [Rpc(SendTo.Server)]
+        [Rpc(SendTo.Server, RequireOwnership = false)]
         public void SpawnEnemyRpc(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, bool destroyWithScene = true)
         {
             if (!IsServer) { return; }
@@ -106,7 +107,7 @@ namespace SnowyLib
             return;
         }
 
-        [Rpc(SendTo.Server)]
+        [Rpc(SendTo.Server, RequireOwnership = false)]
         public void SpawnItemRpc(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, float fallTime = 0f, bool destroyWithScene = false)
         {
             if (!IsServer) { return; }
@@ -117,7 +118,7 @@ namespace SnowyLib
             return;
         }
 
-        [Rpc(SendTo.Server)]
+        [Rpc(SendTo.Server, RequireOwnership = false)]
         public void SpawnMapObjectRpc(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, bool destroyWithScene = true)
         {
             if (!IsServer) { return; }
@@ -127,25 +128,25 @@ namespace SnowyLib
             return;
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void SpawnExplosionRpc(Vector3 explosionPosition, bool spawnExplosionEffect = false, float killRange = 1f, float damageRange = 1f, int nonLethalDamage = 50, float physicsForce = 0f, bool goThroughCar = false)
         {
             Landmine.SpawnExplosion(explosionPosition: explosionPosition, spawnExplosionEffect: spawnExplosionEffect, killRange: killRange, damageRange: damageRange, nonLethalDamage: nonLethalDamage, physicsForce: physicsForce, goThroughCar: goThroughCar);
         }
 
-        [Rpc(SendTo.SpecifiedInParams)]
+        [Rpc(SendTo.SpecifiedInParams, RequireOwnership = false)]
         public void SetEarsRingingRpc(float time, RpcParams rpcParams)
         {
             SoundManager.Instance.earsRingingTimer = time;
         }
 
-        [Rpc(SendTo.SpecifiedInParams)]
+        [Rpc(SendTo.SpecifiedInParams, RequireOwnership = false)]
         public void DisplayStatusEffectRpc(string statusEffectString, RpcParams rpcParams)
         {
             Utils.DisplayStatusEffect(statusEffectString);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void SetShipLeaveEarlyServerRpc(float timeToLeaveEarly, string message, string speakerText = "SAFETY COMPUTER", float waitTime = 4f)
         {
             DialogueSegment dialogueSegment = new DialogueSegment();
@@ -159,13 +160,13 @@ namespace SnowyLib
             HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
         }
 
-        [Rpc(SendTo.Server)]
+        [Rpc(SendTo.Server, RequireOwnership = false)]
         public void DisplayAdRpc()
         {
             HUDManager.Instance.ChooseAdItem();
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void RevivePlayerRpc(ulong clientId, Vector3 position = default(Vector3))
         {
             PlayerControllerB? player = PlayerFromId(clientId);
@@ -286,7 +287,7 @@ namespace SnowyLib
             StartOfRound.Instance.UpdatePlayerVoiceEffects();
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void DropHeldItemRpc(ulong clientId, int dropItemSlot, bool itemsFall, bool disconnecting, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3), bool setInShip = false, bool setInElevator = false)
         {
             PlayerControllerB? player = PlayerFromId(clientId);
@@ -296,7 +297,7 @@ namespace SnowyLib
             player.DropHeldItem(item, itemsFall, disconnecting, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation, setInShip, setInElevator);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void DiscardItemInSlotRpc(ulong clientId, int slot, NetworkObjectReference parentObjectTo, bool placeObject = false, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
         {
             PlayerControllerB? player = PlayerFromId(clientId);
@@ -304,12 +305,38 @@ namespace SnowyLib
             player.DiscardItemInSlot(slot, placeObject, parentObjectTo, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void DiscardItemInSlotRpc(ulong clientId, int slot, bool placeObject = false, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
         {
             PlayerControllerB? player = PlayerFromId(clientId);
             if (player == null) { return; }
             player.DiscardItemInSlot(slot, placeObject, null, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
+        }
+
+        [Rpc(SendTo.Server, RequireOwnership = false)]
+        public void SpawnAndGrabItemRpc(ulong playerGrabbingId, NamespacedKey<DawnItemInfo> key)
+        {
+            PlayerControllerB? player = PlayerFromId(playerGrabbingId);
+            if (player == null) { return; }
+            var item = Utils.SpawnItem(key, player.transform.position);
+            if (item == null) { return; }
+
+            IEnumerator grabItemAfterNetworkSpawn()
+            {
+                yield return new WaitUntil(() => item.NetworkObject != null && item.NetworkObject.IsSpawned);
+                SpawnAndGrabItemClientRpc(playerGrabbingId, item.NetworkObject);
+            }
+
+            StartCoroutine(grabItemAfterNetworkSpawn());
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void SpawnAndGrabItemClientRpc(ulong playerGrabbingId, NetworkObjectReference netRef)
+        {
+            if (localPlayer.actualClientId != playerGrabbingId) { return; }
+            if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get networkobject from networkobjectreference"); return; }
+            var item = netObj.GetComponent<GrabbableObject>();
+            localPlayer.GrabGrabbableObject(item);
         }
     }
 
