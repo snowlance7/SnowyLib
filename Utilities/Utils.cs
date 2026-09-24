@@ -1,8 +1,5 @@
-﻿using Dawn;
-using Dawn.Utils;
+﻿using Dawn.Utils;
 using GameNetcodeStuff;
-using HarmonyLib;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +12,7 @@ using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
-    public static class Utils
+    public static partial class Utils
     {
         public static bool testing => cfgTesting.Value;
 
@@ -90,208 +87,8 @@ namespace SnowyLib
 
         internal static void SetRandoms()
         {
-            Utils.randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
-            Utils.randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
-        }
-
-        internal static void ChatCommand(string[] args)
-        {
-            if (!testing) { return; }
-
-            switch (args[0])
-            {
-                case "/spawning":
-                    DEBUG_disableSpawning = !DEBUG_disableSpawning;
-                    HUDManager.Instance.DisplayTip("SnowyLib", $"Spawning {(DEBUG_disableSpawning ? "disabled" : "enabled")}");
-                    break;
-                case "/time":
-                    DEBUG_disableTime = !DEBUG_disableTime;
-                    StartOfRound.Instance.currentLevel.planetHasTime = !DEBUG_disableTime;
-                    HUDManager.Instance.DisplayTip("Snowylib", $"Time {(DEBUG_disableTime ? "disabled" : "enabled")}");
-                    break;
-                case "/log":
-                    if (args.Length == 1)
-                    {
-                        logger.LogInfo("- rarities");
-                        logger.LogInfo("- archetypes");
-                        logger.LogInfo("- dungeons");
-                        logger.LogInfo("- enemies");
-                        logger.LogInfo("- items");
-                        logger.LogInfo("- mapobjects");
-                        logger.LogInfo("- moons");
-                        logger.LogInfo("- storylogs");
-                        logger.LogInfo("- surfaces");
-                        logger.LogInfo("- terminalcommands");
-                        logger.LogInfo("- tilesets");
-                        logger.LogInfo("- unlockables");
-                        logger.LogInfo("- weathers");
-                        logger.LogInfo("- animations");
-                        logger.LogInfo("- canvas");
-                        return;
-                    }
-                    switch (args[1])
-                    {
-                        case "rarities":
-                            if (args.Length == 2) { return; }
-                            switch (args[2])
-                            {
-                                case "item":
-                                    LogRarities(ContentType.Item);
-                                    break;
-                                case "enemy":
-                                    LogRarities(ContentType.Enemy);
-                                    break;
-                                case "mapobject":
-                                    LogRarities(ContentType.MapObject);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case "archetypes":
-                            foreach (var item in LethalContent.Archetypes.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "dungeons":
-                            foreach (var item in LethalContent.Dungeons.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "enemies":
-                            foreach (var item in LethalContent.Enemies.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "items":
-                            foreach (var item in LethalContent.Items.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "mapobjects":
-                            foreach (var item in LethalContent.MapObjects.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "moons":
-                            foreach (var item in LethalContent.Moons.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "storylogs":
-                            foreach (var item in LethalContent.StoryLogs.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "surfaces":
-                            foreach (var item in LethalContent.Surfaces.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "terminalcommands":
-                            foreach (var item in LethalContent.TerminalCommands.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "tilesets":
-                            foreach (var item in LethalContent.TileSets.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "unlockables":
-                            foreach (var item in LethalContent.Unlockables.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "weathers":
-                            foreach (var item in LethalContent.Weathers.Values)
-                                logger.LogInfo(item.TypedKey.ToString());
-                            break;
-                        case "animations":
-                            LogAnimatorParameters(localPlayer.playerBodyAnimator);
-                            break;
-                        case "canvas":
-                            foreach (Canvas canvas in GameObject.FindObjectsOfType<Canvas>())
-                            {
-                                logger.LogInfo($"{(canvas.transform.parent != null ? canvas.transform.parent.name + "/" : "")}{canvas.name} | Sorting Order: {canvas.sortingOrder} | Render Order: {canvas.renderOrder}");
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case "/spawnenemy":
-                    if (args.Length == 1) { return; }
-                    var enemy = LethalContent.Enemies.Where(x => x.Value.Key.Key.ToLower() == args[1].ToLower()).FirstOrDefault();
-                    EnemyVent? vent = RoundManager.Instance.allEnemyVents.GetClosestToPosition(localPlayer.transform.position, (x) => x.transform.position);
-
-                    if (args.Length > 2 && float.TryParse(args[2], out float ventDelay))
-                        Utils.SpawnEnemy(enemy.Key, vent, ventDelay);
-                    else
-                        SpawnEnemy(enemy.Key, vent);
-
-                        break;
-                case "/refresh":
-                    RoundManager.Instance.RefreshEnemiesList();
-                    HoarderBugAI.RefreshGrabbableObjectsInMapList();
-                    break;
-                case "/dungeon":
-                    var dInfo = RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.GetDawnInfo();
-                    logger.LogInfo($"{dInfo.TypedKey.ToString()} | {RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name}");
-                    break;
-                case "/vignette":
-                    if (args.Length > 2)
-                    {
-                        if (!float.TryParse(args[1], out float intensity) || !float.TryParse(args[2], out float decrease)) { return; }
-                        VignetteOverlay.SetIntensity(intensity, decrease);
-                        HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {intensity} and insanity decrease per second is set to {decrease}");
-                    }
-                    else
-                    {
-                        if (!float.TryParse(args[1], out float intensity)) { return; }
-                        VignetteOverlay.SetIntensity(intensity);
-                        HUDManager.Instance.DisplayTip("SnowyLib", $"Vignette intensity set to {intensity}");
-                    }
-                    break;
-                case "/spawnanim":
-                    localPlayer.SpawnPlayerAnimation();
-                    break;
-                case "/playanim":
-                    if (args.Length > 3 && float.TryParse(args[3], out float time))
-                    {
-                        PlayPlayerAnimation(args[1], args[2], time);
-                    }
-                    else if (args.Length > 2)
-                    {
-                        PlayPlayerAnimation(args[1], args[2], 3f);
-                    }
-                    else if (args.Length > 1)
-                    {
-                        PlayPlayerAnimation(args[1]);
-                    }
-                    break;
-                case "/drunkness":
-                    if (args.Length == 1 || !float.TryParse(args[1], out float drunkness)) { return; }
-                    localPlayer.drunkness = drunkness;
-                    break;
-                case "/debug":
-                    if (args.Length == 1) { return; }
-                    string text = string.Join(" ", args);
-                    text = text.Substring(8);
-                    HUDManager.Instance.SetDebugText(text);
-                    break;
-                case "/unlock":
-                    HUDManager.Instance.DisplayTip("SnowyLib", "Unlocking doors");
-                    foreach (var tao in GameObject.FindObjectsOfType<TerminalAccessibleObject>())
-                    {
-                        if (!tao.isBigDoor) { continue; }
-                        tao.SetDoorLocalClient(open: true);
-                    }
-                    foreach (var doorLock in GameObject.FindObjectsOfType<DoorLock>())
-                    {
-                        if (!doorLock.isLocked) { continue; }
-                        doorLock.UnlockDoorSyncWithServer();
-                    }
-                    break;
-                case "/nv":
-                    if (localPlayerNightVision == null)
-                        SetNightVisionEnabled(true);
-                    else
-                        SetNightVisionEnabled(!localPlayerNightVision.enabled);
-                    HUDManager.Instance.DisplayTip("SnowyLib", $"Night vision {(localPlayerNightVision!.enabled ? "enabled" : "disabled")}");
-                        break;
-                default:
-                    break;
-            }
+            randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
+            randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
         }
 
         public static void SetNightVisionEnabled(bool enable)
@@ -299,7 +96,7 @@ namespace SnowyLib
             if (localPlayerNightVision == null)
             {
                 GameObject prefab = localPlayer.nightVision.gameObject;
-                GameObject obj = GameObject.Instantiate(prefab, localPlayer.nightVision.gameObject.transform.parent);
+                GameObject obj = UnityEngine.Object.Instantiate(prefab, localPlayer.nightVision.gameObject.transform.parent);
                 localPlayerNightVision = obj.GetComponent<Light>();
                 localPlayerNightVision.intensity = 4311f;
                 localPlayerNightVision.range = 15;
@@ -406,7 +203,7 @@ namespace SnowyLib
         public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
         {
             NavMeshPath path = new NavMeshPath();
-            if (!NavMesh.CalculatePath(startPos, endPos, -1, path) || (int)path.status != 0)
+            if (!NavMesh.CalculatePath(startPos, endPos, -1, path) || path.status != 0)
             {
                 return false;
             }
@@ -650,98 +447,6 @@ namespace SnowyLib
         }
 
         /// <summary>
-        /// Spawns an enemy of the specified type at the given position and rotation.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Server
-        /// </remarks>
-        /// <param name="key">The key identifying the enemy type to spawn.</param>
-        /// <param name="position">The world position where the enemy is spawned.</param>
-        /// <param name="rotation">The rotation to apply to the spawned enemy.</param>
-        /// <param name="parentTo">The optional parent transform for the spawned enemy.</param>
-        /// <param name="destroyWithScene">true to destroy the enemy when the scene is unloaded; otherwise, false.</param>
-        /// <returns>The spawned EnemyAI instance, or null if not executed on the server.</returns>
-        public static EnemyAI? SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
-        {
-            if (!IsServerOrHost) { return null; }
-            return SpawnEnemy(LethalContent.Enemies[key].EnemyType, position, rotation, parentTo, destroyWithScene);
-        }
-
-        public static EnemyAI? SpawnEnemy(EnemyType enemyType, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
-        {
-            if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(enemyType.enemyPrefab, position, rotation, parentTo);
-            EnemyAI enemy = obj.GetComponent<EnemyAI>();
-            enemy.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
-            RoundManager.Instance.SpawnedEnemies.Add(enemy);
-            return enemy;
-        }
-
-        public static void SpawnEnemy(NamespacedKey<DawnEnemyInfo> key, EnemyVent? vent = null, float spawnDelay = 0f)
-        {
-            if (!IsServerOrHost) { return; }
-            SpawnEnemy(LethalContent.Enemies[key].EnemyType, vent, spawnDelay);
-        }
-
-        public static void SpawnEnemy(EnemyType enemyType, EnemyVent? vent = null, float spawnDelay = 0f)
-        {
-            if (!IsServerOrHost) { return; }
-            if (vent == null)
-                vent = RoundManager.Instance.allEnemyVents.GetRandom();
-
-            if (vent == null) { return; }
-
-            int enemyIndex = Array.IndexOf(RoundManager.Instance.currentLevel.Enemies.Select(x => x.enemyType).ToArray(), enemyType);
-            vent.enemyType = enemyType;
-            vent.enemyTypeIndex = enemyIndex;
-            vent.occupied = true;
-            vent.spawnTime = TimeOfDay.Instance.currentDayTime + spawnDelay;
-            
-            if (spawnDelay <= 0)
-            {
-                RoundManager.Instance.SpawnEnemyFromVent(vent);
-            }
-            else
-            {
-                vent.SyncVentSpawnTimeClientRpc((int)vent.spawnTime, enemyIndex);
-            }
-        }
-
-        public static GrabbableObject? SpawnItem(NamespacedKey<DawnItemInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = false)
-        {
-            if (!IsServerOrHost) { return null; }
-            return SpawnItem(LethalContent.Items[key].Item, position, rotation, parentTo, destroyWithScene);
-        }
-
-        public static GrabbableObject? SpawnItem(Item item, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = false)
-        {
-            if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(item.spawnPrefab, position, rotation, parentTo);
-            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
-            grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
-            return grabObj;
-        }
-
-        public static GrabbableObject? SpawnItem(Item item, Transform parentTo, bool worldPositionStays = false, bool destroyWithScene = false)
-        {
-            if (!IsServerOrHost) { return null; }
-            GameObject obj = GameObject.Instantiate(item.spawnPrefab, parentTo, worldPositionStays);
-            GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
-            grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
-            return grabObj;
-        }
-
-        public static GameObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
-        {
-            if (!IsServerOrHost) { return null; }
-            var prefab = LethalContent.MapObjects[key].GetMapObjectPrefab();
-            if (prefab == null) { logger.LogError($"Couldnt find prefab for {key}"); return null; }
-            GameObject obj = GameObject.Instantiate(prefab, position, rotation, parentTo);
-            obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
-            return obj;
-        }
-
-        /// <summary>
         /// Plays an audio clip at a specified world position with optional pitch randomization, 3D spatialization,
         /// distance attenuation, and low-pass filtering.
         /// </summary>
@@ -761,7 +466,7 @@ namespace SnowyLib
         /// <param name="audibleNoiseID">The identifier for registering the sound as audible noise, or a negative value to disable.</param>
         public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
-            GameObject soundObj = GameObject.Instantiate(new GameObject("TempSoundEffectObj"), pos);
+            GameObject soundObj = UnityEngine.Object.Instantiate(new GameObject("TempSoundEffectObj"), pos);
             AudioSource source = soundObj.AddComponent<AudioSource>();
 
             OccludeAudio occlude = soundObj.AddComponent<OccludeAudio>();
@@ -781,7 +486,7 @@ namespace SnowyLib
             source.minDistance = min3DDistance;
             source.maxDistance = max3DDistance;
             source.Play();
-            GameObject.Destroy(soundObj, source.clip.length);
+            UnityEngine.Object.Destroy(soundObj, source.clip.length);
 
             WalkieTalkie.TransmitOneShotAudio(source, clip, 0.85f);
             if (spatial3D && audibleNoiseID >= 0)
@@ -807,7 +512,7 @@ namespace SnowyLib
         /// registration.</param>
         public static void PlaySoundAtPosition(Vector3 pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
         {
-            GameObject soundObj = GameObject.Instantiate(new GameObject("TempSoundEffectObj"), pos, Quaternion.identity);
+            GameObject soundObj = UnityEngine.Object.Instantiate(new GameObject("TempSoundEffectObj"), pos, Quaternion.identity);
             AudioSource source = soundObj.AddComponent<AudioSource>();
 
             OccludeAudio occlude = soundObj.AddComponent<OccludeAudio>();
@@ -827,7 +532,7 @@ namespace SnowyLib
             source.minDistance = min3DDistance;
             source.maxDistance = max3DDistance;
             source.Play();
-            GameObject.Destroy(soundObj, source.clip.length);
+            UnityEngine.Object.Destroy(soundObj, source.clip.length);
 
             WalkieTalkie.TransmitOneShotAudio(source, clip, 0.85f);
             if (spatial3D && audibleNoiseID >= 0)
@@ -912,7 +617,7 @@ namespace SnowyLib
             float closestDistance = Mathf.Infinity;
             EntranceTeleport? bestEntrance = null;
 
-            foreach (var entrance in Utils.entrances)
+            foreach (var entrance in entrances)
             {
                 if (entrance == null)
                     continue;
@@ -973,7 +678,7 @@ namespace SnowyLib
             {
                 int layer = LayerMask.NameToLayer(name);
                 if (layer >= 0)
-                    mask |= (1 << layer);
+                    mask |= 1 << layer;
             }
 
             return mask;
@@ -1028,7 +733,7 @@ namespace SnowyLib
         /// <returns>The instantiated ping GameObject.</returns>
         public static GameObject Ping(Vector3 position, string headerText = "Ping", string subText = "", int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = 10)
         {
-            GameObject ping = GameObject.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
+            GameObject ping = UnityEngine.Object.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
 
             ping.tag = "DoNotSet";
             ping.layer = LayerMask.NameToLayer("ScanNode");
@@ -1044,7 +749,7 @@ namespace SnowyLib
             scanNode.requiresLineOfSight = requiresLineOfSight;
 
             if (destroyTime > 0)
-                GameObject.Destroy(ping, destroyTime);
+                UnityEngine.Object.Destroy(ping, destroyTime);
 
             HUDManager h = HUDManager.Instance;
 
@@ -1310,231 +1015,6 @@ namespace SnowyLib
                 Debug.Log(
                     $"{i}: {shader.GetPropertyName(i)} - {shader.GetPropertyType(i)}"
                 );
-            }
-        }
-
-        public static void BuyItem(NamespacedKey<DawnItemInfo> key, int count = 1, bool ignoreMax = false, int newGroupCredits = -1)
-        {
-            if (terminal == null) { logger.LogError("BuyItem failed, unable to find terminal"); return; }
-
-            var dawnShopItem = LethalContent.Items[key].ShopInfo;
-            if (dawnShopItem == null) { logger.LogError($"Failed to buy item {key}, item is not buyable from the shop"); return; }
-
-            dawnShopItem.AddToDropship(ignoreMax, count);
-            terminal.groupCredits = newGroupCredits >= 0 ? newGroupCredits : terminal.groupCredits;
-            terminal.SyncBoughtItemsWithServer(terminal.orderedItemsFromTerminal.ToArray(), terminal.numberOfItemsInDropship);
-        }
-
-        public static void BuyItems(NamespacedKey<DawnItemInfo>[] keys, bool ignoreMax = false, int newGroupCredits = -1)
-        {
-            if (terminal == null) { logger.LogError("BuyItem failed, unable to find terminal"); return; }
-
-            foreach (var key in keys)
-            {
-                var dawnShopItem = LethalContent.Items[key].ShopInfo;
-                if (dawnShopItem == null)
-                {
-                    terminal.orderedItemsFromTerminal.Clear();
-                    terminal.numberOfItemsInDropship = 0;
-                    logger.LogError($"Failed to buy item {key}, item is not buyable from the shop");
-                    return;
-                }
-
-                dawnShopItem.AddToDropship(ignoreMax);
-            }
-            terminal.groupCredits = newGroupCredits >= 0 ? newGroupCredits : terminal.groupCredits;
-            terminal.SyncBoughtItemsWithServer(terminal.orderedItemsFromTerminal.ToArray(), terminal.numberOfItemsInDropship);
-        }
-
-        public static bool TryBuyItem(NamespacedKey<DawnItemInfo> key, int count = 1, bool ignoreMax = false)
-        {
-            if (terminal == null) { logger.LogError("TryBuyItem failed, unable to find terminal"); return false; }
-
-            var dawnShopItem = LethalContent.Items[key].ShopInfo;
-            if (dawnShopItem == null) { logger.LogError($"Failed to buy item {key}, item is not buyable from the shop"); return false; }
-
-            int cost = (int)(dawnShopItem.DawnPurchaseInfo.Cost.Provide() * (dawnShopItem.GetSalePercentage() / 100f)) * count;
-            int newGroupCredits = terminal.groupCredits - cost;
-
-            if (newGroupCredits < 0) { return false; }
-
-            dawnShopItem.AddToDropship(ignoreMax, count);
-            terminal.groupCredits = newGroupCredits;
-            terminal.SyncBoughtItemsWithServer(terminal.orderedItemsFromTerminal.ToArray(), terminal.numberOfItemsInDropship);
-            return true;
-        }
-
-        public static bool TryBuyItems(NamespacedKey<DawnItemInfo>[] keys, bool ignoreMax = false)
-        {
-            if (terminal == null) { logger.LogError("TryBuyItems failed, unable to find terminal"); return false; }
-
-            int newGroupCredits = terminal.groupCredits;
-
-            foreach (var key in keys)
-            {
-                if (!ignoreMax && terminal.orderedItemsFromTerminal.Count > 12) { break; }
-
-                var dawnShopItem = LethalContent.Items[key].ShopInfo;
-                if (dawnShopItem == null)
-                {
-                    terminal.orderedItemsFromTerminal.Clear();
-                    terminal.numberOfItemsInDropship = 0;
-                    logger.LogError($"Failed to buy item {key}, item is not buyable from the shop");
-                    return false;
-                }
-
-                int cost = (int)(dawnShopItem.DawnPurchaseInfo.Cost.Provide() * (dawnShopItem.GetSalePercentage() / 100f));
-                newGroupCredits -= cost;
-
-                if (newGroupCredits < 0)
-                {
-                    terminal.orderedItemsFromTerminal.Clear();
-                    terminal.numberOfItemsInDropship = 0;
-                    return false;
-                }
-
-                dawnShopItem.AddToDropship(ignoreMax);
-            }
-
-            terminal.groupCredits = newGroupCredits;
-            terminal.SyncBoughtItemsWithServer(terminal.orderedItemsFromTerminal.ToArray(), terminal.numberOfItemsInDropship);
-            return true;
-        }
-    }
-
-    [HarmonyPatch]
-    public class UtilsPatches
-    {
-        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnInsideEnemiesFromVentsIfReady))]
-        public static bool RoundManager_SpawnInsideEnemiesFromVentsIfReady_Prefix()
-        {
-            try
-            {
-                if (Utils.testing && Utils.DEBUG_disableSpawning) { return false; }
-                return true;
-            }
-            catch
-            {
-                return true;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnDaytimeEnemiesOutside))]
-        public static bool RoundManager_SpawnDaytimeEnemiesOutside_Prefix()
-        {
-            try
-            {
-                if (Utils.testing && Utils.DEBUG_disableSpawning) { return false; }
-                return true;
-            }
-            catch
-            {
-                return true;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnEnemiesOutside))]
-        public static bool RoundManager_SpawnEnemiesOutside_Prefix()
-        {
-            try
-            {
-                if (Utils.testing && Utils.DEBUG_disableSpawning) { return false; }
-                return true;
-            }
-            catch
-            {
-                return true;
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.FinishGeneratingLevel))]
-        public static void RoundManager_FinishGeneratingLevel_Postfix()
-        {
-            try
-            {
-                Utils.elevator = null;
-                Utils.entrances.Clear();
-
-                Utils.entrances = GameObject.FindObjectsOfType<EntranceTeleport>().ToList();
-                Utils.elevator = GameObject.FindObjectOfType<MineshaftElevatorController>();
-
-                Utils.SetRandoms();
-
-                Utils.OnFinishGeneratingLevel.Invoke();
-            }
-            catch
-            {
-                return;
-            }
-        }
-
-
-        [HarmonyPostfix, HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.OnShipLandedMiscEvents))]
-        public static void StartOfRound_OnShipLandedMiscEvents_Postfix()
-        {
-            try
-            {
-                Utils.OnShipLanded.Invoke();
-            }
-            catch
-            {
-                return;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(Terminal), nameof(Terminal.Start))]
-        public static void Terminal_Start_Prefix(Terminal __instance)
-        {
-            try
-            {
-                Utils.terminal = __instance;
-            }
-            catch
-            {
-                return;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
-        public static void HUDManager_SubmitChat_performed_Prefix(HUDManager __instance)
-        {
-            try
-            {
-                if (!Utils.testing) { return; }
-                string msg = __instance.chatTextField.text;
-                string[] args = msg.Split(" ");
-
-                Utils.ChatCommand(args);
-            }
-            catch (System.Exception e)
-            {
-                logger.LogError(e);
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
-        public static void GrabbableObject_Start_Postfix(GrabbableObject __instance)
-        {
-            try
-            {
-                Utils.spawnedItems.Add(__instance);
-            }
-            catch (System.Exception e)
-            {
-                logger.LogError(e);
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnDestroy))]
-        public static void GrabbableObject_OnDestroy_Postfix(GrabbableObject __instance)
-        {
-            try
-            {
-                Utils.spawnedItems.Remove(__instance);
-            }
-            catch (System.Exception e)
-            {
-                logger.LogError(e);
             }
         }
     }

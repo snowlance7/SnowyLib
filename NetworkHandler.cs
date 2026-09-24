@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using static Netcode.Transports.Facepunch.FacepunchTransport;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib
