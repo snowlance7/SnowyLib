@@ -74,6 +74,9 @@
       <Reference Include="PathfindingLib">
         <HintPath>..\..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\plugins\Zaggy1024-PathfindingLib\PathfindingLib.dll</HintPath>
       </Reference>
+      <Reference Include="UnityEditor">
+        <HintPath>..\..\..\..\..\..\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Data\Managed\UnityEditor.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->
