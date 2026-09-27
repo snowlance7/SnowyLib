@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
@@ -15,6 +16,7 @@ namespace SnowyLib
 
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
+                logger.LogDebug(assembly.FullName);
                 if (assembly == snowyLibAssembly)
                 {
                     ScanAssembly(assembly);

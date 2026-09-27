@@ -286,6 +286,7 @@ namespace SnowyLib
             StartOfRound.Instance.UpdatePlayerVoiceEffects();
         }
 
+        [Obsolete("Use DiscardItemInSlotRpc or player.DiscardItemInSlotAndSync instead", true)]
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void DropHeldItemRpc(ulong clientId, int dropItemSlot, bool itemsFall, bool disconnecting, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3), bool setInShip = false, bool setInElevator = false)
         {

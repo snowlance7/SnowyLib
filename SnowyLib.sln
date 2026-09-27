@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.37027.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnowyLib", "SnowyLib.csproj", "{BE67B378-9F82-412F-A684-E4045E060EDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnowyLib.Editor", "SnowyLib.Editor\SnowyLib.Editor.csproj", "{CE98B840-78FB-4050-9D24-AE19A18F1F48}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnowyLib.Editor", "..\SnowyLib.Editor\SnowyLib.Editor.csproj", "{1E6AA4B1-DD26-478E-9205-14E2E3F2D33E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{BE67B378-9F82-412F-A684-E4045E060EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE67B378-9F82-412F-A684-E4045E060EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE67B378-9F82-412F-A684-E4045E060EDA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CE98B840-78FB-4050-9D24-AE19A18F1F48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE98B840-78FB-4050-9D24-AE19A18F1F48}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE98B840-78FB-4050-9D24-AE19A18F1F48}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE98B840-78FB-4050-9D24-AE19A18F1F48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E6AA4B1-DD26-478E-9205-14E2E3F2D33E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E6AA4B1-DD26-478E-9205-14E2E3F2D33E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E6AA4B1-DD26-478E-9205-14E2E3F2D33E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E6AA4B1-DD26-478E-9205-14E2E3F2D33E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

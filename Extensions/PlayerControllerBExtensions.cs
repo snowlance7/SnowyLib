@@ -170,6 +170,18 @@ namespace SnowyLib
             return voicePlayerState;
         }
 
+        public static void DiscardItemInSlotAndSync(this PlayerControllerB player, int slot, bool placeObject = false, NetworkObject? parentObjectTo = null, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
+        {
+            if (parentObjectTo != null)
+            {
+                NetworkHandler.Instance.DiscardItemInSlotRpc(player.actualClientId, slot, parentObjectTo, placeObject, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
+            }
+            else
+            {
+                NetworkHandler.Instance.DiscardItemInSlotRpc(player.actualClientId, slot, placeObject, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
+            }
+        }
+
         public static void DiscardItemInSlot(this PlayerControllerB player, int slot, bool placeObject = false, NetworkObject? parentObjectTo = null, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
         {
             if (player.currentItemSlot == slot)
@@ -181,7 +193,10 @@ namespace SnowyLib
             if (item == null) { return; }
             player.DropHeldItem(item, itemsFall: true, disconnecting: false, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation, setInShip, setInElevator);
             if (player.IsOwner)
+            {
                 HUDManager.Instance.itemSlotIcons[slot].enabled = false;
+                player.ItemSlots[slot] = null;
+            }
         }
 
         public static bool IsPlayerWithinShipBounds(this PlayerControllerB player)

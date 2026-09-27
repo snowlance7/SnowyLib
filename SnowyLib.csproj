@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.SnowyLib</AssemblyName>
         <Product>SnowyLib</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.18.1</Version>
+        <Version>1.18.2</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
@@ -74,10 +74,11 @@
       <Reference Include="PathfindingLib">
         <HintPath>..\..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\plugins\Zaggy1024-PathfindingLib\PathfindingLib.dll</HintPath>
       </Reference>
-      <Reference Include="UnityEditor">
-        <HintPath>..\..\..\..\..\..\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Data\Managed\UnityEditor.dll</HintPath>
-      </Reference>
     </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="Runtime\**\*.cs" />
+  </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->
   <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
