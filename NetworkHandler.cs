@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using GameNetcodeStuff;
 using HarmonyLib;
+using Steamworks.Data;
 using System;
 using System.Collections;
 using Unity.Netcode;
@@ -338,6 +339,16 @@ namespace SnowyLib
             var item = netObj.GetComponent<GrabbableObject>();
             localPlayer.GrabGrabbableObject(item);
         }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        public void HealPlayerRpc(ulong clientId, int healAmount, bool allowOverhealing = false)
+        {
+            PlayerControllerB? player = PlayerFromId(clientId);
+            if (player == null) { logger.LogError("HealPlayerRpc: Failed to get player from id: " + clientId); return; }
+            player.HealPlayer(healAmount, allowOverhealing);
+        }
+
+
     }
 
     [HarmonyPatch]

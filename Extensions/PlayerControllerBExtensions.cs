@@ -227,5 +227,20 @@ namespace SnowyLib
         {
             NetworkHandler.Instance.SpawnAndGrabItemRpc(player.actualClientId, key);
         }
+
+        public static void HealPlayer(this PlayerControllerB player, int healAmount, bool allowOverhealing = false)
+        {
+            player.health = allowOverhealing ? player.health + healAmount : Mathf.Clamp(player.health + healAmount, 0, 100);
+
+            if (localPlayer == player)
+            {
+                HUDManager.Instance.UpdateHealthUI(player.health, hurtPlayer: false);
+            }
+        }
+
+        public static void HealPlayerAndSync(this PlayerControllerB player, int healAmount, bool allowOverhealing = false)
+        {
+            NetworkHandler.Instance.HealPlayerRpc(player.actualClientId, healAmount, allowOverhealing);
+        }
     }
 }
