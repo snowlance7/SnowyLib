@@ -76,9 +76,9 @@ public static class AttachableObjectManager
         AvailableAttachmentPoints.Add(new AttachmentPoint(bodyPartIndex, position, rotation));
     }
 
-    public static AttachmentPoint FindAvailablePoint(PlayerControllerB player)
+    public static AttachmentPoint? FindAvailablePoint(PlayerControllerB player)
     {
-        return PlayerAttachmentPoints[player].FirstOrDefault(point => !point.IsOccupied);
+        return PlayerAttachmentPoints[player].Where(x => !x.IsOccupied).GetRandom();
     }
 
     public static bool TrySpawnItemOnPlayer(NamespacedKey<DawnItemInfo> key, PlayerControllerB player)
