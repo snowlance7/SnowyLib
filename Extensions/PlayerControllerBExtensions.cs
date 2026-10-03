@@ -242,5 +242,11 @@ namespace SnowyLib
         {
             NetworkHandler.Instance.HealPlayerRpc(player.actualClientId, healAmount, allowOverhealing);
         }
+
+        public static int GetCurrentEmote(this PlayerControllerB player)
+        {
+            if (!player.performingEmote) { return 0; }
+            return player.playerBodyAnimator.GetInteger("emoteNumber");
+        }
     }
 }

@@ -17,7 +17,7 @@ public static class AttachableObjectManager
     [StaticInit]
     public static void Init()
     {
-        AddPoint(0, new Vector3(0, 0.365f, 0.002f), new Vector3(0, 0, 0)); // TODO
+        AddPoint(0, new Vector3(0, 0.365f, 0.002f), new Vector3(0, 0, 0));
         AddPoint(0, new Vector3(-0.1028f, 0.3071f, 0.0856f), new Vector3(-0.245f, 0.815f, 33.496f));
         AddPoint(0, new Vector3(0.138f, 0.3f, 0f), new Vector3(0, 0, -60.948f));
         AddPoint(0, new Vector3(0.1094f, 0f, 0f), new Vector3(0, 0, -60.948f));
