@@ -1017,38 +1017,5 @@ namespace SnowyLib
                 );
             }
         }
-
-        public static void AddForceToEnemy(EnemyAI enemy, Vector3 direction, float force)
-        {
-            enemy.agent.enabled = false;
-            Rigidbody enemyRb = enemy.gameObject.AddComponent<Rigidbody>();
-            enemyRb.isKinematic = false;
-
-            enemyRb.velocity = Vector3.zero;
-            enemyRb.AddForce(direction.normalized * force, ForceMode.Impulse);
-
-            IEnumerator RemoveRigidbodyAfterDelay()
-            {
-                yield return new WaitForSeconds(1f);
-
-                if (enemyRb != null)
-                {
-                    enemyRb.isKinematic = true;
-                    GameObject.Destroy(enemyRb);
-                }
-
-                enemy.agent.enabled = true;
-            }
-
-            NetworkHandler.Instance.StartCoroutine(RemoveRigidbodyAfterDelay());
-        }
-
-        public static void AddForceToPlayer(PlayerControllerB player, Vector3 direction, float force)
-        {
-            player.playerRigidbody.isKinematic = false;
-            player.playerRigidbody.velocity = Vector3.zero;
-            player.externalForceAutoFade += direction * force;
-            player.playerRigidbody.isKinematic = true;
-        }
     }
 }

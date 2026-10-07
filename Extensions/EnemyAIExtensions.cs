@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace SnowyLib
@@ -141,6 +142,31 @@ namespace SnowyLib
         public static bool IsOutside(this EnemyAI enemy)
         {
             return enemy.transform.position.y > -80f;
+        }
+
+        public static void AddForce(this EnemyAI enemy, Vector3 direction, float force)
+        {
+            enemy.agent.enabled = false;
+            Rigidbody enemyRb = enemy.gameObject.AddComponent<Rigidbody>();
+            enemyRb.isKinematic = false;
+
+            enemyRb.velocity = Vector3.zero;
+            enemyRb.AddForce(direction.normalized * force, ForceMode.Impulse);
+
+            IEnumerator RemoveRigidbodyAfterDelay()
+            {
+                yield return new WaitForSeconds(1f);
+
+                if (enemyRb != null)
+                {
+                    enemyRb.isKinematic = true;
+                    GameObject.Destroy(enemyRb);
+                }
+
+                enemy.agent.enabled = true;
+            }
+
+            NetworkHandler.Instance.StartCoroutine(RemoveRigidbodyAfterDelay());
         }
     }
 }

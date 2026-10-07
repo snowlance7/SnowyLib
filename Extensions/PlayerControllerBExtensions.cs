@@ -248,5 +248,13 @@ namespace SnowyLib
             if (!player.performingEmote) { return 0; }
             return player.playerBodyAnimator.GetInteger("emoteNumber");
         }
+
+        public static void AddForce(this PlayerControllerB player, Vector3 direction, float force)
+        {
+            player.playerRigidbody.isKinematic = false;
+            player.playerRigidbody.velocity = Vector3.zero;
+            player.externalForceAutoFade += direction * force;
+            player.playerRigidbody.isKinematic = true;
+        }
     }
 }
