@@ -86,7 +86,7 @@ namespace SnowyLib
             GameObject obj = UnityEngine.Object.Instantiate(item.spawnPrefab, position, rotation, parentTo);
             GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
             grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
-            if (actionAfterSpawn != null) { DoActionAfterItemSpawn(grabObj, actionAfterSpawn); }
+            if (actionAfterSpawn != null) { grabObj.DoActionAfterSpawn(actionAfterSpawn); }
             return grabObj;
         }
 
@@ -96,20 +96,8 @@ namespace SnowyLib
             GameObject obj = UnityEngine.Object.Instantiate(item.spawnPrefab, parentTo, worldPositionStays);
             GrabbableObject grabObj = obj.GetComponent<GrabbableObject>();
             grabObj.NetworkObject.Spawn(destroyWithScene: destroyWithScene);
-            if (actionAfterSpawn != null) { DoActionAfterItemSpawn(grabObj, actionAfterSpawn); }
+            if (actionAfterSpawn != null) { grabObj.DoActionAfterSpawn(actionAfterSpawn); }
             return grabObj;
-        }
-
-        public static void DoActionAfterItemSpawn(GrabbableObject grabbableObject, Action<GrabbableObject> actionAfterSpawn)
-        {
-            IEnumerator doActionAfterItemSpawn(GrabbableObject grabbableObject, Action<GrabbableObject> actionAfterSpawn)
-            {
-                yield return null;
-                yield return new WaitUntil(() => grabbableObject.NetworkObject != null && grabbableObject.NetworkObject.IsSpawned);
-                actionAfterSpawn.Invoke(grabbableObject);
-            }
-
-            NetworkHandler.Instance.StartCoroutine(doActionAfterItemSpawn(grabbableObject, actionAfterSpawn));
         }
 
         public static GameObject? SpawnMapObject(NamespacedKey<DawnMapObjectInfo> key, Vector3 position, Quaternion rotation = default, Transform? parentTo = null, bool destroyWithScene = true)
