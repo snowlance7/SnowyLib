@@ -1017,5 +1017,10 @@ namespace SnowyLib
                 );
             }
         }
+
+        public static Vector3 GetRandomPositionOnSphere(Vector3 center, float radius)
+        {
+            return center + Random.onUnitSphere * radius;
+        }
     }
 }
