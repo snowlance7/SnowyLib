@@ -7,43 +7,30 @@ namespace SnowyLib
 {
     public static class IEnumerableExtensions
     {
-        /// <summary>
-        /// Selects and returns a random element from the collection.
-        /// </summary>
-        /// <typeparam name="T">The reference type of elements in the collection.</typeparam>
-        /// <param name="source">The collection to select a random element from.</param>
-        /// <param name="random">The random number generator to use for selection.</param>
-        /// <returns>A randomly selected element from the collection, or null if the collection is empty.</returns>
-        public static T? GetRandom<T>(this IEnumerable<T> source, System.Random random) where T : class
+        public static T? GetRandom<T>(this IEnumerable<T> source, System.Random random)
         {
             if (source is IList<T> list)
             {
-                if (list.Count == 0) return null;
+                if (list.Count == 0) return default;
                 return list[random.Next(list.Count)];
             }
 
             var array = source as T[] ?? source.ToArray();
-            if (array.Length == 0) return null;
+            if (array.Length == 0) return default;
 
             return array[random.Next(array.Length)];
         }
 
-        /// <summary>
-        /// Returns a random element from the collection or null if the collection is empty.
-        /// </summary>
-        /// <typeparam name="T">The reference type of elements in the collection.</typeparam>
-        /// <param name="source">The collection to select a random element from.</param>
-        /// <returns>A random element from the collection, or null if the collection is empty.</returns>
-        public static T? GetRandom<T>(this IEnumerable<T> source) where T : class
+        public static T? GetRandom<T>(this IEnumerable<T> source)
         {
             if (source is IList<T> list)
             {
-                if (list.Count == 0) return null;
+                if (list.Count == 0) return default;
                 return list[UnityEngine.Random.Range(0, list.Count)];
             }
 
             var array = source as T[] ?? source.ToArray();
-            if (array.Length == 0) return null;
+            if (array.Length == 0) return default;
 
             return array[UnityEngine.Random.Range(0, array.Length)];
         }
