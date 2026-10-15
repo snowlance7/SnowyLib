@@ -18,5 +18,22 @@ namespace SnowyLib
 
             NetworkHandler.Instance.StartCoroutine(doActionAfterSpawn(networkObject, actionAfterSpawn));
         }
+
+        public static void Despawn(this NetworkObject networkObject, bool destroy = true, float despawnTime = 0f)
+        {
+            if (despawnTime <= 0f)
+            {
+                networkObject.Despawn(destroy: destroy);
+                return;
+            }
+
+            IEnumerator despawn(NetworkObject networkObject, bool destroy, float despawnTime)
+            {
+                yield return new WaitForSeconds(despawnTime);
+                networkObject.Despawn(destroy: destroy);
+            }
+
+            NetworkHandler.Instance.StartCoroutine(despawn(networkObject, destroy, despawnTime));
+        }
     }
 }
