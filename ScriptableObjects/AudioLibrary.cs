@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SnowyLib
 {
-    [CreateAssetMenu(fileName = "AudioLibrary", menuName = "SnowyLib/AudioLibrary", order = 0)]
+    [CreateAssetMenu(fileName = "AudioLibrary", menuName = "SnowyLib/Audio Library", order = 0)]
     public class AudioLibrary : ScriptableObject
     {
         public AudioClipGroup[] Groups = [];

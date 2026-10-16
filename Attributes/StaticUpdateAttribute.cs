@@ -38,16 +38,24 @@ namespace SnowyLib
             {
                 foreach (MethodInfo method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (!method.IsDefined(typeof(StaticUpdateAttribute), false))
+                    try
+                    {
+                        if (!method.IsDefined(typeof(StaticUpdateAttribute), false))
+                            continue;
+
+                        if (method.ReturnType != typeof(void))
+                            throw new Exception($"{method.DeclaringType.FullName}.{method.Name} must return void.");
+
+                        if (method.GetParameters().Length != 0)
+                            throw new Exception($"{method.DeclaringType.FullName}.{method.Name} cannot have parameters.");
+
+                        updates.Add((Action)Delegate.CreateDelegate(typeof(Action), method));
+                    }
+                    catch (Exception e)
+                    {
+                        Plugin.logger.LogError(e);
                         continue;
-
-                    if (method.ReturnType != typeof(void))
-                        throw new Exception($"{method.DeclaringType.FullName}.{method.Name} must return void.");
-
-                    if (method.GetParameters().Length != 0)
-                        throw new Exception($"{method.DeclaringType.FullName}.{method.Name} cannot have parameters.");
-
-                    updates.Add((Action)Delegate.CreateDelegate(typeof(Action), method));
+                    }
                 }
             }
         }
@@ -67,7 +75,17 @@ namespace SnowyLib
         internal static void Update()
         {
             foreach (Action update in updates)
-                update();
+            {
+                try
+                {
+                    update();
+                }
+                catch (Exception e)
+                {
+                    Plugin.logger.LogError(e);
+                    continue;
+                }
+            }
         }
     }
 }

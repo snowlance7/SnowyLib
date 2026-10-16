@@ -36,16 +36,24 @@ namespace SnowyLib
             {
                 foreach (MethodInfo method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (!method.IsDefined(typeof(StaticInitAttribute), false))
+                    try
+                    {
+                        if (!method.IsDefined(typeof(StaticInitAttribute), false))
+                            continue;
+
+                        if (method.ReturnType != typeof(void))
+                            throw new Exception($"{method.DeclaringType.FullName}.{method.Name} must return void.");
+
+                        if (method.GetParameters().Length != 0)
+                            throw new Exception($"{method.DeclaringType.FullName}.{method.Name} cannot have parameters.");
+
+                        method.Invoke(null, null);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e);
                         continue;
-
-                    if (method.ReturnType != typeof(void))
-                        throw new Exception($"{method.DeclaringType.FullName}.{method.Name} must return void.");
-
-                    if (method.GetParameters().Length != 0)
-                        throw new Exception($"{method.DeclaringType.FullName}.{method.Name} cannot have parameters.");
-
-                    method.Invoke(null, null);
+                    }
                 }
             }
         }
