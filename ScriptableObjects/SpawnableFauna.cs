@@ -59,18 +59,18 @@ public class SpawnableFauna : SpawnableMapObject
 [HarmonyPatch]
 internal static class SpawnableFaunaPatches
 {
-    [HarmonyPostfix]
+    /*[HarmonyPostfix]
     [HarmonyPatch(typeof(OutsideBuilder), "Build")]
     private static bool OutsideBuilder_Build_Postfix(OutsideBuilder __instance, ref DawnInsideMapObjectInfo __result)
     {
         try
         {
-            if ()
+            //if ()
         }
         catch (Exception e)
         {
             logger.LogError(e);
             return true;
         }
-    }
+    }*/
 }

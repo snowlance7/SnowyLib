@@ -256,5 +256,16 @@ namespace SnowyLib
             player.externalForceAutoFade += direction * force;
             player.playerRigidbody.isKinematic = true;
         }
+
+        public static void ChangePlayerSize(this PlayerControllerB player, float size)
+        {
+            player.thisPlayerBody.localScale = new Vector3(size, size, size);
+            player.RebuildRig();
+        }
+
+        public static void ChangePlayerSizeAndSync(this PlayerControllerB player, float size)
+        {
+            NetworkHandler.Instance.ChangePlayerSizeRpc(player.actualClientId, size);
+        }
     }
 }

@@ -59,10 +59,9 @@ namespace SnowyLib
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void ChangePlayerSizeRpc(ulong clientId, float size)
         {
-            PlayerControllerB? playerHeldBy = PlayerFromId(clientId);
-            if (playerHeldBy == null) { return; }
-            playerHeldBy.thisPlayerBody.localScale = new Vector3(size, size, size);
-            playerHeldBy.RebuildRig();
+            PlayerControllerB? player = PlayerFromId(clientId);
+            if (player == null) { logger.LogError($"ChangePlayerSizeRpc: Couldnt get player from id: {clientId}"); return; }
+            player.ChangePlayerSize(size);
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
