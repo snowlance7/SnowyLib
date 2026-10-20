@@ -1,4 +1,5 @@
-﻿using Dawn.Utils;
+﻿using Dawn;
+using Dawn.Utils;
 using GameNetcodeStuff;
 using System.Collections;
 using System.Collections.Generic;
@@ -248,6 +249,57 @@ namespace SnowyLib
                     default:
                         break;
                 }
+            }
+        }
+
+        internal static void LogAverageRarities(ContentType contentType)
+        {
+            switch (contentType)
+            {
+                case ContentType.Item:
+                    LogItemAverageRarities();
+                    break;
+                case ContentType.Enemy:
+                    LogEnemyAverageRarities();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        internal static void LogItemAverageRarities()
+        {
+            var sortedAveragedRarities = StartOfRound.Instance.levels
+                .SelectMany(level => level.spawnableScrap)
+                .GroupBy(scrap => scrap.spawnableItem)
+                .Select(group => new
+                {
+                    Item = group.Key,
+                    AverageRarity = (int)group.Average(scrap => scrap.rarity)
+                })
+                .OrderByDescending(item => item.AverageRarity);
+
+            foreach (var item in sortedAveragedRarities)
+            {
+                logger.LogInfo($"{item.Item.itemName}: {item.AverageRarity}");
+            }
+        }
+
+        internal static void LogEnemyAverageRarities()
+        {
+            var sortedAveragedRarities = StartOfRound.Instance.levels
+                .SelectMany(level => level.Enemies)
+                .GroupBy(enemy => enemy.enemyType)
+                .Select(group => new
+                {
+                    Enemy = group.Key,
+                    AverageRarity = (int)group.Average(enemy => enemy.rarity)
+                })
+                .OrderByDescending(enemy => enemy.AverageRarity);
+
+            foreach (var enemy in sortedAveragedRarities)
+            {
+                logger.LogInfo($"{enemy.Enemy.enemyName}: {enemy.AverageRarity}");
             }
         }
 

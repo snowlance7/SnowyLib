@@ -26,6 +26,7 @@ public static partial class Utils
             case "/log":
                 if (args.Length == 1)
                 {
+                    logger.LogInfo("- avrarities");
                     logger.LogInfo("- rarities");
                     logger.LogInfo("- archetypes");
                     logger.LogInfo("- dungeons");
@@ -57,6 +58,23 @@ public static partial class Utils
                                 break;
                             case "mapobject":
                                 LogRarities(ContentType.MapObject);
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case "avrarities":
+                        if (args.Length == 2) { return; }
+                        switch (args[2])
+                        {
+                            case "item":
+                                LogAverageRarities(ContentType.Item);
+                                break;
+                            case "enemy":
+                                LogAverageRarities(ContentType.Enemy);
+                                break;
+                            case "mapobject":
+                                LogAverageRarities(ContentType.MapObject);
                                 break;
                             default:
                                 break;
