@@ -6,10 +6,11 @@ using static SnowyLib.Plugin;
 
 namespace SnowyLib;
 
-public class PostGenSpawnableObject
+public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
 {
-    public static List<PostGenSpawnableObject> RegisteredObjects = new List<PostGenSpawnableObject>();
+    public static List<PostGenSpawnableObject> RegisteredObjects { get; private set; } = new List<PostGenSpawnableObject>();
 
+    public string Name => prefab.name;
     public GameObject prefab;
     public Func<int> spawnAmount;
     public Func<SpawnDefinition> spawnDefinition;
@@ -19,6 +20,12 @@ public class PostGenSpawnableObject
         this.prefab = prefab;
         this.spawnAmount = spawnAmount;
         this.spawnDefinition = spawnDefinition;
+    }
+
+    public static void Register(PostGenSpawnableObject postGenSpawnableObject)
+    {
+        if (RegisteredObjects.Contains(postGenSpawnableObject)) { logger.LogError($"Failed to register PostGenSpawnableObject ({postGenSpawnableObject.Name}). A PostGenSpawnableObject with the same prefab already exists."); return; }
+        RegisteredObjects.Add(postGenSpawnableObject);
     }
 
     [OnFinishGeneratingLevel]
@@ -41,5 +48,10 @@ public class PostGenSpawnableObject
                 if (spawnDefinition.postSpawnAction != null) netObj.DoActionAfterSpawn(spawnDefinition.postSpawnAction);
             }
         }
+    }
+
+    public bool Equals(PostGenSpawnableObject other)
+    {
+        return prefab == other.prefab;
     }
 }

@@ -140,5 +140,19 @@ namespace SnowyLib
                 logger.LogError(e);
             }
         }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.PlayFirstDayShipAnimation))]
+        public static bool StartOfRound_PlayFirstDayShipAnimation_Prefix()
+        {
+            try
+            {
+                return !Utils.testing;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e);
+                return true;
+            }
+        }
     }
 }
