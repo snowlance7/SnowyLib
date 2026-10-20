@@ -717,11 +717,7 @@ namespace SnowyLib
                 Vector3.Distance(bestEntrance.exitScript.transform.position, position2);
         }
 
-        /// <summary>
-        /// Creates a LayerMask that includes the specified layers by name.
-        /// </summary>
-        /// <param name="layerNames">An array of layer names to include in the mask.</param>
-        /// <returns>A LayerMask representing the combined layers.</returns>
+        [System.Obsolete("Use LayerMask.GetMask", true)]
         public static LayerMask CreateMask(params string[] layerNames)
         {
             LayerMask mask = 0;
