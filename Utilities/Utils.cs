@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using Dawn.Utils;
 using GameNetcodeStuff;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -1068,7 +1069,18 @@ namespace SnowyLib
 
         public static Vector3 GetRandomPositionOnSphere(Vector3 center, float radius)
         {
-            return center + Random.onUnitSphere * radius;
+            return center + UnityEngine.Random.onUnitSphere * radius;
+        }
+
+        public static void InvokeAfterDelay(Action action, float delay)
+        {
+            IEnumerator invokeAfterDelay(Action action, float delay)
+            {
+                yield return new WaitForSeconds(delay);
+                action.Invoke();
+            }
+
+            NetworkHandler.Instance.StartCoroutine(invokeAfterDelay(action, delay));
         }
     }
 }
