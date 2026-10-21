@@ -26,6 +26,7 @@ namespace SnowyLib
         //public static bool DEBUG_disableMoving = false;
 
         public static bool localPlayerFrozen = false;
+        public static bool overridingLocalPlayerDeath = false;
 
         public static GameObject[] allAINodes => insideAINodes.Concat(outsideAINodes).ToArray();
 

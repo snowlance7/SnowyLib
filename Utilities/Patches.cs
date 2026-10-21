@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using GameNetcodeStuff;
+using HarmonyLib;
 using System;
 using System.Linq;
 using static SnowyLib.Plugin;
@@ -152,6 +153,20 @@ namespace SnowyLib
             {
                 logger.LogError(e);
                 return true;
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.AllowPlayerDeath))]
+        public static void PlayerControllerB_AllowPlayerDeath_Postfix(ref bool __result)
+        {
+            try
+            {
+                if (Utils.overridingLocalPlayerDeath) { __result = false; }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e);
+                return;
             }
         }
     }
