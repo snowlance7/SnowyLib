@@ -14,18 +14,25 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
     public GameObject prefab;
     public Func<int> spawnAmount;
     public Func<SpawnDefinition> spawnDefinition;
+    public Action? postSpawningAction;
 
-    public PostGenSpawnableObject(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition)
+    public PostGenSpawnableObject(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
     {
         this.prefab = prefab;
         this.spawnAmount = spawnAmount;
         this.spawnDefinition = spawnDefinition;
+        this.postSpawningAction = postSpawningAction;
     }
 
     public static void Register(PostGenSpawnableObject postGenSpawnableObject)
     {
         if (RegisteredObjects.Contains(postGenSpawnableObject)) { logger.LogError($"Failed to register PostGenSpawnableObject ({postGenSpawnableObject.Name}). A PostGenSpawnableObject with the same prefab already exists."); return; }
         RegisteredObjects.Add(postGenSpawnableObject);
+    }
+
+    public static void Register(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
+    {
+        Register(new PostGenSpawnableObject(prefab, spawnAmount, spawnDefinition, postSpawningAction));
     }
 
     [OnFinishGeneratingLevel]
@@ -47,6 +54,8 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
                 netObj.Spawn(destroyWithScene: spawnDefinition.destroyWithScene);
                 if (spawnDefinition.postSpawnAction != null) netObj.DoActionAfterSpawn(spawnDefinition.postSpawnAction);
             }
+
+            obj.postSpawningAction?.Invoke();
         }
     }
 
