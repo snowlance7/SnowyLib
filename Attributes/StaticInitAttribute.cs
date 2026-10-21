@@ -16,7 +16,6 @@ namespace SnowyLib
 
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                logger.LogDebug(assembly.FullName);
                 if (assembly == snowyLibAssembly)
                 {
                     ScanAssembly(assembly);

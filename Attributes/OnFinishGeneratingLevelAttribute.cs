@@ -13,6 +13,7 @@ public sealed class OnFinishGeneratingLevelAttribute : Attribute
 {
     private static readonly List<Action> methods = new();
 
+    [StaticInit]
     internal static void Initialize()
     {
         methods.Clear();

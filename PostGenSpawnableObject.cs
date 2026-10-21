@@ -29,7 +29,7 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
     }
 
     [OnFinishGeneratingLevel]
-    internal static void Generate() // TODO: Add logs
+    internal static void Generate()
     {
         if (!IsServerOrHost) { return; }
 
