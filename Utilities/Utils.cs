@@ -1073,6 +1073,20 @@ namespace SnowyLib
             return center + UnityEngine.Random.onUnitSphere * radius;
         }
 
+        public static Vector3 GetRandomPositionInCircle(Vector3 center, float radius)
+        {
+            Vector2 offset = UnityEngine.Random.insideUnitCircle * radius;
+            return new Vector3(center.x + offset.x, center.y, center.z + offset.y);
+        }
+
+        public static Vector3 GetRandomPositionInCircle(Vector3 center, float minRadius, float maxRadius)
+        {
+            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+            float radius = Mathf.Sqrt(UnityEngine.Random.Range(minRadius * minRadius, maxRadius * maxRadius));
+
+            return center + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+        }
+
         public static void InvokeAfterDelay(Action action, float delay)
         {
             IEnumerator invokeAfterDelay(Action action, float delay)
