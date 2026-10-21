@@ -7,30 +7,26 @@ namespace SnowyLib
 {
     public static class IEnumerableExtensions
     {
-        public static T? GetRandom<T>(this IEnumerable<T> source, System.Random random)
+        public static T GetRandom<T>(this IEnumerable<T> source, System.Random random)
         {
             if (source is IList<T> list)
             {
-                if (list.Count == 0) return default;
                 return list[random.Next(list.Count)];
             }
 
             var array = source as T[] ?? source.ToArray();
-            if (array.Length == 0) return default;
 
             return array[random.Next(array.Length)];
         }
 
-        public static T? GetRandom<T>(this IEnumerable<T> source)
+        public static T GetRandom<T>(this IEnumerable<T> source)
         {
             if (source is IList<T> list)
             {
-                if (list.Count == 0) return default;
                 return list[UnityEngine.Random.Range(0, list.Count)];
             }
 
             var array = source as T[] ?? source.ToArray();
-            if (array.Length == 0) return default;
 
             return array[UnityEngine.Random.Range(0, array.Length)];
         }

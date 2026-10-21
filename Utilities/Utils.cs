@@ -1082,5 +1082,24 @@ namespace SnowyLib
 
             NetworkHandler.Instance.StartCoroutine(invokeAfterDelay(action, delay));
         }
+
+        public static Vector3 GetRandomPointInsideCollider(Collider collider)
+        {
+            Bounds bounds = collider.bounds;
+
+            for (int i = 0; i < 100; i++)
+            {
+                Vector3 point = new Vector3(
+                    UnityEngine.Random.Range(bounds.min.x, bounds.max.x),
+                    UnityEngine.Random.Range(bounds.min.y, bounds.max.y),
+                    UnityEngine.Random.Range(bounds.min.z, bounds.max.z)
+                );
+
+                if (collider.ClosestPoint(point) == point)
+                    return point;
+            }
+
+            return collider.bounds.center;
+        }
     }
 }
