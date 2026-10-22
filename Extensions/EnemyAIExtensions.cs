@@ -144,29 +144,37 @@ namespace SnowyLib
             return enemy.transform.position.y > -80f;
         }
 
-        public static void AddForce(this EnemyAI enemy, Vector3 direction, float force)
+        public static void AddForce(this EnemyAI enemy, Vector3 direction, float force, float airTime = 1f)
         {
             enemy.agent.enabled = false;
-            Rigidbody enemyRb = enemy.gameObject.AddComponent<Rigidbody>();
+
+            bool addedRigidbody = false;
+            Rigidbody? enemyRb = enemy.gameObject.GetComponent<Rigidbody>();
+            if (enemyRb == null)
+            {
+                addedRigidbody = true;
+                enemyRb = enemy.gameObject.AddComponent<Rigidbody>();
+            }
+
             enemyRb.isKinematic = false;
 
             enemyRb.velocity = Vector3.zero;
             enemyRb.AddForce(direction.normalized * force, ForceMode.Impulse);
 
-            IEnumerator RemoveRigidbodyAfterDelay()
+            IEnumerator RemoveRigidbodyAfterDelay(float delay, bool removeRigidbody)
             {
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(delay);
 
                 if (enemyRb != null)
                 {
                     enemyRb.isKinematic = true;
-                    GameObject.Destroy(enemyRb);
+                    if (removeRigidbody) GameObject.Destroy(enemyRb);
                 }
 
                 enemy.agent.enabled = true;
             }
 
-            NetworkHandler.Instance.StartCoroutine(RemoveRigidbodyAfterDelay());
+            NetworkHandler.Instance.StartCoroutine(RemoveRigidbodyAfterDelay(airTime, addedRigidbody));
         }
     }
 }
