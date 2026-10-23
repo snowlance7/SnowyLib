@@ -6,14 +6,34 @@ namespace SnowyLib;
 
 public static class ObjectExtensions
 {
-    public static void DoActionWhenNotNull(this object obj, Action<object> action)
+    public static void InvokeWhenNotNull(this Func<object> getObject, Action<object> action, float maxWaitTime = Mathf.Infinity)
     {
-        IEnumerator doActionWhenNotNull(object obj, Action<object> action)
+        IEnumerator invokeWhenNotNull()
         {
-            yield return new WaitUntil(() => obj != null);
-            action.Invoke(obj);
+            float elapsedTime = 0f;
+            object obj;
+
+            while ((obj = getObject()) == null)
+            {
+                elapsedTime += Time.deltaTime;
+
+                if (elapsedTime > maxWaitTime)
+                    yield break;
+
+                yield return null;
+            }
+
+            try
+            {
+                action.Invoke(obj);
+            }
+            catch (Exception e)
+            {
+                Plugin.logger.LogError(e);
+                yield break;
+            }
         }
 
-        NetworkHandler.Instance.StartCoroutine(doActionWhenNotNull(obj, action));
+        NetworkHandler.Instance.StartCoroutine(invokeWhenNotNull());
     }
 }

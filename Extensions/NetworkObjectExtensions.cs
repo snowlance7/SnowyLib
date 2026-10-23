@@ -7,16 +7,26 @@ namespace SnowyLib
 {
     public static class NetworkObjectExtensions
     {
-        public static void DoActionAfterSpawn(this NetworkObject networkObject, Action<NetworkObject> actionAfterSpawn)
+        public static void InvokeAfterSpawn(this NetworkObject networkObject, Action<NetworkObject> actionAfterSpawn, float maxWaitTime = Mathf.Infinity)
         {
-            IEnumerator doActionAfterSpawn(NetworkObject networkObject, Action<NetworkObject> actionAfterSpawn)
+            IEnumerator invokeAfterSpawn()
             {
-                yield return null;
-                yield return new WaitUntil(() => networkObject.IsSpawned);
-                actionAfterSpawn.Invoke(networkObject);
+                float elapsedTime = 0f;
+
+                while (networkObject != null && !networkObject.IsSpawned)
+                {
+                    if (elapsedTime >= maxWaitTime)
+                        yield break;
+
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+
+                if (networkObject != null && networkObject.IsSpawned)
+                    actionAfterSpawn.Invoke(networkObject);
             }
 
-            NetworkHandler.Instance.StartCoroutine(doActionAfterSpawn(networkObject, actionAfterSpawn));
+            NetworkHandler.Instance.StartCoroutine(invokeAfterSpawn());
         }
 
         public static void Despawn(this NetworkObject networkObject, bool destroy = true, float despawnTime = 0f)
@@ -30,7 +40,9 @@ namespace SnowyLib
             IEnumerator despawn(NetworkObject networkObject, bool destroy, float despawnTime)
             {
                 yield return new WaitForSeconds(despawnTime);
-                networkObject.Despawn(destroy: destroy);
+
+                if (networkObject != null && networkObject.IsSpawned)
+                    networkObject.Despawn(destroy: destroy);
             }
 
             NetworkHandler.Instance.StartCoroutine(despawn(networkObject, destroy, despawnTime));

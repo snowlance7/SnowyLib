@@ -59,7 +59,7 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
                 GameObject spawnedObj = GameObject.Instantiate(obj.prefab, spawnDefinition.position, spawnDefinition.rotation, spawnDefinition.parentTo);
                 var netObj = spawnedObj.GetComponent<NetworkObject>();
                 netObj.Spawn(destroyWithScene: spawnDefinition.destroyWithScene);
-                if (spawnDefinition.postSpawnAction != null) netObj.DoActionAfterSpawn(spawnDefinition.postSpawnAction);
+                if (spawnDefinition.postSpawnAction != null) netObj.InvokeAfterSpawn(spawnDefinition.postSpawnAction);
             }
 
             obj.postSpawningAction?.Invoke();
