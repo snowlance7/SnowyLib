@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dawn;
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -33,6 +34,11 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
     public static void Register(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
     {
         Register(new PostGenSpawnableObject(prefab, spawnAmount, spawnDefinition, postSpawningAction));
+    }
+
+    public static void Register(NamespacedKey<DawnItemInfo> key, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
+    {
+        Register(LethalContent.Items[key].Item.spawnPrefab, spawnAmount, spawnDefinition, postSpawningAction);
     }
 
     [OnFinishGeneratingLevel]
