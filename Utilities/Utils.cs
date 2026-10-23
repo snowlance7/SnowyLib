@@ -12,1090 +12,1100 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem.Utilities;
 using static SnowyLib.Plugin;
 
-namespace SnowyLib
+namespace SnowyLib;
+
+public static partial class Utils
 {
-    public static partial class Utils
+    public static bool testing => cfgTesting.Value;
+
+    public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
+    public static bool DEBUG_disableSpawning = false;
+    public static bool DEBUG_disableTime = false;
+    //public static bool DEBUG_disableTargetting = false;
+    //public static bool DEBUG_disableHostTargetting = false;
+    //public static bool DEBUG_disableMoving = false;
+
+    public static bool localPlayerFrozen = false;
+    public static bool overridingLocalPlayerDeath = false;
+
+    public static GameObject[] allAINodes => insideAINodes.Concat(outsideAINodes).ToArray();
+
+    public static GameObject[] insideAINodes
     {
-        public static bool testing => cfgTesting.Value;
-
-        public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
-        public static bool DEBUG_disableSpawning = false;
-        public static bool DEBUG_disableTime = false;
-        //public static bool DEBUG_disableTargetting = false;
-        //public static bool DEBUG_disableHostTargetting = false;
-        //public static bool DEBUG_disableMoving = false;
-
-        public static bool localPlayerFrozen = false;
-        public static bool overridingLocalPlayerDeath = false;
-
-        public static GameObject[] allAINodes => insideAINodes.Concat(outsideAINodes).ToArray();
-
-        public static GameObject[] insideAINodes
+        get
         {
-            get
+            if (RoundManager.Instance.insideAINodes != null && RoundManager.Instance.insideAINodes.Length > 0)
             {
-                if (RoundManager.Instance.insideAINodes != null && RoundManager.Instance.insideAINodes.Length > 0)
-                {
-                    return RoundManager.Instance.insideAINodes;
-                }
-
-                return GameObject.FindGameObjectsWithTag("AINode");
-            }
-        }
-        public static GameObject[] outsideAINodes
-        {
-            get
-            {
-                if (RoundManager.Instance.outsideAINodes != null && RoundManager.Instance.outsideAINodes.Length > 0)
-                {
-                    return RoundManager.Instance.outsideAINodes;
-                }
-
-                return GameObject.FindGameObjectsWithTag("OutsideAINode");
-            }
-        }
-
-        public static List<GrabbableObject> spawnedItems { get; internal set; } = new List<GrabbableObject>();
-
-        public static List<EntranceTeleport> entrances { get; internal set; } = [];
-        public static MineshaftElevatorController? elevator { get; internal set; }
-        public static Terminal? terminal { get; internal set; }
-
-        public static BoundedRange randomPercentage = new BoundedRange(0f, 1f);
-        public static System.Random randomLocal { get; internal set; } = new();
-        public static System.Random randomGlobal { get; internal set; } = new();
-
-        public static UnityEvent OnFinishGeneratingLevel { get; internal set; } = new();
-        public static UnityEvent OnShipLanded { get; internal set; } = new();
-
-        public static Light? localPlayerNightVision;
-
-        public static bool isOnCompanyMoon => StartOfRound.Instance?.currentLevel.levelID == 3;
-
-        public const ulong RodrigoSteamID = 76561198164429786;
-        public const ulong LizzieSteamID = 76561199094139351;
-        public const ulong GlitchSteamID = 76561198984467725;
-        public const ulong RatSteamID = 76561199182474292;
-        public const ulong XuSteamID = 76561198399127090;
-        public const ulong SlayerSteamID = 76561198077184650;
-        public const ulong SnowySteamID = 76561198253760639;
-        public const ulong FunoSteamID = 76561198993437314;
-
-        public enum ContentType
-        {
-            Item,
-            Enemy,
-            MapObject
-        }
-
-        internal static void SetRandoms()
-        {
-            randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
-            randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
-        }
-
-        public static void SetNightVisionEnabled(bool enable)
-        {
-            if (localPlayerNightVision == null)
-            {
-                GameObject prefab = localPlayer.nightVision.gameObject;
-                GameObject obj = UnityEngine.Object.Instantiate(prefab, localPlayer.nightVision.gameObject.transform.parent);
-                localPlayerNightVision = obj.GetComponent<Light>();
-                localPlayerNightVision.intensity = 4311f;
-                localPlayerNightVision.range = 15;
+                return RoundManager.Instance.insideAINodes;
             }
 
-            localPlayerNightVision.enabled = enable;
+            return GameObject.FindGameObjectsWithTag("AINode");
+        }
+    }
+    public static GameObject[] outsideAINodes
+    {
+        get
+        {
+            if (RoundManager.Instance.outsideAINodes != null && RoundManager.Instance.outsideAINodes.Length > 0)
+            {
+                return RoundManager.Instance.outsideAINodes;
+            }
+
+            return GameObject.FindGameObjectsWithTag("OutsideAINode");
+        }
+    }
+
+    public static List<GrabbableObject> spawnedItems { get; internal set; } = new List<GrabbableObject>();
+
+    public static List<EntranceTeleport> entrances { get; internal set; } = [];
+    public static MineshaftElevatorController? elevator { get; internal set; }
+    public static Terminal? terminal { get; internal set; }
+
+    public static BoundedRange randomPercentage = new BoundedRange(0f, 1f);
+    public static System.Random randomLocal { get; internal set; } = new();
+    public static System.Random randomGlobal { get; internal set; } = new();
+
+    public static UnityEvent OnFinishGeneratingLevel { get; internal set; } = new();
+    public static UnityEvent OnShipLanded { get; internal set; } = new();
+
+    public static Light? localPlayerNightVision;
+
+    public static bool isOnCompanyMoon => StartOfRound.Instance?.currentLevel.levelID == 3;
+
+    public const ulong RodrigoSteamID = 76561198164429786;
+    public const ulong LizzieSteamID = 76561199094139351;
+    public const ulong GlitchSteamID = 76561198984467725;
+    public const ulong RatSteamID = 76561199182474292;
+    public const ulong XuSteamID = 76561198399127090;
+    public const ulong SlayerSteamID = 76561198077184650;
+    public const ulong SnowySteamID = 76561198253760639;
+    public const ulong FunoSteamID = 76561198993437314;
+
+    public enum ContentType
+    {
+        Item,
+        Enemy,
+        MapObject
+    }
+
+    internal static void SetRandoms()
+    {
+        randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
+        randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
+    }
+
+    public static void SetNightVisionEnabled(bool enable)
+    {
+        if (localPlayerNightVision == null)
+        {
+            GameObject prefab = localPlayer.nightVision.gameObject;
+            GameObject obj = UnityEngine.Object.Instantiate(prefab, localPlayer.nightVision.gameObject.transform.parent);
+            localPlayerNightVision = obj.GetComponent<Light>();
+            localPlayerNightVision.intensity = 4311f;
+            localPlayerNightVision.range = 15;
         }
 
-        /// <summary>
-        /// Determines whether a navigable path exists between two positions, considering entrances and elevator
-        /// transitions.
-        /// </summary>
-        /// <param name="startPos">The starting position in world coordinates.</param>
-        /// <param name="endPos">The destination position in world coordinates.</param>
-        /// <param name="isOutside">true if the starting position is outside the building; otherwise, false.</param>
-        /// <returns>true if a valid path exists; otherwise, false.</returns>
-        public static bool SmartCanPathToPoint(Vector3 startPos, Vector3 endPos, bool isOutside)
+        localPlayerNightVision.enabled = enable;
+    }
+
+    /// <summary>
+    /// Determines whether a navigable path exists between two positions, considering entrances and elevator
+    /// transitions.
+    /// </summary>
+    /// <param name="startPos">The starting position in world coordinates.</param>
+    /// <param name="endPos">The destination position in world coordinates.</param>
+    /// <param name="isOutside">true if the starting position is outside the building; otherwise, false.</param>
+    /// <returns>true if a valid path exists; otherwise, false.</returns>
+    public static bool SmartCanPathToPoint(Vector3 startPos, Vector3 endPos, bool isOutside)
+    {
+        bool inside = !isOutside;
+
+        // 1. Direct path
+        if (CanPathToPoint(startPos, endPos))
+            return true;
+
+        if (entrances.Count <= 0 && elevator == null)
+            return false;
+
+        // Cache elevator points if present
+        Vector3 elevTop = Vector3.zero;
+        Vector3 elevBottom = Vector3.zero;
+        Vector3 elevInside = Vector3.zero;
+
+        if (elevator != null)
         {
-            bool inside = !isOutside;
+            elevTop = elevator.elevatorTopPoint.position;
+            elevBottom = elevator.elevatorBottomPoint.position;
+            elevInside = elevator.elevatorInsidePoint.position;
+        }
 
-            // 1. Direct path
-            if (CanPathToPoint(startPos, endPos))
-                return true;
-
-            if (entrances.Count <= 0 && elevator == null)
-                return false;
-
-            // Cache elevator points if present
-            Vector3 elevTop = Vector3.zero;
-            Vector3 elevBottom = Vector3.zero;
-            Vector3 elevInside = Vector3.zero;
-
-            if (elevator != null)
+        // 2. Entrances
+        if (entrances != null)
+        {
+            foreach (var entrance in entrances)
             {
-                elevTop = elevator.elevatorTopPoint.position;
-                elevBottom = elevator.elevatorBottomPoint.position;
-                elevInside = elevator.elevatorInsidePoint.position;
-            }
+                bool relevant = inside
+                    ? !entrance.isEntranceToBuilding
+                    : entrance.isEntranceToBuilding;
 
-            // 2. Entrances
-            if (entrances != null)
-            {
-                foreach (var entrance in entrances)
+                if (!relevant)
+                    continue;
+
+                if (entrance.exitScript == null && !entrance.FindExitPoint())
+                    continue;
+
+                Vector3 from = entrance.entrancePoint.position;
+                Vector3 to = entrance.exitScript!.entrancePoint.position;
+
+                // start -> entrance -> exit -> end
+                if (CanPathToPoint(startPos, from) && CanPathToPoint(to, endPos))
+                    return true;
+
+                // Combine with elevator if present
+                if (elevator != null)
                 {
-                    bool relevant = inside
-                        ? !entrance.isEntranceToBuilding
-                        : entrance.isEntranceToBuilding;
-
-                    if (!relevant)
-                        continue;
-
-                    if (entrance.exitScript == null && !entrance.FindExitPoint())
-                        continue;
-
-                    Vector3 from = entrance.entrancePoint.position;
-                    Vector3 to = entrance.exitScript!.entrancePoint.position;
-
-                    // start -> entrance -> exit -> end
-                    if (CanPathToPoint(startPos, from) && CanPathToPoint(to, endPos))
-                        return true;
-
-                    // Combine with elevator if present
-                    if (elevator != null)
-                    {
-                        // start -> elevator -> entrance -> exit -> end
-                        if (CanPathToPoint(startPos, elevBottom) &&
-                            CanPathToPoint(elevTop, from) &&
-                            CanPathToPoint(to, endPos))
-                            return true;
-                    }
-                }
-            }
-
-            // 3. Elevator-only paths
-            if (elevator != null)
-            {
-                bool usingElevator = inside &&
-                    Vector3.Distance(startPos, elevInside) < 1f;
-
-                if (usingElevator)
-                {
-                    if (CanPathToPoint(elevTop, endPos) || CanPathToPoint(elevBottom, endPos))
-                        return true;
-                }
-                else
-                {
-                    if (CanPathToPoint(startPos, elevBottom) && CanPathToPoint(elevTop, endPos))
-                        return true;
-
-                    if (inside && CanPathToPoint(startPos, elevTop) && CanPathToPoint(elevBottom, endPos))
+                    // start -> elevator -> entrance -> exit -> end
+                    if (CanPathToPoint(startPos, elevBottom) &&
+                        CanPathToPoint(elevTop, from) &&
+                        CanPathToPoint(to, endPos))
                         return true;
                 }
             }
+        }
 
+        // 3. Elevator-only paths
+        if (elevator != null)
+        {
+            bool usingElevator = inside &&
+                Vector3.Distance(startPos, elevInside) < 1f;
+
+            if (usingElevator)
+            {
+                if (CanPathToPoint(elevTop, endPos) || CanPathToPoint(elevBottom, endPos))
+                    return true;
+            }
+            else
+            {
+                if (CanPathToPoint(startPos, elevBottom) && CanPathToPoint(elevTop, endPos))
+                    return true;
+
+                if (inside && CanPathToPoint(startPos, elevTop) && CanPathToPoint(elevBottom, endPos))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Determines whether a valid navigable path exists between two positions on the NavMesh.
+    /// </summary>
+    /// <param name="startPos">The starting position in world coordinates.</param>
+    /// <param name="endPos">The target position in world coordinates.</param>
+    /// <returns>true if a valid path exists; otherwise, false.</returns>
+    public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
+    {
+        NavMeshPath path = new NavMeshPath();
+        if (!NavMesh.CalculatePath(startPos, endPos, -1, path) || path.status != 0)
+        {
             return false;
         }
-
-        /// <summary>
-        /// Determines whether a valid navigable path exists between two positions on the NavMesh.
-        /// </summary>
-        /// <param name="startPos">The starting position in world coordinates.</param>
-        /// <param name="endPos">The target position in world coordinates.</param>
-        /// <returns>true if a valid path exists; otherwise, false.</returns>
-        public static bool CanPathToPoint(Vector3 startPos, Vector3 endPos)
+        float pathDistance = 0f;
+        if (path.corners.Length > 1)
         {
-            NavMeshPath path = new NavMeshPath();
-            if (!NavMesh.CalculatePath(startPos, endPos, -1, path) || path.status != 0)
+            for (int i = 1; i < path.corners.Length; i++)
             {
-                return false;
-            }
-            float pathDistance = 0f;
-            if (path.corners.Length > 1)
-            {
-                for (int i = 1; i < path.corners.Length; i++)
-                {
-                    pathDistance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
-                }
-            }
-            return pathDistance > 0;
-        }
-
-        internal static void LogRarities(ContentType contentType)
-        {
-            foreach (var level in StartOfRound.Instance.levels)
-            {
-                logger.LogInfo($"- {level.name}:");
-
-                switch (contentType)
-                {
-                    case ContentType.Item:
-                        foreach (var item in level.spawnableScrap)
-                        {
-                            logger.LogInfo($"-- {item.spawnableItem.itemName}: {item.rarity}");
-                        }
-                        break;
-                    case ContentType.Enemy:
-                        foreach (var enemy in level.Enemies)
-                        {
-                            logger.LogInfo($"-- {enemy.enemyType.name}: {enemy.rarity}");
-                        }
-                        break;
-                    case ContentType.MapObject:
-                        foreach (var mapObject in level.spawnableMapObjects)
-                        {
-                            logger.LogInfo($"-- {mapObject.prefabToSpawn.name}:");
-                            Debug.Log(string.Join("\n", mapObject.numberToSpawn.keys.Select(k => $"--- ({k.time}, {k.value})")));
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                pathDistance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
             }
         }
+        return pathDistance > 0;
+    }
 
-        internal static void LogAverageRarities(ContentType contentType)
+    internal static void LogRarities(ContentType contentType)
+    {
+        foreach (var level in StartOfRound.Instance.levels)
         {
+            logger.LogInfo($"- {level.name}:");
+
             switch (contentType)
             {
                 case ContentType.Item:
-                    LogItemAverageRarities();
+                    foreach (var item in level.spawnableScrap)
+                    {
+                        logger.LogInfo($"-- {item.spawnableItem.itemName}: {item.rarity}");
+                    }
                     break;
                 case ContentType.Enemy:
-                    LogEnemyAverageRarities();
+                    foreach (var enemy in level.Enemies)
+                    {
+                        logger.LogInfo($"-- {enemy.enemyType.name}: {enemy.rarity}");
+                    }
+                    break;
+                case ContentType.MapObject:
+                    foreach (var mapObject in level.spawnableMapObjects)
+                    {
+                        logger.LogInfo($"-- {mapObject.prefabToSpawn.name}:");
+                        Debug.Log(string.Join("\n", mapObject.numberToSpawn.keys.Select(k => $"--- ({k.time}, {k.value})")));
+                    }
                     break;
                 default:
                     break;
             }
         }
+    }
 
-        internal static void LogItemAverageRarities()
+    internal static void LogAverageRarities(ContentType contentType)
+    {
+        switch (contentType)
         {
-            var sortedAveragedRarities = StartOfRound.Instance.levels
-                .SelectMany(level => level.spawnableScrap)
-                .GroupBy(scrap => scrap.spawnableItem)
-                .Select(group => new
-                {
-                    Item = group.Key,
-                    AverageRarity = (int)group.Average(scrap => scrap.rarity)
-                })
-                .OrderByDescending(item => item.AverageRarity);
-
-            foreach (var item in sortedAveragedRarities)
-            {
-                logger.LogInfo($"{item.Item.itemName}: {item.AverageRarity}");
-            }
+            case ContentType.Item:
+                LogItemAverageRarities();
+                break;
+            case ContentType.Enemy:
+                LogEnemyAverageRarities();
+                break;
+            default:
+                break;
         }
+    }
 
-        internal static void LogEnemyAverageRarities()
-        {
-            var sortedAveragedRarities = StartOfRound.Instance.levels
-                .SelectMany(level => level.Enemies)
-                .GroupBy(enemy => enemy.enemyType)
-                .Select(group => new
-                {
-                    Enemy = group.Key,
-                    AverageRarity = (int)group.Average(enemy => enemy.rarity)
-                })
-                .OrderByDescending(enemy => enemy.AverageRarity);
-
-            foreach (var enemy in sortedAveragedRarities)
+    internal static void LogItemAverageRarities()
+    {
+        var sortedAveragedRarities = StartOfRound.Instance.levels
+            .SelectMany(level => level.spawnableScrap)
+            .GroupBy(scrap => scrap.spawnableItem)
+            .Select(group => new
             {
-                logger.LogInfo($"{enemy.Enemy.enemyName}: {enemy.AverageRarity}");
-            }
-        }
+                Item = group.Key,
+                AverageRarity = (int)group.Average(scrap => scrap.rarity)
+            })
+            .OrderByDescending(item => item.AverageRarity);
 
-        /// <summary>
-        /// Plays an animation on the local player's animator using the specified parameter and value for a given
-        /// duration.
-        /// </summary>
-        /// <param name="animName">The name of the animation parameter to modify.</param>
-        /// <param name="animValue">The value to assign to the animation parameter, interpreted according to its type.</param>
-        /// <param name="time">The duration in seconds for which the animation should play.</param>
-        public static void PlayPlayerAnimation(string animName, string animValue = "", float time = 1f)
+        foreach (var item in sortedAveragedRarities)
         {
-            var param = localPlayer.playerBodyAnimator.parameters.Where(x => x.name == animName).FirstOrDefault();
+            logger.LogInfo($"{item.Item.itemName}: {item.AverageRarity}");
+        }
+    }
 
-            localPlayer.PlayQuickSpecialAnimation(time);
+    internal static void LogEnemyAverageRarities()
+    {
+        var sortedAveragedRarities = StartOfRound.Instance.levels
+            .SelectMany(level => level.Enemies)
+            .GroupBy(enemy => enemy.enemyType)
+            .Select(group => new
+            {
+                Enemy = group.Key,
+                AverageRarity = (int)group.Average(enemy => enemy.rarity)
+            })
+            .OrderByDescending(enemy => enemy.AverageRarity);
 
+        foreach (var enemy in sortedAveragedRarities)
+        {
+            logger.LogInfo($"{enemy.Enemy.enemyName}: {enemy.AverageRarity}");
+        }
+    }
+
+    /// <summary>
+    /// Plays an animation on the local player's animator using the specified parameter and value for a given
+    /// duration.
+    /// </summary>
+    /// <param name="animName">The name of the animation parameter to modify.</param>
+    /// <param name="animValue">The value to assign to the animation parameter, interpreted according to its type.</param>
+    /// <param name="time">The duration in seconds for which the animation should play.</param>
+    public static void PlayPlayerAnimation(string animName, string animValue = "", float time = 1f)
+    {
+        var param = localPlayer.playerBodyAnimator.parameters.Where(x => x.name == animName).FirstOrDefault();
+
+        localPlayer.PlayQuickSpecialAnimation(time);
+
+        switch (param.type)
+        {
+            case AnimatorControllerParameterType.Float:
+                if (!float.TryParse(animValue, out float value1)) { return; }
+                localPlayer.playerBodyAnimator.SetFloat(animName, value1);
+                break;
+            case AnimatorControllerParameterType.Int:
+                if (!int.TryParse(animValue, out int value2)) { return; }
+                localPlayer.playerBodyAnimator.SetInteger(animName, value2);
+                break;
+            case AnimatorControllerParameterType.Bool:
+                if (!bool.TryParse(animValue, out bool value3)) { return; }
+                localPlayer.playerBodyAnimator.SetBool(animName, value3);
+                break;
+            case AnimatorControllerParameterType.Trigger:
+                localPlayer.playerBodyAnimator.SetTrigger(animName);
+                break;
+            default:
+                break;
+        }
+    }
+
+    internal static void LogAnimatorParameters(Animator animator)
+    {
+        foreach (var param in animator.parameters)
+        {
             switch (param.type)
             {
-                case AnimatorControllerParameterType.Float:
-                    if (!float.TryParse(animValue, out float value1)) { return; }
-                    localPlayer.playerBodyAnimator.SetFloat(animName, value1);
-                    break;
-                case AnimatorControllerParameterType.Int:
-                    if (!int.TryParse(animValue, out int value2)) { return; }
-                    localPlayer.playerBodyAnimator.SetInteger(animName, value2);
-                    break;
                 case AnimatorControllerParameterType.Bool:
-                    if (!bool.TryParse(animValue, out bool value3)) { return; }
-                    localPlayer.playerBodyAnimator.SetBool(animName, value3);
+                    logger.LogInfo($"{param.name} (Bool) = {animator.GetBool(param.name)}");
                     break;
+
+                case AnimatorControllerParameterType.Float:
+                    logger.LogInfo($"{param.name} (Float) = {animator.GetFloat(param.name)}");
+                    break;
+
+                case AnimatorControllerParameterType.Int:
+                    logger.LogInfo($"{param.name} (Int) = {animator.GetInteger(param.name)}");
+                    break;
+
                 case AnimatorControllerParameterType.Trigger:
-                    localPlayer.playerBodyAnimator.SetTrigger(animName);
-                    break;
-                default:
+                    logger.LogInfo($"{param.name} (Trigger)");
                     break;
             }
         }
+    }
 
-        internal static void LogAnimatorParameters(Animator animator)
+    /// <summary>
+    /// Calculates the optimal direction to throw an object by performing multiple raycasts around the forward
+    /// vector and selecting the direction with the farthest unobstructed path.
+    /// </summary>
+    /// <param name="origin">The starting position for the raycasts.</param>
+    /// <param name="forward">The initial forward direction to base the search around.</param>
+    /// <param name="rayCount">The number of directions to sample around the forward vector.</param>
+    /// <param name="maxDistance">The maximum distance each raycast can reach.</param>
+    /// <param name="layerMask">The layer mask used to filter raycast collisions.</param>
+    /// <returns>The direction vector that allows for the farthest throw from the origin.</returns>
+    public static Vector3 GetBestThrowDirection(Vector3 origin, Vector3 forward, int rayCount, float maxDistance, LayerMask layerMask)
+    {
+        Vector3 bestDirection = forward;
+        float farthestHit = 0f;
+
+        for (int i = 0; i < rayCount; i++)
         {
-            foreach (var param in animator.parameters)
+            float angle = i * (360f / rayCount);
+            Vector3 dir = Quaternion.Euler(0, angle, 0) * forward.normalized;
+
+            // Raycast from origin outward
+            if (Physics.Raycast(origin + Vector3.up * 0.5f, dir, out RaycastHit hit, maxDistance, layerMask))
             {
-                switch (param.type)
+                if (hit.distance > farthestHit)
                 {
-                    case AnimatorControllerParameterType.Bool:
-                        logger.LogInfo($"{param.name} (Bool) = {animator.GetBool(param.name)}");
-                        break;
-
-                    case AnimatorControllerParameterType.Float:
-                        logger.LogInfo($"{param.name} (Float) = {animator.GetFloat(param.name)}");
-                        break;
-
-                    case AnimatorControllerParameterType.Int:
-                        logger.LogInfo($"{param.name} (Int) = {animator.GetInteger(param.name)}");
-                        break;
-
-                    case AnimatorControllerParameterType.Trigger:
-                        logger.LogInfo($"{param.name} (Trigger)");
-                        break;
+                    bestDirection = dir;
+                    farthestHit = hit.distance;
                 }
+            }
+            else
+            {
+                // If nothing is hit, assume max distance (ideal throw)
+                return dir;
             }
         }
 
-        /// <summary>
-        /// Calculates the optimal direction to throw an object by performing multiple raycasts around the forward
-        /// vector and selecting the direction with the farthest unobstructed path.
-        /// </summary>
-        /// <param name="origin">The starting position for the raycasts.</param>
-        /// <param name="forward">The initial forward direction to base the search around.</param>
-        /// <param name="rayCount">The number of directions to sample around the forward vector.</param>
-        /// <param name="maxDistance">The maximum distance each raycast can reach.</param>
-        /// <param name="layerMask">The layer mask used to filter raycast collisions.</param>
-        /// <returns>The direction vector that allows for the farthest throw from the origin.</returns>
-        public static Vector3 GetBestThrowDirection(Vector3 origin, Vector3 forward, int rayCount, float maxDistance, LayerMask layerMask)
+        return bestDirection;
+    }
+
+    /// <summary>
+    /// Generates a random position on the NavMesh within an annular region defined by minimum and maximum radii
+    /// from a center point.
+    /// </summary>
+    /// <param name="center">The center point around which to sample the NavMesh.</param>
+    /// <param name="minRadius">The minimum distance from the center point for the annulus.</param>
+    /// <param name="maxRadius">The maximum distance from the center point for the annulus.</param>
+    /// <param name="sampleCount">The number of attempts to find a valid NavMesh position.</param>
+    /// <returns>A valid position on the NavMesh within the specified annulus, or the original center position if none is
+    /// found.</returns>
+    public static Vector3 GetRandomNavMeshPositionInAnnulus(Vector3 center, float minRadius, float maxRadius, int sampleCount = 10)
+    {
+        Vector3 randomDirection;
+        float y = center.y;
+
+        // Make sure minRadius is less than maxRadius
+        if (minRadius >= maxRadius)
         {
-            Vector3 bestDirection = forward;
-            float farthestHit = 0f;
-
-            for (int i = 0; i < rayCount; i++)
-            {
-                float angle = i * (360f / rayCount);
-                Vector3 dir = Quaternion.Euler(0, angle, 0) * forward.normalized;
-
-                // Raycast from origin outward
-                if (Physics.Raycast(origin + Vector3.up * 0.5f, dir, out RaycastHit hit, maxDistance, layerMask))
-                {
-                    if (hit.distance > farthestHit)
-                    {
-                        bestDirection = dir;
-                        farthestHit = hit.distance;
-                    }
-                }
-                else
-                {
-                    // If nothing is hit, assume max distance (ideal throw)
-                    return dir;
-                }
-            }
-
-            return bestDirection;
-        }
-
-        /// <summary>
-        /// Generates a random position on the NavMesh within an annular region defined by minimum and maximum radii
-        /// from a center point.
-        /// </summary>
-        /// <param name="center">The center point around which to sample the NavMesh.</param>
-        /// <param name="minRadius">The minimum distance from the center point for the annulus.</param>
-        /// <param name="maxRadius">The maximum distance from the center point for the annulus.</param>
-        /// <param name="sampleCount">The number of attempts to find a valid NavMesh position.</param>
-        /// <returns>A valid position on the NavMesh within the specified annulus, or the original center position if none is
-        /// found.</returns>
-        public static Vector3 GetRandomNavMeshPositionInAnnulus(Vector3 center, float minRadius, float maxRadius, int sampleCount = 10)
-        {
-            Vector3 randomDirection;
-            float y = center.y;
-
-            // Make sure minRadius is less than maxRadius
-            if (minRadius >= maxRadius)
-            {
-                logger.LogWarning("minRadius should be less than maxRadius. Returning original position.");
-                return center;
-            }
-
-            // Try a few times to get a valid point
-            for (int i = 0; i < sampleCount; i++)
-            {
-                // Get a random direction
-                randomDirection = UnityEngine.Random.insideUnitSphere;
-                randomDirection.y = 0f;
-                randomDirection.Normalize();
-
-                // Random distance between min and max radius
-                float distance = UnityEngine.Random.Range(minRadius, maxRadius);
-
-                // Calculate the new position
-                Vector3 pos = center + randomDirection * distance;
-                pos.y = y;
-
-                // Check if it's on the NavMesh
-                if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
-                {
-                    return hit.position;
-                }
-            }
-
-            logger.LogWarning("Unable to find valid NavMesh position in annulus. Returning original position.");
+            logger.LogWarning("minRadius should be less than maxRadius. Returning original position.");
             return center;
         }
 
-        /// <summary>
-        /// Generates a list of evenly spaced positions on the NavMesh around a specified center point.
-        /// </summary>
-        /// <param name="center">The center point around which to generate positions.</param>
-        /// <param name="count">The number of positions to generate.</param>
-        /// <param name="minRadius">The minimum distance from the center for generated positions.</param>
-        /// <param name="maxRadius">The maximum distance from the center for generated positions.</param>
-        /// <returns>A list of valid positions on the NavMesh.</returns>
-        public static List<Vector3> GetEvenlySpacedNavMeshPositions(Vector3 center, int count, float minRadius, float maxRadius)
+        // Try a few times to get a valid point
+        for (int i = 0; i < sampleCount; i++)
         {
-            List<Vector3> positions = new List<Vector3>();
+            // Get a random direction
+            randomDirection = UnityEngine.Random.insideUnitSphere;
+            randomDirection.y = 0f;
+            randomDirection.Normalize();
 
-            // Validate
-            if (count <= 0 || minRadius > maxRadius)
+            // Random distance between min and max radius
+            float distance = UnityEngine.Random.Range(minRadius, maxRadius);
+
+            // Calculate the new position
+            Vector3 pos = center + randomDirection * distance;
+            pos.y = y;
+
+            // Check if it's on the NavMesh
+            if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             {
-                logger.LogWarning("Invalid parameters for turret spawn positions.");
-                return positions;
+                return hit.position;
             }
+        }
 
-            float y = center.y;
-            float angleStep = 360f / count;
+        logger.LogWarning("Unable to find valid NavMesh position in annulus. Returning original position.");
+        return center;
+    }
 
-            for (int i = 0; i < count; i++)
-            {
-                float angle = i * angleStep;
+    /// <summary>
+    /// Generates a list of evenly spaced positions on the NavMesh around a specified center point.
+    /// </summary>
+    /// <param name="center">The center point around which to generate positions.</param>
+    /// <param name="count">The number of positions to generate.</param>
+    /// <param name="minRadius">The minimum distance from the center for generated positions.</param>
+    /// <param name="maxRadius">The maximum distance from the center for generated positions.</param>
+    /// <returns>A list of valid positions on the NavMesh.</returns>
+    public static List<Vector3> GetEvenlySpacedNavMeshPositions(Vector3 center, int count, float minRadius, float maxRadius)
+    {
+        List<Vector3> positions = new List<Vector3>();
 
-                float radians = angle * Mathf.Deg2Rad;
-
-                float radius = UnityEngine.Random.Range(minRadius, maxRadius);
-
-                float x = Mathf.Cos(radians) * radius;
-                float z = Mathf.Sin(radians) * radius;
-
-                Vector3 pos = new Vector3(center.x + x, y, center.z + z);
-
-                if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
-                {
-                    positions.Add(hit.position);
-                }
-                else
-                {
-                    logger.LogWarning($"Could not find valid NavMesh position for turret {i}. Skipping.");
-                }
-            }
-
+        // Validate
+        if (count <= 0 || minRadius > maxRadius)
+        {
+            logger.LogWarning("Invalid parameters for turret spawn positions.");
             return positions;
         }
 
-        /// <summary>
-        /// Plays an audio clip at a specified world position with optional pitch randomization, 3D spatialization,
-        /// distance attenuation, and low-pass filtering.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Local
-        /// Destroys the temporary sound object after playback and transmits audio to
-        /// walkie-talkies. Registers the sound as audible noise if spatial3D is enabled and audibleNoiseID is
-        /// non-negative.</remarks>
-        /// <param name="pos">The transform representing the world position where the sound is played.</param>
-        /// <param name="clip">The audio clip to play.</param>
-        /// <param name="volume">The playback volume, from 0.0 (silent) to 1.0 (full volume).</param>
-        /// <param name="randomizePitch">true to randomize the pitch of the sound; otherwise, false.</param>
-        /// <param name="spatial3D">true to spatialize the sound in 3D space; otherwise, false.</param>
-        /// <param name="min3DDistance">The minimum distance at which the sound is audible.</param>
-        /// <param name="max3DDistance">The maximum distance at which the sound can be heard.</param>
-        /// <param name="cutoffFrequency">The cutoff frequency for the low-pass filter applied to the sound.</param>
-        /// <param name="audibleNoiseID">The identifier for registering the sound as audible noise, or a negative value to disable.</param>
-        public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
+        float y = center.y;
+        float angleStep = 360f / count;
+
+        for (int i = 0; i < count; i++)
         {
-            GameObject soundObj = UnityEngine.Object.Instantiate(new GameObject("TempSoundEffectObj"), pos);
-            AudioSource source = soundObj.AddComponent<AudioSource>();
+            float angle = i * angleStep;
 
-            OccludeAudio occlude = soundObj.AddComponent<OccludeAudio>();
-            occlude.lowPassOverride = 20000f;
+            float radians = angle * Mathf.Deg2Rad;
 
-            AudioLowPassFilter filter = soundObj.AddComponent<AudioLowPassFilter>();
-            filter.cutoffFrequency = cutoffFrequency;
+            float radius = UnityEngine.Random.Range(minRadius, maxRadius);
 
-            source.rolloffMode = AudioRolloffMode.Linear;
+            float x = Mathf.Cos(radians) * radius;
+            float z = Mathf.Sin(radians) * radius;
 
-            if (randomizePitch)
-                source.pitch = UnityEngine.Random.Range(0.94f, 1.06f);
+            Vector3 pos = new Vector3(center.x + x, y, center.z + z);
 
-            source.clip = clip;
-            source.volume = volume;
-            source.spatialBlend = spatial3D ? 1 : 0;
-            source.minDistance = min3DDistance;
-            source.maxDistance = max3DDistance;
-            source.Play();
-            UnityEngine.Object.Destroy(soundObj, source.clip.length);
-
-            WalkieTalkie.TransmitOneShotAudio(source, clip, 0.85f);
-            if (spatial3D && audibleNoiseID >= 0)
-                RoundManager.Instance.PlayAudibleNoise(source.transform.position, 4f * volume, volume / 2f, 0, noiseIsInsideClosedShip: true, audibleNoiseID);
-        }
-
-        /// <summary>
-        /// Plays an audio clip at a specified world position with configurable volume, pitch, spatialization, distance
-        /// attenuation, and low-pass filtering. Optionally registers the sound as an audible noise event.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        /// <param name="pos">The world position where the audio clip is played.</param>
-        /// <param name="clip">The audio clip to play.</param>
-        /// <param name="volume">The playback volume, from 0 (silent) to 1 (full volume).</param>
-        /// <param name="randomizePitch">true to randomize the pitch slightly; otherwise, false.</param>
-        /// <param name="spatial3D">true to spatialize the sound in 3D space; otherwise, false.</param>
-        /// <param name="min3DDistance">The minimum distance at which the sound is heard at full volume.</param>
-        /// <param name="max3DDistance">The maximum distance at which the sound can be heard.</param>
-        /// <param name="cutoffFrequency">The cutoff frequency for the low-pass filter applied to the audio.</param>
-        /// <param name="audibleNoiseID">The identifier for registering the sound as an audible noise event, or a negative value to skip
-        /// registration.</param>
-        public static void PlaySoundAtPosition(Vector3 pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
-        {
-            GameObject soundObj = UnityEngine.Object.Instantiate(new GameObject("TempSoundEffectObj"), pos, Quaternion.identity);
-            AudioSource source = soundObj.AddComponent<AudioSource>();
-
-            OccludeAudio occlude = soundObj.AddComponent<OccludeAudio>();
-            occlude.lowPassOverride = 20000f;
-
-            AudioLowPassFilter filter = soundObj.AddComponent<AudioLowPassFilter>();
-            filter.cutoffFrequency = cutoffFrequency;
-
-            source.rolloffMode = AudioRolloffMode.Linear;
-
-            if (randomizePitch)
-                source.pitch = UnityEngine.Random.Range(0.94f, 1.06f);
-
-            source.clip = clip;
-            source.volume = volume;
-            source.spatialBlend = spatial3D ? 1 : 0;
-            source.minDistance = min3DDistance;
-            source.maxDistance = max3DDistance;
-            source.Play();
-            UnityEngine.Object.Destroy(soundObj, source.clip.length);
-
-            WalkieTalkie.TransmitOneShotAudio(source, clip, 0.85f);
-            if (spatial3D && audibleNoiseID >= 0)
-                RoundManager.Instance.PlayAudibleNoise(source.transform.position, 4f * volume, volume / 2f, 0, noiseIsInsideClosedShip: true, audibleNoiseID);
-        }
-
-        /// <summary>
-        /// Plays a random audio clip from the specified array at the given position with optional pitch randomization,
-        /// 3D spatialization, distance settings, and cutoff frequency.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        /// <param name="pos">The transform representing the position in world space where the sound is played.</param>
-        /// <param name="clips">The array of audio clips to select from for playback.</param>
-        /// <param name="volume">The playback volume, where 1.0 is full volume.</param>
-        /// <param name="randomizePitch">true to randomize the pitch of the audio clip; otherwise, false.</param>
-        /// <param name="spatial3D">true to enable 3D spatialization of the sound; otherwise, false.</param>
-        /// <param name="min3DDistance">The minimum distance at which the sound is audible.</param>
-        /// <param name="max3DDistance">The maximum distance at which the sound is audible.</param>
-        /// <param name="cutoffFrequency">The cutoff frequency applied to the audio playback.</param>
-        /// <param name="audibleNoiseID">The identifier for the audible noise event.</param>
-        public static void PlaySoundAtPosition(Transform pos, AudioClip[] clips, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
-        {
-            int index = UnityEngine.Random.Range(0, clips.Length);
-            PlaySoundAtPosition(pos, clips[index], volume, randomizePitch, spatial3D, min3DDistance, max3DDistance, cutoffFrequency, audibleNoiseID);
-        }
-
-        /// <summary>
-        /// Plays a random audio clip from the specified array at the given 3D position with optional pitch
-        /// randomization, spatialization, distance attenuation, and frequency cutoff.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        /// <param name="pos">The position in world space where the sound is played.</param>
-        /// <param name="clips">An array of audio clips to select from for playback.</param>
-        /// <param name="volume">The playback volume, ranging from 0.0 (silent) to 1.0 (full volume).</param>
-        /// <param name="randomizePitch">true to randomize the pitch of the audio clip; otherwise, false.</param>
-        /// <param name="spatial3D">true to enable 3D spatialization of the sound; otherwise, false.</param>
-        /// <param name="min3DDistance">The minimum distance from the source at which the sound is audible.</param>
-        /// <param name="max3DDistance">The maximum distance from the source at which the sound is audible.</param>
-        /// <param name="cutoffFrequency">The cutoff frequency applied to the audio playback in hertz.</param>
-        /// <param name="audibleNoiseID">The identifier for the audible noise event.</param>
-        public static void PlaySoundAtPosition(Vector3 pos, AudioClip[] clips, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
-        {
-            int index = UnityEngine.Random.Range(0, clips.Length);
-            PlaySoundAtPosition(pos, clips[index], volume, randomizePitch, spatial3D, min3DDistance, max3DDistance, cutoffFrequency, audibleNoiseID);
-        }
-
-        public static PlayerControllerB GetRandomPlayer(System.Random random)
-        {
-            var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
-            return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[random.Next(StartOfRound.Instance.allPlayerScripts.Length)] : players[random.Next(players.Length)];
-        }
-
-        public static PlayerControllerB GetRandomPlayer()
-        {
-            var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
-            return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[UnityEngine.Random.Range(0, StartOfRound.Instance.allPlayerScripts.Length)] : players[UnityEngine.Random.Range(0, players.Length)];
-        }
-
-        public static void LogChat(string msg, string nameOfUserWhoTyped = "Server")
-        {
-            HUDManager.Instance.AddChatMessage(msg, nameOfUserWhoTyped);
-        }
-
-        /// <summary>
-        /// Calculates the shortest distance between two positions, accounting for building entrances and exits when
-        /// transitioning between inside and outside areas.
-        /// </summary>
-        /// <param name="position1">The starting position.</param>
-        /// <param name="position2">The target position.</param>
-        /// <param name="fastDistanceCheck">If true, uses a faster, less accurate calculation based on squared distances.</param>
-        /// <returns>The shortest distance between the two positions, or -1 if no valid entrance is found during a fast distance
-        /// check.</returns>
-        public static float SmartDistance(Vector3 position1, Vector3 position2, bool fastDistanceCheck = false)
-        {
-            if (position1.IsOutside() == position2.IsOutside())
-                return Vector3.Distance(position1, position2);
-
-            float closestDistance = Mathf.Infinity;
-            EntranceTeleport? bestEntrance = null;
-
-            foreach (var entrance in entrances)
+            if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             {
-                if (entrance == null)
-                    continue;
-
-                if (entrance.isEntranceToBuilding != position1.IsOutside())
-                    continue;
-
-                if (entrance.exitScript == null &&
-                    (entrance.exitPointDoesntExist || !entrance.FindExitPoint()))
-                    continue;
-
-                if (entrance.exitScript == null)
-                    continue;
-
-                if (fastDistanceCheck)
-                {
-                    float distance =
-                        (position1 - entrance.transform.position).sqrMagnitude +
-                        (entrance.exitScript.transform.position - position2).sqrMagnitude;
-
-                    if (distance < closestDistance)
-                    {
-                        closestDistance = distance;
-                        bestEntrance = entrance;
-                    }
-                }
-                else
-                {
-                    float distance =
-                        Vector3.Distance(position1, entrance.transform.position) +
-                        Vector3.Distance(entrance.exitScript.transform.position, position2);
-
-                    closestDistance = Mathf.Min(closestDistance, distance);
-                }
+                positions.Add(hit.position);
             }
-
-            if (!fastDistanceCheck)
-                return closestDistance;
-
-            if (bestEntrance == null)
-                return -1;
-
-            return
-                Vector3.Distance(position1, bestEntrance.transform.position) +
-                Vector3.Distance(bestEntrance.exitScript.transform.position, position2);
-        }
-
-        [System.Obsolete("Use LayerMask.GetMask", true)]
-        public static LayerMask CreateMask(params string[] layerNames)
-        {
-            LayerMask mask = 0;
-
-            foreach (var name in layerNames)
+            else
             {
-                int layer = LayerMask.NameToLayer(name);
-                if (layer >= 0)
-                    mask |= 1 << layer;
+                logger.LogWarning($"Could not find valid NavMesh position for turret {i}. Skipping.");
             }
-
-            return mask;
         }
 
-        public static Collider? GetLargestCollider(Collider[] colliders)
+        return positions;
+    }
+
+    /// <summary>
+    /// Plays an audio clip at a specified world position with optional pitch randomization, 3D spatialization,
+    /// distance attenuation, and low-pass filtering.
+    /// </summary>
+    /// <remarks>
+    /// Execution: Local
+    /// Destroys the temporary sound object after playback and transmits audio to
+    /// walkie-talkies. Registers the sound as audible noise if spatial3D is enabled and audibleNoiseID is
+    /// non-negative.</remarks>
+    /// <param name="pos">The transform representing the world position where the sound is played.</param>
+    /// <param name="clip">The audio clip to play.</param>
+    /// <param name="volume">The playback volume, from 0.0 (silent) to 1.0 (full volume).</param>
+    /// <param name="randomizePitch">true to randomize the pitch of the sound; otherwise, false.</param>
+    /// <param name="spatial3D">true to spatialize the sound in 3D space; otherwise, false.</param>
+    /// <param name="min3DDistance">The minimum distance at which the sound is audible.</param>
+    /// <param name="max3DDistance">The maximum distance at which the sound can be heard.</param>
+    /// <param name="cutoffFrequency">The cutoff frequency for the low-pass filter applied to the sound.</param>
+    /// <param name="audibleNoiseID">The identifier for registering the sound as audible noise, or a negative value to disable.</param>
+    public static void PlaySoundAtPosition(Transform pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
+    {
+        GameObject soundObj = UnityEngine.Object.Instantiate(new GameObject("TempSoundEffectObj"), pos);
+        AudioSource source = soundObj.AddComponent<AudioSource>();
+
+        OccludeAudio occlude = soundObj.AddComponent<OccludeAudio>();
+        occlude.lowPassOverride = 20000f;
+
+        AudioLowPassFilter filter = soundObj.AddComponent<AudioLowPassFilter>();
+        filter.cutoffFrequency = cutoffFrequency;
+
+        source.rolloffMode = AudioRolloffMode.Linear;
+
+        if (randomizePitch)
+            source.pitch = UnityEngine.Random.Range(0.94f, 1.06f);
+
+        source.clip = clip;
+        source.volume = volume;
+        source.spatialBlend = spatial3D ? 1 : 0;
+        source.minDistance = min3DDistance;
+        source.maxDistance = max3DDistance;
+        source.Play();
+        UnityEngine.Object.Destroy(soundObj, source.clip.length);
+
+        WalkieTalkie.TransmitOneShotAudio(source, clip, 0.85f);
+        if (spatial3D && audibleNoiseID >= 0)
+            RoundManager.Instance.PlayAudibleNoise(source.transform.position, 4f * volume, volume / 2f, 0, noiseIsInsideClosedShip: true, audibleNoiseID);
+    }
+
+    /// <summary>
+    /// Plays an audio clip at a specified world position with configurable volume, pitch, spatialization, distance
+    /// attenuation, and low-pass filtering. Optionally registers the sound as an audible noise event.
+    /// </summary>
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    /// <param name="pos">The world position where the audio clip is played.</param>
+    /// <param name="clip">The audio clip to play.</param>
+    /// <param name="volume">The playback volume, from 0 (silent) to 1 (full volume).</param>
+    /// <param name="randomizePitch">true to randomize the pitch slightly; otherwise, false.</param>
+    /// <param name="spatial3D">true to spatialize the sound in 3D space; otherwise, false.</param>
+    /// <param name="min3DDistance">The minimum distance at which the sound is heard at full volume.</param>
+    /// <param name="max3DDistance">The maximum distance at which the sound can be heard.</param>
+    /// <param name="cutoffFrequency">The cutoff frequency for the low-pass filter applied to the audio.</param>
+    /// <param name="audibleNoiseID">The identifier for registering the sound as an audible noise event, or a negative value to skip
+    /// registration.</param>
+    public static void PlaySoundAtPosition(Vector3 pos, AudioClip clip, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
+    {
+        GameObject soundObj = UnityEngine.Object.Instantiate(new GameObject("TempSoundEffectObj"), pos, Quaternion.identity);
+        AudioSource source = soundObj.AddComponent<AudioSource>();
+
+        OccludeAudio occlude = soundObj.AddComponent<OccludeAudio>();
+        occlude.lowPassOverride = 20000f;
+
+        AudioLowPassFilter filter = soundObj.AddComponent<AudioLowPassFilter>();
+        filter.cutoffFrequency = cutoffFrequency;
+
+        source.rolloffMode = AudioRolloffMode.Linear;
+
+        if (randomizePitch)
+            source.pitch = UnityEngine.Random.Range(0.94f, 1.06f);
+
+        source.clip = clip;
+        source.volume = volume;
+        source.spatialBlend = spatial3D ? 1 : 0;
+        source.minDistance = min3DDistance;
+        source.maxDistance = max3DDistance;
+        source.Play();
+        UnityEngine.Object.Destroy(soundObj, source.clip.length);
+
+        WalkieTalkie.TransmitOneShotAudio(source, clip, 0.85f);
+        if (spatial3D && audibleNoiseID >= 0)
+            RoundManager.Instance.PlayAudibleNoise(source.transform.position, 4f * volume, volume / 2f, 0, noiseIsInsideClosedShip: true, audibleNoiseID);
+    }
+
+    /// <summary>
+    /// Plays a random audio clip from the specified array at the given position with optional pitch randomization,
+    /// 3D spatialization, distance settings, and cutoff frequency.
+    /// </summary>
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    /// <param name="pos">The transform representing the position in world space where the sound is played.</param>
+    /// <param name="clips">The array of audio clips to select from for playback.</param>
+    /// <param name="volume">The playback volume, where 1.0 is full volume.</param>
+    /// <param name="randomizePitch">true to randomize the pitch of the audio clip; otherwise, false.</param>
+    /// <param name="spatial3D">true to enable 3D spatialization of the sound; otherwise, false.</param>
+    /// <param name="min3DDistance">The minimum distance at which the sound is audible.</param>
+    /// <param name="max3DDistance">The maximum distance at which the sound is audible.</param>
+    /// <param name="cutoffFrequency">The cutoff frequency applied to the audio playback.</param>
+    /// <param name="audibleNoiseID">The identifier for the audible noise event.</param>
+    public static void PlaySoundAtPosition(Transform pos, AudioClip[] clips, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
+    {
+        int index = UnityEngine.Random.Range(0, clips.Length);
+        PlaySoundAtPosition(pos, clips[index], volume, randomizePitch, spatial3D, min3DDistance, max3DDistance, cutoffFrequency, audibleNoiseID);
+    }
+
+    /// <summary>
+    /// Plays a random audio clip from the specified array at the given 3D position with optional pitch
+    /// randomization, spatialization, distance attenuation, and frequency cutoff.
+    /// </summary>
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    /// <param name="pos">The position in world space where the sound is played.</param>
+    /// <param name="clips">An array of audio clips to select from for playback.</param>
+    /// <param name="volume">The playback volume, ranging from 0.0 (silent) to 1.0 (full volume).</param>
+    /// <param name="randomizePitch">true to randomize the pitch of the audio clip; otherwise, false.</param>
+    /// <param name="spatial3D">true to enable 3D spatialization of the sound; otherwise, false.</param>
+    /// <param name="min3DDistance">The minimum distance from the source at which the sound is audible.</param>
+    /// <param name="max3DDistance">The maximum distance from the source at which the sound is audible.</param>
+    /// <param name="cutoffFrequency">The cutoff frequency applied to the audio playback in hertz.</param>
+    /// <param name="audibleNoiseID">The identifier for the audible noise event.</param>
+    public static void PlaySoundAtPosition(Vector3 pos, AudioClip[] clips, float volume = 1f, bool randomizePitch = true, bool spatial3D = true, float min3DDistance = 1f, float max3DDistance = 10f, float cutoffFrequency = 22000, int audibleNoiseID = 0)
+    {
+        int index = UnityEngine.Random.Range(0, clips.Length);
+        PlaySoundAtPosition(pos, clips[index], volume, randomizePitch, spatial3D, min3DDistance, max3DDistance, cutoffFrequency, audibleNoiseID);
+    }
+
+    public static PlayerControllerB GetRandomPlayer(System.Random random)
+    {
+        var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
+        return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[random.Next(StartOfRound.Instance.allPlayerScripts.Length)] : players[random.Next(players.Length)];
+    }
+
+    public static PlayerControllerB GetRandomPlayer()
+    {
+        var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
+        return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[UnityEngine.Random.Range(0, StartOfRound.Instance.allPlayerScripts.Length)] : players[UnityEngine.Random.Range(0, players.Length)];
+    }
+
+    public static void LogChat(string msg, string nameOfUserWhoTyped = "Server")
+    {
+        HUDManager.Instance.AddChatMessage(msg, nameOfUserWhoTyped);
+    }
+
+    /// <summary>
+    /// Calculates the shortest distance between two positions, accounting for building entrances and exits when
+    /// transitioning between inside and outside areas.
+    /// </summary>
+    /// <param name="position1">The starting position.</param>
+    /// <param name="position2">The target position.</param>
+    /// <param name="fastDistanceCheck">If true, uses a faster, less accurate calculation based on squared distances.</param>
+    /// <returns>The shortest distance between the two positions, or -1 if no valid entrance is found during a fast distance
+    /// check.</returns>
+    public static float SmartDistance(Vector3 position1, Vector3 position2, bool fastDistanceCheck = false)
+    {
+        if (position1.IsOutside() == position2.IsOutside())
+            return Vector3.Distance(position1, position2);
+
+        float closestDistance = Mathf.Infinity;
+        EntranceTeleport? bestEntrance = null;
+
+        foreach (var entrance in entrances)
         {
-            if (colliders.Length == 0)
-                return null;
+            if (entrance == null)
+                continue;
 
-            Collider largest = colliders[0];
-            float largestVolume = largest.bounds.size.x *
-                                  largest.bounds.size.y *
-                                  largest.bounds.size.z;
+            if (entrance.isEntranceToBuilding != position1.IsOutside())
+                continue;
 
-            foreach (Collider col in colliders)
+            if (entrance.exitScript == null &&
+                (entrance.exitPointDoesntExist || !entrance.FindExitPoint()))
+                continue;
+
+            if (entrance.exitScript == null)
+                continue;
+
+            if (fastDistanceCheck)
             {
-                Bounds bounds = col.bounds;
+                float distance =
+                    (position1 - entrance.transform.position).sqrMagnitude +
+                    (entrance.exitScript.transform.position - position2).sqrMagnitude;
 
-                float volume =
-                    bounds.size.x *
-                    bounds.size.y *
-                    bounds.size.z;
-
-                if (volume > largestVolume)
+                if (distance < closestDistance)
                 {
-                    largestVolume = volume;
-                    largest = col;
+                    closestDistance = distance;
+                    bestEntrance = entrance;
                 }
             }
-
-            logger.LogDebug($"Got largest collider: {largest.name} | Enabled: {largest.enabled} | Size: {largest.bounds.size} | Volume: {largestVolume}");
-
-            return largest;
-        }
-
-        /// <summary>
-        /// Creates and initializes a ping GameObject at the specified world position with customizable display text,
-        /// node type, range, and lifetime.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        /// <param name="position">The world position where the ping is instantiated.</param>
-        /// <param name="headerText">The main text displayed on the ping.</param>
-        /// <param name="subText">The secondary text displayed on the ping.</param>
-        /// <param name="nodeType">The type of node represented by the ping.</param>
-        /// <param name="requiresLineOfSight">true if line of sight is required for the ping; otherwise, false.</param>
-        /// <param name="minRange">The minimum effective range of the ping.</param>
-        /// <param name="maxRange">The maximum effective range of the ping.</param>
-        /// <param name="destroyTime">The time in seconds before the ping is destroyed. Set to 0 or less to persist indefinitely.</param>
-        /// <returns>The instantiated ping GameObject.</returns>
-        public static GameObject Ping(Vector3 position, string headerText = "Ping", string subText = "", int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = 10)
-        {
-            GameObject ping = UnityEngine.Object.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
-
-            ping.tag = "DoNotSet";
-            ping.layer = LayerMask.NameToLayer("ScanNode");
-
-            ping.AddComponent<BoxCollider>();
-
-            ScanNodeProperties scanNode = ping.AddComponent<ScanNodeProperties>();
-            scanNode.maxRange = maxRange;
-            scanNode.minRange = minRange;
-            scanNode.headerText = headerText;
-            scanNode.subText = subText;
-            scanNode.nodeType = nodeType;
-            scanNode.requiresLineOfSight = requiresLineOfSight;
-
-            if (destroyTime > 0)
-                UnityEngine.Object.Destroy(ping, destroyTime);
-
-            HUDManager h = HUDManager.Instance;
-
-            if (!h.nodesOnScreen.Contains(scanNode))
+            else
             {
-                h.nodesOnScreen.Add(scanNode);
+                float distance =
+                    Vector3.Distance(position1, entrance.transform.position) +
+                    Vector3.Distance(entrance.exitScript.transform.position, position2);
+
+                closestDistance = Mathf.Min(closestDistance, distance);
             }
+        }
 
-            if (h.scanNodes.ContainsValue(scanNode)) { return ping; }
+        if (!fastDistanceCheck)
+            return closestDistance;
 
-            for (int i = 0; i < h.scanElements.Length; i++)
+        if (bestEntrance == null)
+            return -1;
+
+        return
+            Vector3.Distance(position1, bestEntrance.transform.position) +
+            Vector3.Distance(bestEntrance.exitScript.transform.position, position2);
+    }
+
+    [System.Obsolete("Use LayerMask.GetMask", true)]
+    public static LayerMask CreateMask(params string[] layerNames)
+    {
+        LayerMask mask = 0;
+
+        foreach (var name in layerNames)
+        {
+            int layer = LayerMask.NameToLayer(name);
+            if (layer >= 0)
+                mask |= 1 << layer;
+        }
+
+        return mask;
+    }
+
+    public static Collider? GetLargestCollider(Collider[] colliders)
+    {
+        if (colliders.Length == 0)
+            return null;
+
+        Collider largest = colliders[0];
+        float largestVolume = largest.bounds.size.x *
+                              largest.bounds.size.y *
+                              largest.bounds.size.z;
+
+        foreach (Collider col in colliders)
+        {
+            Bounds bounds = col.bounds;
+
+            float volume =
+                bounds.size.x *
+                bounds.size.y *
+                bounds.size.z;
+
+            if (volume > largestVolume)
             {
-                if (h.scanNodes.TryAdd(h.scanElements[i], scanNode))
-                {
-                    break;
-                }
+                largestVolume = volume;
+                largest = col;
             }
-
-            return ping;
         }
 
-        /// <summary>
-        /// Sets the ship to leave early at the specified time, displays the provided dialogue, and triggers the ship
-        /// leaving alert.
-        /// </summary>
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        /// <param name="timeToLeaveEarly">The time, in hours, when the ship should leave early.</param>
-        /// <param name="shipLeavingEarlyDialogue">The dialogue segments to display when the ship is leaving early.</param>
-        public static void SetShipLeaveEarly(float timeToLeaveEarly, DialogueSegment[] shipLeavingEarlyDialogue)
+        logger.LogDebug($"Got largest collider: {largest.name} | Enabled: {largest.enabled} | Size: {largest.bounds.size} | Volume: {largestVolume}");
+
+        return largest;
+    }
+
+    /// <summary>
+    /// Creates and initializes a ping GameObject at the specified world position with customizable display text,
+    /// node type, range, and lifetime.
+    /// </summary>
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    /// <param name="position">The world position where the ping is instantiated.</param>
+    /// <param name="headerText">The main text displayed on the ping.</param>
+    /// <param name="subText">The secondary text displayed on the ping.</param>
+    /// <param name="nodeType">The type of node represented by the ping.</param>
+    /// <param name="requiresLineOfSight">true if line of sight is required for the ping; otherwise, false.</param>
+    /// <param name="minRange">The minimum effective range of the ping.</param>
+    /// <param name="maxRange">The maximum effective range of the ping.</param>
+    /// <param name="destroyTime">The time in seconds before the ping is destroyed. Set to 0 or less to persist indefinitely.</param>
+    /// <returns>The instantiated ping GameObject.</returns>
+    public static GameObject Ping(Vector3 position, string headerText = "Ping", string subText = "", int nodeType = 0, bool requiresLineOfSight = false, int minRange = 1, int maxRange = 2000, float destroyTime = 10)
+    {
+        GameObject ping = UnityEngine.Object.Instantiate(new GameObject("Ping"), position, Quaternion.identity);
+
+        ping.tag = "DoNotSet";
+        ping.layer = LayerMask.NameToLayer("ScanNode");
+
+        ping.AddComponent<BoxCollider>();
+
+        ScanNodeProperties scanNode = ping.AddComponent<ScanNodeProperties>();
+        scanNode.maxRange = maxRange;
+        scanNode.minRange = minRange;
+        scanNode.headerText = headerText;
+        scanNode.subText = subText;
+        scanNode.nodeType = nodeType;
+        scanNode.requiresLineOfSight = requiresLineOfSight;
+
+        if (destroyTime > 0)
+            UnityEngine.Object.Destroy(ping, destroyTime);
+
+        HUDManager h = HUDManager.Instance;
+
+        if (!h.nodesOnScreen.Contains(scanNode))
         {
-            TimeOfDay.Instance.shipLeaveAutomaticallyTime = timeToLeaveEarly;
-            TimeOfDay.Instance.shipLeavingAlertCalled = true;
-            HUDManager.Instance.ReadDialogue(shipLeavingEarlyDialogue);
-            HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
+            h.nodesOnScreen.Add(scanNode);
         }
 
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        public static void DisplayStatusEffect(string message)
-        {
-            HUDManager.Instance.DisplayStatusEffect(message);
-        }
+        if (h.scanNodes.ContainsValue(scanNode)) { return ping; }
 
-        /// <remarks>
-        /// Execution: Local
-        /// </remarks>
-        public static void DisplayDialogue(DialogueSegment[] dialogues)
+        for (int i = 0; i < h.scanElements.Length; i++)
         {
-            HUDManager.Instance.ReadDialogue(dialogues);
-        }
-
-
-        /// <remarks>
-        /// Requires spawned signal translator to work
-        /// </remarks>
-        public static void DisplaySignalTranslatorMessage(string message)
-        {
-            HUDManager.Instance.UseSignalTranslatorServerRpc(message);
-        }
-
-        /// <summary>
-        /// Displays a random ad
-        /// </summary>
-        public static void DisplayAd()
-        {
-            HUDManager.Instance.ChooseAdItem();
-        }
-
-        /// <summary>
-        /// Displays an advertisement for the specified item with optional top and bottom text.
-        /// </summary>
-        /// <param name="item">The item to advertise.</param>
-        /// <param name="top">The text displayed at the top of the advertisement.</param>
-        /// <param name="bottom">The text displayed at the bottom of the advertisement.</param>
-        public static void DisplayAd(Item item, string top, string bottom)
-        {
-            if (item == null)
+            if (h.scanNodes.TryAdd(h.scanElements[i], scanNode))
             {
-                logger.LogWarning("Display Item Ad: Item is Null");
-                return;
+                break;
             }
-            if (item.spawnPrefab == null)
-            {
-                logger.LogWarning("Display Item Ad: Item spawn prefab is null");
-                return;
-            }
-            HUDManager.Instance.CreateToolAdModel(-100, item);
-            DoAdStuff(top, bottom);
         }
 
-        /// <summary>
-        /// Displays an advertisement for the specified unlockable with optional top and bottom text.
-        /// </summary>
-        /// <param name="unlockable">The unlockable to advertise.</param>
-        /// <param name="top">The text displayed at the top of the advertisement.</param>
-        /// <param name="bottom">The text displayed at the bottom of the advertisement.</param>
-        public static void DisplayAd(UnlockableItem unlockable, string top, string bottom)
+        return ping;
+    }
+
+    /// <summary>
+    /// Sets the ship to leave early at the specified time, displays the provided dialogue, and triggers the ship
+    /// leaving alert.
+    /// </summary>
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    /// <param name="timeToLeaveEarly">The time, in hours, when the ship should leave early.</param>
+    /// <param name="shipLeavingEarlyDialogue">The dialogue segments to display when the ship is leaving early.</param>
+    public static void SetShipLeaveEarly(float timeToLeaveEarly, DialogueSegment[] shipLeavingEarlyDialogue)
+    {
+        TimeOfDay.Instance.shipLeaveAutomaticallyTime = timeToLeaveEarly;
+        TimeOfDay.Instance.shipLeavingAlertCalled = true;
+        HUDManager.Instance.ReadDialogue(shipLeavingEarlyDialogue);
+        HUDManager.Instance.shipLeavingEarlyIcon.enabled = true;
+    }
+
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    public static void DisplayStatusEffect(string message)
+    {
+        HUDManager.Instance.DisplayStatusEffect(message);
+    }
+
+    /// <remarks>
+    /// Execution: Local
+    /// </remarks>
+    public static void DisplayDialogue(DialogueSegment[] dialogues)
+    {
+        HUDManager.Instance.ReadDialogue(dialogues);
+    }
+
+
+    /// <remarks>
+    /// Requires spawned signal translator to work
+    /// </remarks>
+    public static void DisplaySignalTranslatorMessage(string message)
+    {
+        HUDManager.Instance.UseSignalTranslatorServerRpc(message);
+    }
+
+    /// <summary>
+    /// Displays a random ad
+    /// </summary>
+    public static void DisplayAd()
+    {
+        HUDManager.Instance.ChooseAdItem();
+    }
+
+    /// <summary>
+    /// Displays an advertisement for the specified item with optional top and bottom text.
+    /// </summary>
+    /// <param name="item">The item to advertise.</param>
+    /// <param name="top">The text displayed at the top of the advertisement.</param>
+    /// <param name="bottom">The text displayed at the bottom of the advertisement.</param>
+    public static void DisplayAd(Item item, string top, string bottom)
+    {
+        if (item == null)
         {
-            if (unlockable == null)
-            {
-                logger.LogWarning("Display Unlockable Ad: Unlockable is Null");
-                return;
-            }
-            if (unlockable.prefabObject == null)
-            {
-                logger.LogWarning("Display Unlockable Ad: Unlockable prefabObject is Null");
-                return;
-            }
-            HUDManager.Instance.CreateFurnitureAdModel(unlockable);
-            DoAdStuff(top, bottom);
+            logger.LogWarning("Display Item Ad: Item is Null");
+            return;
+        }
+        if (item.spawnPrefab == null)
+        {
+            logger.LogWarning("Display Item Ad: Item spawn prefab is null");
+            return;
+        }
+        HUDManager.Instance.CreateToolAdModel(-100, item);
+        DoAdStuff(top, bottom);
+    }
+
+    /// <summary>
+    /// Displays an advertisement for the specified unlockable with optional top and bottom text.
+    /// </summary>
+    /// <param name="unlockable">The unlockable to advertise.</param>
+    /// <param name="top">The text displayed at the top of the advertisement.</param>
+    /// <param name="bottom">The text displayed at the bottom of the advertisement.</param>
+    public static void DisplayAd(UnlockableItem unlockable, string top, string bottom)
+    {
+        if (unlockable == null)
+        {
+            logger.LogWarning("Display Unlockable Ad: Unlockable is Null");
+            return;
+        }
+        if (unlockable.prefabObject == null)
+        {
+            logger.LogWarning("Display Unlockable Ad: Unlockable prefabObject is Null");
+            return;
+        }
+        HUDManager.Instance.CreateFurnitureAdModel(unlockable);
+        DoAdStuff(top, bottom);
+    }
+
+    private static void DoAdStuff(string top, string bottom)
+    {
+        logger.LogDebug($"Do Ad Stuff: {top} {bottom}");
+        var hm = HUDManager.Instance;
+        hm.advertTopText.text = top;
+        hm.advertBottomText.text = bottom;
+        if (hm.displayAdCoroutine != null)
+        {
+            hm.StopCoroutine(hm.displayAdCoroutine);
+        }
+        hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
+    }
+
+    /// <summary>
+    /// Calculates the topmost point of the renderable bounds of a GameObject, optionally including disabled
+    /// renderers.
+    /// </summary>
+    /// <param name="obj">The GameObject whose renderable bounds are evaluated.</param>
+    /// <param name="includeDisabled">true to include disabled renderers; otherwise, false.</param>
+    /// <returns>A Vector3 representing the topmost point of the object's renderable bounds.</returns>
+    public static Vector3 GetTopOfObjectRender(GameObject obj, bool includeDisabled = false)
+    {
+        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+
+        Bounds combinedBounds = renderers[0].bounds;
+
+        foreach (Renderer renderer in renderers)
+        {
+            if (!renderer.enabled && !includeDisabled) { continue; }
+            combinedBounds.Encapsulate(renderer.bounds);
         }
 
-        private static void DoAdStuff(string top, string bottom)
+        return new Vector3(
+            combinedBounds.center.x,
+            combinedBounds.max.y,
+            combinedBounds.center.z
+        );
+    }
+
+    /// <summary>
+    /// Despawns the specified network object after it has been spawned.
+    /// </summary>
+    /// <param name="networkObject">The network object to despawn.</param>
+    /// <param name="destroy">true to destroy the network object after despawning; otherwise, false.</param>
+    public static void DespawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy = true)
+    {
+        IEnumerator despawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy)
         {
-            logger.LogDebug($"Do Ad Stuff: {top} {bottom}");
-            var hm = HUDManager.Instance;
-            hm.advertTopText.text = top;
-            hm.advertBottomText.text = bottom;
-            if (hm.displayAdCoroutine != null)
-            {
-                hm.StopCoroutine(hm.displayAdCoroutine);
-            }
-            hm.displayAdCoroutine = hm.StartCoroutine(hm.displayAd());
+            yield return null;
+            yield return new WaitUntil(() => networkObject.IsSpawned);
+            yield return null;
+            networkObject.Despawn(destroy: destroy);
         }
 
-        /// <summary>
-        /// Calculates the topmost point of the renderable bounds of a GameObject, optionally including disabled
-        /// renderers.
-        /// </summary>
-        /// <param name="obj">The GameObject whose renderable bounds are evaluated.</param>
-        /// <param name="includeDisabled">true to include disabled renderers; otherwise, false.</param>
-        /// <returns>A Vector3 representing the topmost point of the object's renderable bounds.</returns>
-        public static Vector3 GetTopOfObjectRender(GameObject obj, bool includeDisabled = false)
+        PluginInstance.StartCoroutine(despawnNetworkObjectWhenSpawned(networkObject, destroy));
+    }
+
+    /// <summary>
+    /// Creates a new readable Texture2D containing the pixel data from the specified source texture.
+    /// </summary>
+    /// <param name="source">The texture to convert to a readable Texture2D.</param>
+    /// <returns>A Texture2D that is readable and contains the pixel data from the source texture.</returns>
+    public static Texture2D MakeTextureReadable(Texture source)
+    {
+        RenderTexture renderTexture = RenderTexture.GetTemporary(
+            source.width,
+            source.height,
+            0,
+            RenderTextureFormat.ARGB32
+        );
+
+        Graphics.Blit(source, renderTexture);
+
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = renderTexture;
+
+        Texture2D readableTexture = new Texture2D(
+            source.width,
+            source.height,
+            TextureFormat.RGBA32,
+            false
+        );
+
+        readableTexture.ReadPixels(
+            new Rect(0, 0, source.width, source.height),
+            0,
+            0
+        );
+
+        readableTexture.Apply();
+
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(renderTexture);
+
+        return readableTexture;
+    }
+
+    /// <summary>
+    /// Calculates the dominant color in a texture by grouping similar colors and selecting the most frequent one.
+    /// </summary>
+    /// <param name="texture">The texture from which to determine the dominant color.</param>
+    /// <returns>The most frequent color in the texture, or white if the texture is null.</returns>
+    public static Color GetDominantColor(Texture2D texture)
+    {
+        if (texture == null)
+            return Color.white;
+
+        Color[] pixels = texture.GetPixels();
+
+        Dictionary<Color32, int> colorCounts = new();
+
+        foreach (Color pixel in pixels)
         {
-            Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+            Color32 color = pixel;
 
-            Bounds combinedBounds = renderers[0].bounds;
+            color.r = (byte)(color.r / 16 * 16);
+            color.g = (byte)(color.g / 16 * 16);
+            color.b = (byte)(color.b / 16 * 16);
 
-            foreach (Renderer renderer in renderers)
+            if (color.a < 20)
+                continue;
+
+            if (colorCounts.ContainsKey(color))
+                colorCounts[color]++;
+            else
+                colorCounts[color] = 1;
+        }
+
+        Color32 dominantColor = Color.white;
+        int highestCount = 0;
+
+        foreach (var pair in colorCounts)
+        {
+            if (pair.Value > highestCount)
             {
-                if (!renderer.enabled && !includeDisabled) { continue; }
-                combinedBounds.Encapsulate(renderer.bounds);
+                highestCount = pair.Value;
+                dominantColor = pair.Key;
             }
+        }
 
-            return new Vector3(
-                combinedBounds.center.x,
-                combinedBounds.max.y,
-                combinedBounds.center.z
+        return dominantColor;
+    }
+
+    public static void LogShaderProperties(Shader shader)
+    {
+        for (int i = 0; i < shader.GetPropertyCount(); i++)
+        {
+            Debug.Log(
+                $"{i}: {shader.GetPropertyName(i)} - {shader.GetPropertyType(i)}"
             );
         }
+    }
 
-        /// <summary>
-        /// Despawns the specified network object after it has been spawned.
-        /// </summary>
-        /// <param name="networkObject">The network object to despawn.</param>
-        /// <param name="destroy">true to destroy the network object after despawning; otherwise, false.</param>
-        public static void DespawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy = true)
+    public static Vector3 GetRandomPositionOnSphere(Vector3 center, float radius)
+    {
+        return center + UnityEngine.Random.onUnitSphere * radius;
+    }
+
+    public static Vector2 RandomOnUnitCircle()
+    {
+        float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+        return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+    }
+
+    public static Vector3 GetRandomPositionOnCircle(Vector3 center, float radius)
+    {
+        Vector2 offset = RandomOnUnitCircle() * radius;
+        return new Vector3(center.x + offset.x, center.y, center.z + offset.y);
+    }
+
+    public static Vector3 GetRandomPositionInCircle(Vector3 center, float radius)
+    {
+        Vector2 offset = UnityEngine.Random.insideUnitCircle * radius;
+        return new Vector3(center.x + offset.x, center.y, center.z + offset.y);
+    }
+
+    public static Vector3 GetRandomPositionInCircle(Vector3 center, float minRadius, float maxRadius)
+    {
+        float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+        float radius = Mathf.Sqrt(UnityEngine.Random.Range(minRadius * minRadius, maxRadius * maxRadius));
+        return center + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+    }
+
+    public static void InvokeAfterDelay(Action action, float delay)
+    {
+        IEnumerator invokeAfterDelay(Action action, float delay)
         {
-            IEnumerator despawnNetworkObjectWhenSpawned(NetworkObject networkObject, bool destroy)
-            {
-                yield return null;
-                yield return new WaitUntil(() => networkObject.IsSpawned);
-                yield return null;
-                networkObject.Despawn(destroy: destroy);
-            }
-
-            PluginInstance.StartCoroutine(despawnNetworkObjectWhenSpawned(networkObject, destroy));
+            yield return new WaitForSeconds(delay);
+            action.Invoke();
         }
 
-        /// <summary>
-        /// Creates a new readable Texture2D containing the pixel data from the specified source texture.
-        /// </summary>
-        /// <param name="source">The texture to convert to a readable Texture2D.</param>
-        /// <returns>A Texture2D that is readable and contains the pixel data from the source texture.</returns>
-        public static Texture2D MakeTextureReadable(Texture source)
-        {
-            RenderTexture renderTexture = RenderTexture.GetTemporary(
-                source.width,
-                source.height,
-                0,
-                RenderTextureFormat.ARGB32
-            );
-
-            Graphics.Blit(source, renderTexture);
-
-            RenderTexture previous = RenderTexture.active;
-            RenderTexture.active = renderTexture;
-
-            Texture2D readableTexture = new Texture2D(
-                source.width,
-                source.height,
-                TextureFormat.RGBA32,
-                false
-            );
-
-            readableTexture.ReadPixels(
-                new Rect(0, 0, source.width, source.height),
-                0,
-                0
-            );
-
-            readableTexture.Apply();
-
-            RenderTexture.active = previous;
-            RenderTexture.ReleaseTemporary(renderTexture);
-
-            return readableTexture;
-        }
-
-        /// <summary>
-        /// Calculates the dominant color in a texture by grouping similar colors and selecting the most frequent one.
-        /// </summary>
-        /// <param name="texture">The texture from which to determine the dominant color.</param>
-        /// <returns>The most frequent color in the texture, or white if the texture is null.</returns>
-        public static Color GetDominantColor(Texture2D texture)
-        {
-            if (texture == null)
-                return Color.white;
-
-            Color[] pixels = texture.GetPixels();
-
-            Dictionary<Color32, int> colorCounts = new();
-
-            foreach (Color pixel in pixels)
-            {
-                Color32 color = pixel;
-
-                color.r = (byte)(color.r / 16 * 16);
-                color.g = (byte)(color.g / 16 * 16);
-                color.b = (byte)(color.b / 16 * 16);
-
-                if (color.a < 20)
-                    continue;
-
-                if (colorCounts.ContainsKey(color))
-                    colorCounts[color]++;
-                else
-                    colorCounts[color] = 1;
-            }
-
-            Color32 dominantColor = Color.white;
-            int highestCount = 0;
-
-            foreach (var pair in colorCounts)
-            {
-                if (pair.Value > highestCount)
-                {
-                    highestCount = pair.Value;
-                    dominantColor = pair.Key;
-                }
-            }
-
-            return dominantColor;
-        }
-
-        public static void LogShaderProperties(Shader shader)
-        {
-            for (int i = 0; i < shader.GetPropertyCount(); i++)
-            {
-                Debug.Log(
-                    $"{i}: {shader.GetPropertyName(i)} - {shader.GetPropertyType(i)}"
-                );
-            }
-        }
-
-        public static Vector3 GetRandomPositionOnSphere(Vector3 center, float radius)
-        {
-            return center + UnityEngine.Random.onUnitSphere * radius;
-        }
-
-        public static Vector3 GetRandomPositionInCircle(Vector3 center, float radius)
-        {
-            Vector2 offset = UnityEngine.Random.insideUnitCircle * radius;
-            return new Vector3(center.x + offset.x, center.y, center.z + offset.y);
-        }
-
-        public static Vector3 GetRandomPositionInCircle(Vector3 center, float minRadius, float maxRadius)
-        {
-            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-            float radius = Mathf.Sqrt(UnityEngine.Random.Range(minRadius * minRadius, maxRadius * maxRadius));
-
-            return center + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
-        }
-
-        public static void InvokeAfterDelay(Action action, float delay)
-        {
-            IEnumerator invokeAfterDelay(Action action, float delay)
-            {
-                yield return new WaitForSeconds(delay);
-                action.Invoke();
-            }
-
-            NetworkHandler.Instance.StartCoroutine(invokeAfterDelay(action, delay));
-        }
+        NetworkHandler.Instance.StartCoroutine(invokeAfterDelay(action, delay));
     }
 }
