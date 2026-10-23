@@ -6,12 +6,12 @@ namespace SnowyLib;
 
 public static class ObjectExtensions
 {
-    public static void InvokeWhenNotNull(this Func<object> getObject, Action<object> action, float maxWaitTime = Mathf.Infinity)
+    public static void InvokeWhenNotNull(this Func<object?> getObject, Action<object> action, float maxWaitTime = 10f)
     {
         IEnumerator invokeWhenNotNull()
         {
             float elapsedTime = 0f;
-            object obj;
+            object? obj;
 
             while ((obj = getObject()) == null)
             {

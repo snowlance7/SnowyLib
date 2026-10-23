@@ -7,7 +7,7 @@ namespace SnowyLib
 {
     public static class NetworkObjectExtensions
     {
-        public static void InvokeAfterSpawn(this NetworkObject networkObject, Action<NetworkObject> actionAfterSpawn, float maxWaitTime = Mathf.Infinity)
+        public static void InvokeAfterSpawn(this NetworkObject networkObject, Action<NetworkObject> actionAfterSpawn, float maxWaitTime = 10f)
         {
             IEnumerator invokeAfterSpawn()
             {
@@ -27,6 +27,13 @@ namespace SnowyLib
             }
 
             NetworkHandler.Instance.StartCoroutine(invokeAfterSpawn());
+        }
+
+        public static void Spawn(this NetworkObject networkObject, bool destroyWithScene = false, Action<NetworkObject>? actionAfterSpawn = null, float maxWaitTime = 10f)
+        {
+            networkObject.Spawn(destroyWithScene);
+            if (actionAfterSpawn == null) { return; }
+            networkObject.InvokeAfterSpawn(actionAfterSpawn, maxWaitTime);
         }
 
         public static void Despawn(this NetworkObject networkObject, bool destroy = true, float despawnTime = 0f)
