@@ -14,10 +14,10 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
     public string Name => prefab.name;
     public GameObject prefab;
     public Func<int> spawnAmount;
-    public Func<SpawnDefinition> spawnDefinition;
+    public Func<SpawnDefinition?> spawnDefinition;
     public Action? postSpawningAction;
 
-    public PostGenSpawnableObject(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
+    public PostGenSpawnableObject(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition?> spawnDefinition, Action? postSpawningAction = null)
     {
         this.prefab = prefab;
         this.spawnAmount = spawnAmount;
@@ -31,12 +31,12 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
         RegisteredObjects.Add(postGenSpawnableObject);
     }
 
-    public static void Register(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
+    public static void Register(GameObject prefab, Func<int> spawnAmount, Func<SpawnDefinition?> spawnDefinition, Action? postSpawningAction = null)
     {
         Register(new PostGenSpawnableObject(prefab, spawnAmount, spawnDefinition, postSpawningAction));
     }
 
-    public static void Register(NamespacedKey<DawnItemInfo> key, Func<int> spawnAmount, Func<SpawnDefinition> spawnDefinition, Action? postSpawningAction = null)
+    public static void Register(NamespacedKey<DawnItemInfo> key, Func<int> spawnAmount, Func<SpawnDefinition?> spawnDefinition, Action? postSpawningAction = null)
     {
         Register(LethalContent.Items[key].Item.spawnPrefab, spawnAmount, spawnDefinition, postSpawningAction);
     }
@@ -53,7 +53,8 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
 
             for (int i = 0; i < spawnAmount; i++)
             {
-                SpawnDefinition spawnDefinition = obj.spawnDefinition.Invoke();
+                SpawnDefinition? spawnDefinition = obj.spawnDefinition.Invoke();
+                if (spawnDefinition == null) { continue; }
 
                 GameObject spawnedObj = GameObject.Instantiate(obj.prefab, spawnDefinition.position, spawnDefinition.rotation, spawnDefinition.parentTo);
                 var netObj = spawnedObj.GetComponent<NetworkObject>();
