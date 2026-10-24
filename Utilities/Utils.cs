@@ -221,90 +221,6 @@ public static partial class Utils
         return pathDistance > 0;
     }
 
-    internal static void LogRarities(ContentType contentType)
-    {
-        foreach (var level in StartOfRound.Instance.levels)
-        {
-            logger.LogInfo($"- {level.name}:");
-
-            switch (contentType)
-            {
-                case ContentType.Item:
-                    foreach (var item in level.spawnableScrap)
-                    {
-                        logger.LogInfo($"-- {item.spawnableItem.itemName}: {item.rarity}");
-                    }
-                    break;
-                case ContentType.Enemy:
-                    foreach (var enemy in level.Enemies)
-                    {
-                        logger.LogInfo($"-- {enemy.enemyType.name}: {enemy.rarity}");
-                    }
-                    break;
-                case ContentType.MapObject:
-                    foreach (var mapObject in level.spawnableMapObjects)
-                    {
-                        logger.LogInfo($"-- {mapObject.prefabToSpawn.name}:");
-                        Debug.Log(string.Join("\n", mapObject.numberToSpawn.keys.Select(k => $"--- ({k.time}, {k.value})")));
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    internal static void LogAverageRarities(ContentType contentType)
-    {
-        switch (contentType)
-        {
-            case ContentType.Item:
-                LogItemAverageRarities();
-                break;
-            case ContentType.Enemy:
-                LogEnemyAverageRarities();
-                break;
-            default:
-                break;
-        }
-    }
-
-    internal static void LogItemAverageRarities()
-    {
-        var sortedAveragedRarities = StartOfRound.Instance.levels
-            .SelectMany(level => level.spawnableScrap)
-            .GroupBy(scrap => scrap.spawnableItem)
-            .Select(group => new
-            {
-                Item = group.Key,
-                AverageRarity = (int)group.Average(scrap => scrap.rarity)
-            })
-            .OrderByDescending(item => item.AverageRarity);
-
-        foreach (var item in sortedAveragedRarities)
-        {
-            logger.LogInfo($"{item.Item.itemName}: {item.AverageRarity}");
-        }
-    }
-
-    internal static void LogEnemyAverageRarities()
-    {
-        var sortedAveragedRarities = StartOfRound.Instance.levels
-            .SelectMany(level => level.Enemies)
-            .GroupBy(enemy => enemy.enemyType)
-            .Select(group => new
-            {
-                Enemy = group.Key,
-                AverageRarity = (int)group.Average(enemy => enemy.rarity)
-            })
-            .OrderByDescending(enemy => enemy.AverageRarity);
-
-        foreach (var enemy in sortedAveragedRarities)
-        {
-            logger.LogInfo($"{enemy.Enemy.enemyName}: {enemy.AverageRarity}");
-        }
-    }
-
     /// <summary>
     /// Plays an animation on the local player's animator using the specified parameter and value for a given
     /// duration.
@@ -337,31 +253,6 @@ public static partial class Utils
                 break;
             default:
                 break;
-        }
-    }
-
-    internal static void LogAnimatorParameters(Animator animator)
-    {
-        foreach (var param in animator.parameters)
-        {
-            switch (param.type)
-            {
-                case AnimatorControllerParameterType.Bool:
-                    logger.LogInfo($"{param.name} (Bool) = {animator.GetBool(param.name)}");
-                    break;
-
-                case AnimatorControllerParameterType.Float:
-                    logger.LogInfo($"{param.name} (Float) = {animator.GetFloat(param.name)}");
-                    break;
-
-                case AnimatorControllerParameterType.Int:
-                    logger.LogInfo($"{param.name} (Int) = {animator.GetInteger(param.name)}");
-                    break;
-
-                case AnimatorControllerParameterType.Trigger:
-                    logger.LogInfo($"{param.name} (Trigger)");
-                    break;
-            }
         }
     }
 
@@ -647,11 +538,6 @@ public static partial class Utils
     {
         var players = StartOfRound.Instance.allPlayerScripts.Where(p => p != null && p.isPlayerControlled).ToArray();
         return players.Length == 0 ? StartOfRound.Instance.allPlayerScripts[UnityEngine.Random.Range(0, StartOfRound.Instance.allPlayerScripts.Length)] : players[UnityEngine.Random.Range(0, players.Length)];
-    }
-
-    public static void LogChat(string msg, string nameOfUserWhoTyped = "Server")
-    {
-        HUDManager.Instance.AddChatMessage(msg, nameOfUserWhoTyped);
     }
 
     /// <summary>
@@ -1058,16 +944,6 @@ public static partial class Utils
         return dominantColor;
     }
 
-    public static void LogShaderProperties(Shader shader)
-    {
-        for (int i = 0; i < shader.GetPropertyCount(); i++)
-        {
-            Debug.Log(
-                $"{i}: {shader.GetPropertyName(i)} - {shader.GetPropertyType(i)}"
-            );
-        }
-    }
-
     public static Vector3 GetRandomPositionOnSphere(Vector3 center, float radius)
     {
         return center + UnityEngine.Random.onUnitSphere * radius;
@@ -1107,5 +983,23 @@ public static partial class Utils
         }
 
         NetworkHandler.Instance.StartCoroutine(invokeAfterDelay(action, delay));
+    }
+
+    public static string[] GetLayerNames(LayerMask layerMask)
+    {
+        List<string> layerNames = new List<string>();
+
+        for (int i = 0; i < 32; i++)
+        {
+            if ((layerMask.value & (1 << i)) != 0)
+            {
+                string layerName = LayerMask.LayerToName(i);
+
+                if (!string.IsNullOrEmpty(layerName))
+                    layerNames.Add(layerName);
+            }
+        }
+
+        return layerNames.ToArray();
     }
 }
