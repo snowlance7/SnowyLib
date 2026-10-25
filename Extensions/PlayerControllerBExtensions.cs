@@ -257,15 +257,27 @@ namespace SnowyLib
             player.playerRigidbody.isKinematic = true;
         }
 
-        public static void ChangePlayerSize(this PlayerControllerB player, float size)
+        public static void ChangePlayerSize(this PlayerControllerB player, float size, bool hideScavengerHelmet = false)
         {
             player.thisPlayerBody.localScale = new Vector3(size, size, size);
             player.RebuildRig();
+
+            if (hideScavengerHelmet && localPlayer == player)
+            {
+                if (size < 1f && localPlayer.localVisor.gameObject.activeSelf)
+                {
+                    localPlayer.localVisor.gameObject.SetActive(false);
+                }
+                else if (size >= 1f && !localPlayer.localVisor.gameObject.activeSelf)
+                {
+                    localPlayer.localVisor.gameObject.SetActive(true);
+                }
+            }
         }
 
-        public static void ChangePlayerSizeAndSync(this PlayerControllerB player, float size)
+        public static void ChangePlayerSizeAndSync(this PlayerControllerB player, float size, bool hideScavengerHelmet = false)
         {
-            NetworkHandler.Instance.ChangePlayerSizeRpc(player.actualClientId, size);
+            NetworkHandler.Instance.ChangePlayerSizeRpc(player.actualClientId, size, hideScavengerHelmet);
         }
     }
 }

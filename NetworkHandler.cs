@@ -57,11 +57,11 @@ namespace SnowyLib
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        public void ChangePlayerSizeRpc(ulong clientId, float size)
+        public void ChangePlayerSizeRpc(ulong clientId, float size, bool hideScavengerHelmet = false)
         {
             PlayerControllerB? player = PlayerFromId(clientId);
             if (player == null) { logger.LogError($"ChangePlayerSizeRpc: Couldnt get player from id: {clientId}"); return; }
-            player.ChangePlayerSize(size);
+            player.ChangePlayerSize(size, hideScavengerHelmet);
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
