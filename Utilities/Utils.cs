@@ -620,11 +620,8 @@ public static partial class Utils
         return mask;
     }
 
-    public static Collider? GetLargestCollider(Collider[] colliders)
+    public static Collider GetLargestCollider(Collider[] colliders)
     {
-        if (colliders.Length == 0)
-            return null;
-
         Collider largest = colliders[0];
         float largestVolume = largest.bounds.size.x *
                               largest.bounds.size.y *
@@ -1001,5 +998,10 @@ public static partial class Utils
         }
 
         return layerNames.ToArray();
+    }
+
+    public static Color GetColor(float r, float g, float b)
+    {
+        return new Color(r / 255f, g / 255f, b / 255f);
     }
 }
