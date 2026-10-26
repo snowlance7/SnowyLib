@@ -1,4 +1,5 @@
 using HarmonyLib;
+using static SnowyLib.Plugin;
 
 namespace SnowyLib
 {
