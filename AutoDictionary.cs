@@ -18,6 +18,11 @@ namespace SnowyLib
             _factory = factory;
         }
 
+        public AutoDictionary()
+        {
+            _factory = ((key) => default);
+        }
+
         public new TValue this[TKey key]
         {
             get
