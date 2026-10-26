@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System;
 using System.Linq;
+using UnityEngine;
 using static SnowyLib.Plugin;
 
 namespace SnowyLib;
@@ -61,6 +62,8 @@ public static class UtilsPatches
 
             Utils.entrances = UnityEngine.Object.FindObjectsOfType<EntranceTeleport>().ToList();
             Utils.elevator = UnityEngine.Object.FindObjectOfType<MineshaftElevatorController>();
+
+            Utils.currentLevelTrees = GameObject.FindGameObjectsWithTag("Tree");
 
             Utils.SetRandoms();
 

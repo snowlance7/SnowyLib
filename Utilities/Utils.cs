@@ -70,6 +70,8 @@ public static partial class Utils
 
     public static Light? localPlayerNightVision;
 
+    public static GameObject[] currentLevelTrees { get; internal set; } = [];
+
     public static bool isOnCompanyMoon => StartOfRound.Instance?.currentLevel.levelID == 3;
 
     public const ulong RodrigoSteamID = 76561198164429786;
