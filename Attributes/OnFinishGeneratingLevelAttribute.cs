@@ -76,6 +76,8 @@ public sealed class OnFinishGeneratingLevelAttribute : Attribute
 
     internal static void OnFinishGeneratingLevel()
     {
+        Utils.OnFinishGeneratingLevelPatches();
+
         foreach (Action method in methods)
         {
             try

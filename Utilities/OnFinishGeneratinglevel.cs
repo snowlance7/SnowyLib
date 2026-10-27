@@ -6,7 +6,6 @@ namespace SnowyLib;
 
 public static partial class Utils
 {
-    [OnFinishGeneratingLevel]
     internal static void OnFinishGeneratingLevelPatches()
     {
         elevator = null;
