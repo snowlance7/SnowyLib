@@ -64,6 +64,7 @@ public static class UtilsPatches
             Utils.elevator = UnityEngine.Object.FindObjectOfType<MineshaftElevatorController>();
 
             Utils.currentLevelTrees = GameObject.FindGameObjectsWithTag("Tree");
+            logger.LogDebug($"{Utils.currentLevelTrees.Count()} trees found!");
 
             Utils.SetRandoms();
 
