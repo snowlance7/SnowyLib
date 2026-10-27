@@ -21,13 +21,11 @@ public sealed class OnFinishGeneratingLevelAttribute : Attribute
         Assembly snowyLibAssembly = typeof(OnFinishGeneratingLevelAttribute).Assembly;
         string snowyLibName = snowyLibAssembly.GetName().Name;
 
+        ScanAssembly(snowyLibAssembly);
+
         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            if (assembly == snowyLibAssembly)
-            {
-                ScanAssembly(assembly);
-                continue;
-            }
+            if (assembly == snowyLibAssembly) { continue; }
 
             if (!assembly.GetReferencedAssemblies().Any(a => a.Name == snowyLibName))
                 continue;

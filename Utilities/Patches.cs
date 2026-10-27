@@ -52,30 +52,6 @@ public static class UtilsPatches
         }
     }
 
-    [HarmonyPostfix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.FinishGeneratingLevel))]
-    public static void RoundManager_FinishGeneratingLevel_Postfix()
-    {
-        try
-        {
-            Utils.elevator = null;
-            Utils.entrances.Clear();
-
-            Utils.entrances = UnityEngine.Object.FindObjectsOfType<EntranceTeleport>().ToList();
-            Utils.elevator = UnityEngine.Object.FindObjectOfType<MineshaftElevatorController>();
-
-            Utils.currentLevelTrees = GameObject.FindGameObjectsWithTag("Tree");
-            logger.LogDebug($"{Utils.currentLevelTrees.Count()} trees found!");
-
-            Utils.SetRandoms();
-
-            Utils.OnFinishGeneratingLevel.Invoke();
-        }
-        catch
-        {
-            return;
-        }
-    }
-
 
     [HarmonyPostfix, HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.OnShipLandedMiscEvents))]
     public static void StartOfRound_OnShipLandedMiscEvents_Postfix()
