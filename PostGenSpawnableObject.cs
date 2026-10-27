@@ -49,7 +49,7 @@ public class PostGenSpawnableObject : IEquatable<PostGenSpawnableObject>
         foreach (var obj in RegisteredObjects)
         {
             int spawnAmount = obj.spawnAmount.Invoke();
-            logger.LogDebug($"Spawning {spawnAmount} PostGenSpawnableObjects");
+            logger.LogDebug($"Spawning {spawnAmount} {obj.Name}s");
 
             for (int i = 0; i < spawnAmount; i++)
             {
