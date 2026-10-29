@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
@@ -1006,4 +1007,18 @@ public static partial class Utils
     {
         return new Color(r / 255f, g / 255f, b / 255f);
     }
+
+    public static Vector3 GetSpreadDirection(Vector3 originalDirection, float spreadAngle)
+    {
+        Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * spreadAngle;
+
+        Quaternion offset = Quaternion.Euler(randomOffset.y, randomOffset.x, 0f);
+
+        return (offset * originalDirection).normalized;
+    }
+
+    //public static IEnumerable<T> GetClasses<T>(params Assembly[] assemblies)
+    //{
+
+    //}
 }
