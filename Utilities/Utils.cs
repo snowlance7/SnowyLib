@@ -69,8 +69,6 @@ public static partial class Utils
     public static UnityEvent OnFinishGeneratingLevel { get; internal set; } = new();
     public static UnityEvent OnShipLanded { get; internal set; } = new();
 
-    public static Light? localPlayerNightVision;
-
     public static GameObject[] currentLevelTrees { get; internal set; } = [];
 
     public static bool isOnCompanyMoon => StartOfRound.Instance?.currentLevel.levelID == 3;
@@ -95,20 +93,6 @@ public static partial class Utils
     {
         randomLocal = new System.Random(StartOfRound.Instance.randomMapSeed);
         randomGlobal = new System.Random(StartOfRound.Instance.randomMapSeed);
-    }
-
-    public static void SetNightVisionEnabled(bool enable)
-    {
-        if (localPlayerNightVision == null)
-        {
-            GameObject prefab = localPlayer.nightVision.gameObject;
-            GameObject obj = UnityEngine.Object.Instantiate(prefab, localPlayer.nightVision.gameObject.transform.parent);
-            localPlayerNightVision = obj.GetComponent<Light>();
-            localPlayerNightVision.intensity = 4311f;
-            localPlayerNightVision.range = 15;
-        }
-
-        localPlayerNightVision.enabled = enable;
     }
 
     /// <summary>

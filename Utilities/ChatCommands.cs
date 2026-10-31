@@ -215,11 +215,8 @@ public static partial class Utils
                 }
                 break;
             case "/nv":
-                if (localPlayerNightVision == null)
-                    SetNightVisionEnabled(true);
-                else
-                    SetNightVisionEnabled(!localPlayerNightVision.enabled);
-                HUDManager.Instance.DisplayTip("SnowyLib", $"Night vision {(localPlayerNightVision!.enabled ? "enabled" : "disabled")}");
+                NightVision.Toggle();
+                HUDManager.Instance.DisplayTip("SnowyLib", $"Night vision {(NightVision.Enabled ? "enabled" : "disabled")}");
                 break;
             default:
                 break;
