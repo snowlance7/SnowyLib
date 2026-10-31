@@ -1001,7 +1001,108 @@ public static partial class Utils
         return (offset * originalDirection).normalized;
     }
 
-    //public static IEnumerable<T> GetClasses<T>(params Assembly[] assemblies)
+    /// <summary>
+    /// Calculates a valid spawn position for a pocket room within the specified constraints.
+    /// </summary>
+    /// <param name="size">The dimensions of the pocket room.</param>
+    /// <param name="orientation">The rotation to apply to the pocket room.</param>
+    /// <param name="YPosition">The vertical position for the spawn point. Defaults to -500.</param>
+    /// <param name="padding">The additional space to maintain around the pocket room. Defaults to 5.</param>
+    /// <param name="maxRadius">The maximum search radius for a valid spawn position. Defaults to 100.</param>
+    /// <returns>A Vector3 representing a valid spawn position.</returns>
+    /// <exception cref="Exception">Thrown when no valid spawn position can be found within the search radius.</exception>
+    public static Vector3 GetValidPocketRoomSpawnPosition(Vector3 size, Quaternion orientation, float YPosition = -500f, float padding = 5f, int maxRadius = 100)
+    {
+        Vector3 center = new Vector3(0f, YPosition, 0f);
+
+        Vector3 halfExtents = (size / 2f) + Vector3.one * padding;
+
+        float spacing = size.x + padding * 2f;
+
+        int x = 0;
+        int z = 0;
+
+        int dx = 1;
+        int dz = 0;
+
+        int segmentLength = 1;
+        int segmentProgress = 0;
+        int segmentsCompleted = 0;
+
+        int maxPositions = (maxRadius * 2 + 1) * (maxRadius * 2 + 1);
+
+        for (int i = 0; i < maxPositions; i++)
+        {
+            Vector3 samplePosition = center + orientation * new Vector3(x * spacing, 0f, z * spacing);
+
+            if (IsPocketRoomPositionAvailable(samplePosition, halfExtents, orientation)) { return samplePosition; }
+
+            x += dx;
+            z += dz;
+            segmentProgress++;
+
+            if (segmentProgress == segmentLength)
+            {
+                segmentProgress = 0;
+
+                int temp = dx;
+                dx = -dz;
+                dz = temp;
+
+                segmentsCompleted++;
+
+                if (segmentsCompleted % 2 == 0)
+                    segmentLength++;
+            }
+        }
+
+        throw new Exception("Unable to find an available pocket room position!");
+    }
+
+    private static bool IsPocketRoomPositionAvailable(Vector3 position, Vector3 halfExtents, Quaternion orientation)
+    {
+        return Physics.OverlapBox(position, halfExtents, orientation, ~0, QueryTriggerInteraction.Collide).Length == 0;
+    }
+
+
+    public static Bounds CalculateMapBounds()
+    {
+        Renderer[] renderers = GameObject.FindObjectsOfType<Renderer>();
+        Collider[] colliders = GameObject.FindObjectsOfType<Collider>();
+
+        Bounds bounds = new Bounds();
+        bool initialized = false;
+
+        foreach (Renderer renderer in renderers)
+        {
+            if (!initialized)
+            {
+                bounds = renderer.bounds;
+                initialized = true;
+            }
+            else
+            {
+                bounds.Encapsulate(renderer.bounds);
+            }
+        }
+
+        foreach (Collider collider in colliders)
+        {
+            if (!initialized)
+            {
+                bounds = collider.bounds;
+                initialized = true;
+            }
+            else
+            {
+                bounds.Encapsulate(collider.bounds);
+            }
+        }
+
+        return bounds;
+    }
+
+    //public static IEnumerable<T> GetClasses<T>(params Assembly[] assemblies) // TODO
     //{
 
     //}

@@ -15,7 +15,7 @@ public class NightVision : MonoBehaviour
     public static bool Enabled => Intensity > 0;
     public static float Intensity { get; private set; } = 0f;
 
-    public static void Init() // TODO: Figure out why it doesnt work the first time
+    public static void Init() // TODO: Figure out why it doesnt work the first time (i hate unity)
     {
         Instance ??= new GameObject("NightVision").AddComponent<NightVision>();
         DontDestroyOnLoad(Instance.gameObject);
@@ -34,8 +34,8 @@ public class NightVision : MonoBehaviour
         FarLight.transform.SetParent(transform);
         FarLight.transform.position = mapCamera.position + Vector3.down * 30f;
         FarLight.range = 500f;
-        NearLight.intensity = 0f;
-        FarLight.intensity = 0f;
+        NearLight.intensity = 10000;
+        FarLight.intensity = 110000; // TODO: Check if this works?
     }
 
     public static void Toggle()
