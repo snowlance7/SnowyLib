@@ -279,5 +279,10 @@ namespace SnowyLib
         {
             NetworkHandler.Instance.ChangePlayerSizeRpc(player.actualClientId, size, hideScavengerHelmet);
         }
+
+        public static void TeleportPlayerSynced(this PlayerControllerB player, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
+        {
+            NetworkHandler.Instance.TeleportPlayerRpc(player.actualClientId, pos, withRotation, rot, allowInteractTrigger, enableController);
+        }
     }
 }

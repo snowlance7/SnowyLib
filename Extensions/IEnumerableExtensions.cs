@@ -3,244 +3,228 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace SnowyLib
+namespace SnowyLib;
+
+public static class IEnumerableExtensions
 {
-    public static class IEnumerableExtensions
+    public static T GetRandom<T>(this IEnumerable<T> source, System.Random random)
     {
-        public static T GetRandom<T>(this IEnumerable<T> source, System.Random random)
+        if (source is IList<T> list)
         {
-            if (source is IList<T> list)
-            {
-                return list[random.Next(list.Count)];
-            }
-
-            var array = source as T[] ?? source.ToArray();
-
-            return array[random.Next(array.Length)];
+            return list[random.Next(list.Count)];
         }
 
-        public static T GetRandom<T>(this IEnumerable<T> source)
+        var array = source as T[] ?? source.ToArray();
+
+        return array[random.Next(array.Length)];
+    }
+
+    public static T GetRandom<T>(this IEnumerable<T> source)
+    {
+        if (source is IList<T> list)
         {
-            if (source is IList<T> list)
-            {
-                return list[UnityEngine.Random.Range(0, list.Count)];
-            }
-
-            var array = source as T[] ?? source.ToArray();
-
-            return array[UnityEngine.Random.Range(0, array.Length)];
+            return list[UnityEngine.Random.Range(0, list.Count)];
         }
 
-        /// <summary>
-        /// Finds the element in the collection whose position is closest to the specified target position.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="list">The collection of elements to search.</param>
-        /// <param name="position">The target position to compare against.</param>
-        /// <param name="positionSelector">A function that returns the position of an element.</param>
-        /// <param name="closestDistance">When this method returns, contains the distance to the closest element found.</param>
-        /// <param name="fastDistanceCheck">true to use a faster, approximate distance calculation; otherwise, false.</param>
-        /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
-        /// <returns>The element closest to the specified position, or null if no element is found.</returns>
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float closestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+        var array = source as T[] ?? source.ToArray();
+
+        return array[UnityEngine.Random.Range(0, array.Length)];
+    }
+
+    /// <summary>
+    /// Finds the element in the collection whose position is closest to the specified target position.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the collection.</typeparam>
+    /// <param name="list">The collection of elements to search.</param>
+    /// <param name="position">The target position to compare against.</param>
+    /// <param name="positionSelector">A function that returns the position of an element.</param>
+    /// <param name="closestDistance">When this method returns, contains the distance to the closest element found.</param>
+    /// <param name="fastDistanceCheck">true to use a faster, approximate distance calculation; otherwise, false.</param>
+    /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
+    /// <returns>The element closest to the specified position, or null if no element is found.</returns>
+    public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float closestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    {
+        T? closest = null;
+        closestDistance = Mathf.Infinity;
+        excluded ??= [];
+
+        foreach (var item in list)
         {
-            T? closest = null;
-            closestDistance = Mathf.Infinity;
-            excluded ??= [];
+            if (item == null || excluded.Contains(item)) continue;
 
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
+            float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
+            if (distance >= closestDistance) continue;
 
-                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
-                if (distance >= closestDistance) continue;
-
-                closest = item;
-                closestDistance = distance;
-            }
-
-            return closest;
+            closest = item;
+            closestDistance = distance;
         }
 
-        /// <summary>
-        /// Finds the element in the collection whose position is closest to the specified position.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="list">The collection of elements to search.</param>
-        /// <param name="position">The target position to compare against.</param>
-        /// <param name="positionSelector">A function that returns the position of an element.</param>
-        /// <param name="fastDistanceCheck">true to use a faster, less precise distance calculation; otherwise, false.</param>
-        /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
-        /// <returns>The element closest to the specified position, or null if no suitable element is found.</returns>
-        public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+        return closest;
+    }
+
+    /// <summary>
+    /// Finds the element in the collection whose position is closest to the specified position.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the collection.</typeparam>
+    /// <param name="list">The collection of elements to search.</param>
+    /// <param name="position">The target position to compare against.</param>
+    /// <param name="positionSelector">A function that returns the position of an element.</param>
+    /// <param name="fastDistanceCheck">true to use a faster, less precise distance calculation; otherwise, false.</param>
+    /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
+    /// <returns>The element closest to the specified position, or null if no suitable element is found.</returns>
+    public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    {
+        T? closest = null;
+        float closestDistance = Mathf.Infinity;
+        excluded ??= [];
+
+        foreach (var item in list)
         {
-            T? closest = null;
-            float closestDistance = Mathf.Infinity;
-            excluded ??= [];
+            if (item == null || excluded.Contains(item)) continue;
 
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
+            float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
+            if (distance >= closestDistance) continue;
 
-                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
-                if (distance >= closestDistance) continue;
-
-                closest = item;
-                closestDistance = distance;
-            }
-
-            return closest;
+            closest = item;
+            closestDistance = distance;
         }
 
-        /// <summary>
-        /// Finds the element in the collection that is farthest from the specified position.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="list">The collection to search.</param>
-        /// <param name="position">The reference position to measure distance from.</param>
-        /// <param name="positionSelector">A function that returns the position of an element.</param>
-        /// <param name="farthestDistance">When this method returns, contains the distance to the farthest element found.</param>
-        /// <param name="fastDistanceCheck">true to use a faster, approximate distance calculation; otherwise, false.</param>
-        /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
-        /// <returns>The element farthest from the specified position, or null if no valid element is found.</returns>
-        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+        return closest;
+    }
+
+    /// <summary>
+    /// Finds the element in the collection that is farthest from the specified position.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the collection.</typeparam>
+    /// <param name="list">The collection to search.</param>
+    /// <param name="position">The reference position to measure distance from.</param>
+    /// <param name="positionSelector">A function that returns the position of an element.</param>
+    /// <param name="farthestDistance">When this method returns, contains the distance to the farthest element found.</param>
+    /// <param name="fastDistanceCheck">true to use a faster, approximate distance calculation; otherwise, false.</param>
+    /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
+    /// <returns>The element farthest from the specified position, or null if no valid element is found.</returns>
+    public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    {
+        T? farthest = null;
+        farthestDistance = 0f;
+        excluded ??= [];
+
+        foreach (var item in list)
         {
-            T? farthest = null;
-            farthestDistance = 0f;
-            excluded ??= [];
+            if (item == null || excluded.Contains(item)) continue;
 
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
+            float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
+            if (distance <= farthestDistance) continue;
 
-                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
-                if (distance <= farthestDistance) continue;
-
-                farthest = item;
-                farthestDistance = distance;
-            }
-
-            return farthest;
+            farthest = item;
+            farthestDistance = distance;
         }
 
-        /// <summary>
-        /// Finds the element in the collection that is farthest from the specified position.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="list">The sequence of elements to search.</param>
-        /// <param name="position">The reference position to measure distance from.</param>
-        /// <param name="positionSelector">A function that returns the position of each element.</param>
-        /// <param name="fastDistanceCheck">true to use a faster, less precise distance calculation; otherwise, false.</param>
-        /// <param name="excluded">A sequence of elements to exclude from the search, or null to include all elements.</param>
-        /// <returns>The element farthest from the specified position, or null if the collection is empty or all elements are
-        /// excluded.</returns>
-        public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+        return farthest;
+    }
+
+    /// <summary>
+    /// Finds the element in the collection that is farthest from the specified position.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the collection.</typeparam>
+    /// <param name="list">The sequence of elements to search.</param>
+    /// <param name="position">The reference position to measure distance from.</param>
+    /// <param name="positionSelector">A function that returns the position of each element.</param>
+    /// <param name="fastDistanceCheck">true to use a faster, less precise distance calculation; otherwise, false.</param>
+    /// <param name="excluded">A sequence of elements to exclude from the search, or null to include all elements.</param>
+    /// <returns>The element farthest from the specified position, or null if the collection is empty or all elements are
+    /// excluded.</returns>
+    public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    {
+        T? farthest = null;
+        float farthestDistance = 0f;
+        excluded ??= [];
+
+        foreach (var item in list)
         {
-            T? farthest = null;
-            float farthestDistance = 0f;
-            excluded ??= [];
+            if (item == null || excluded.Contains(item)) continue;
 
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
+            float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
+            if (distance <= farthestDistance) continue;
 
-                float distance = Utils.SmartDistance(position, positionSelector(item), fastDistanceCheck);
-                if (distance <= farthestDistance) continue;
-
-                farthest = item;
-                farthestDistance = distance;
-            }
-
-            return farthest;
+            farthest = item;
+            farthestDistance = distance;
         }
 
-        /// <summary>
-        /// Returns the elements in the collection whose positions are within the specified range of a reference
-        /// position, excluding any specified elements.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the collection.</typeparam>
-        /// <param name="list">The collection of elements to filter.</param>
-        /// <param name="position">The reference position to measure distances from.</param>
-        /// <param name="positionSelector">A function that returns the position of each element.</param>
-        /// <param name="range">The maximum distance from the reference position to include an element.</param>
-        /// <param name="excluded">A collection of elements to exclude from the results, or null to exclude none.</param>
-        /// <returns>A collection of elements within the specified range of the reference position.</returns>
-        public static IEnumerable<T> GetInRange<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, float range, IEnumerable<T>? excluded = null) where T : class
+        return farthest;
+    }
+
+    /// <summary>
+    /// Returns the elements in the collection whose positions are within the specified range of a reference
+    /// position, excluding any specified elements.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the collection.</typeparam>
+    /// <param name="list">The collection of elements to filter.</param>
+    /// <param name="position">The reference position to measure distances from.</param>
+    /// <param name="positionSelector">A function that returns the position of each element.</param>
+    /// <param name="range">The maximum distance from the reference position to include an element.</param>
+    /// <param name="excluded">A collection of elements to exclude from the results, or null to exclude none.</param>
+    /// <returns>A collection of elements within the specified range of the reference position.</returns>
+    public static IEnumerable<T> GetInRange<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, float range, IEnumerable<T>? excluded = null) where T : class
+    {
+        List<T> inRange = new List<T>();
+        excluded ??= [];
+
+        foreach (var item in list)
         {
-            List<T> inRange = new List<T>();
-            excluded ??= [];
+            if (item == null || excluded.Contains(item)) continue;
 
-            foreach (var item in list)
-            {
-                if (item == null || excluded.Contains(item)) continue;
-
-                if (Vector3.Distance(position, positionSelector(item)) < range)
-                    inRange.Add(item);
-            }
-
-            return inRange;
+            if (Vector3.Distance(position, positionSelector(item)) < range)
+                inRange.Add(item);
         }
 
-        public static Vector3 GetCenter(this IEnumerable<Vector3> positions)
+        return inRange;
+    }
+
+    public static Vector3 GetCenter(this IEnumerable<Vector3> positions)
+    {
+        Vector3 center = Vector3.zero;
+        int count = 0;
+
+        foreach (Vector3 position in positions)
         {
-            Vector3 center = Vector3.zero;
-            int count = 0;
-
-            foreach (Vector3 position in positions)
-            {
-                center += position;
-                count++;
-            }
-
-            return count > 0 ? center / count : Vector3.zero;
+            center += position;
+            count++;
         }
 
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, System.Random random)
+        return count > 0 ? center / count : Vector3.zero;
+    }
+
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, System.Random random)
+    {
+        List<T> list = source.ToList();
+
+        for (int i = list.Count() - 1; i > 0; i--)
         {
-            List<T> list = source.ToList();
+            int randomIndex = random.Next(i + 1);
 
-            for (int i = list.Count() - 1; i > 0; i--)
-            {
-                int randomIndex = random.Next(i + 1);
-
-                (list[i], list[randomIndex]) = (list[randomIndex], list[i]);
-            }
-
-            return list;
+            (list[i], list[randomIndex]) = (list[randomIndex], list[i]);
         }
 
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
+        return list;
+    }
+
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
+    {
+        List<T> list = source.ToList();
+
+        for (int i = list.Count() - 1; i > 0; i--)
         {
-            List<T> list = source.ToList();
+            int randomIndex = UnityEngine.Random.Range(0, i + 1);
 
-            for (int i = list.Count() - 1; i > 0; i--)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, i + 1);
-
-                (list[i], list[randomIndex]) = (list[randomIndex], list[i]);
-            }
-
-            return list;
+            (list[i], list[randomIndex]) = (list[randomIndex], list[i]);
         }
 
-        public static void Shuffle<T>(this IList<T> list)
-        {
-            for (int i = list.Count - 1; i > 0; i--)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, i + 1);
+        return list;
+    }
 
-                (list[i], list[randomIndex]) = (list[randomIndex], list[i]);
-            }
-        }
-
-        public static void Shuffle<T>(this IList<T> list, System.Random random)
-        {
-            for (int i = list.Count - 1; i > 0; i--)
-            {
-                int randomIndex = random.Next(i + 1);
-
-                (list[i], list[randomIndex]) = (list[randomIndex], list[i]);
-            }
-        }
+    public static IEnumerable<T> OrderByDistance<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector)
+    {
+        return list.OrderBy(x => Vector3.Distance(position, positionSelector(x)));
     }
 }

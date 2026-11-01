@@ -347,7 +347,12 @@ namespace SnowyLib
             player.HealPlayer(healAmount, allowOverhealing);
         }
 
-
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        internal void TeleportPlayerRpc(ulong clientId, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
+        {
+            PlayerControllerB player = PlayerFromId(clientId);
+            Utils.TeleportPlayer(player, pos, withRotation, rot, allowInteractTrigger, enableController);
+        }
     }
 
     [HarmonyPatch]

@@ -1102,6 +1102,12 @@ public static partial class Utils
         return bounds;
     }
 
+    public static void TeleportPlayer(PlayerControllerB player, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
+    {
+        // TODO
+        throw new System.NotImplementedException();
+    }
+
     //public static IEnumerable<T> GetClasses<T>(params Assembly[] assemblies) // TODO
     //{
 
