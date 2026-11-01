@@ -227,4 +227,9 @@ public static class IEnumerableExtensions
     {
         return list.OrderBy(x => Vector3.Distance(position, positionSelector(x)));
     }
+
+    //public static IEnumerable<T> GetClasses<T>(params Assembly[] assemblies) // TODO
+    //{
+
+    //}
 }

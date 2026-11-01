@@ -1102,14 +1102,31 @@ public static partial class Utils
         return bounds;
     }
 
-    public static void TeleportPlayer(PlayerControllerB player, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
+    public static void TeleportPlayer(PlayerControllerB player, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true, bool inElevator = false, bool inHangarShipRoom = false)
     {
-        // TODO
-        throw new System.NotImplementedException();
+        player.TeleportPlayer(pos, withRotation, rot, allowInteractTrigger, enableController);
+        player.isInElevator = inElevator;
+        player.isInHangarShipRoom = inHangarShipRoom;
+        player.isInsideFactory = !pos.IsOutside();
+
+        foreach (var item in player.ItemSlots)
+        {
+            item.isInFactory = player.isInsideFactory;
+        }
+        player.ItemOnlySlot.isInFactory = player.isInsideFactory;
     }
 
-    //public static IEnumerable<T> GetClasses<T>(params Assembly[] assemblies) // TODO
-    //{
+    public static void TeleportPlayer(PlayerControllerB player, Vector3 pos, bool isInsideFactory, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true, bool inElevator = false, bool inHangarShipRoom = false)
+    {
+        player.TeleportPlayer(pos, withRotation, rot, allowInteractTrigger, enableController);
+        player.isInElevator = inElevator;
+        player.isInHangarShipRoom = inHangarShipRoom;
+        player.isInsideFactory = isInsideFactory;
 
-    //}
+        foreach (var item in player.ItemSlots)
+        {
+            item.isInFactory = player.isInsideFactory;
+        }
+        player.ItemOnlySlot.isInFactory = player.isInsideFactory;
+    }
 }

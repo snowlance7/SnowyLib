@@ -348,10 +348,17 @@ namespace SnowyLib
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        internal void TeleportPlayerRpc(ulong clientId, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
+        internal void TeleportPlayerRpc(ulong clientId, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true, bool inElevator = false, bool inHangarShipRoom = false)
         {
             PlayerControllerB player = PlayerFromId(clientId);
-            Utils.TeleportPlayer(player, pos, withRotation, rot, allowInteractTrigger, enableController);
+            Utils.TeleportPlayer(player, pos, withRotation, rot, allowInteractTrigger, enableController, inElevator, inHangarShipRoom);
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        internal void TeleportPlayerRpc(ulong clientId, Vector3 pos, bool isInsideFactory, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true, bool inElevator = false, bool inHangarShipRoom = false)
+        {
+            PlayerControllerB player = PlayerFromId(clientId);
+            Utils.TeleportPlayer(player, pos, isInsideFactory, withRotation, rot, allowInteractTrigger, enableController, inElevator, inHangarShipRoom);
         }
     }
 

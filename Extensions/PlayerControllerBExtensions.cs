@@ -284,5 +284,10 @@ namespace SnowyLib
         {
             NetworkHandler.Instance.TeleportPlayerRpc(player.actualClientId, pos, withRotation, rot, allowInteractTrigger, enableController);
         }
+
+        public static void TeleportPlayerSynced(this PlayerControllerB player, Vector3 pos, bool isInsideFactory, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
+        {
+            NetworkHandler.Instance.TeleportPlayerRpc(player.actualClientId, pos, isInsideFactory, withRotation, rot, allowInteractTrigger, enableController);
+        }
     }
 }
