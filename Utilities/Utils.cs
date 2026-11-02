@@ -1111,8 +1111,10 @@ public static partial class Utils
 
         foreach (var item in player.ItemSlots)
         {
+            if (item == null) { continue; }
             item.isInFactory = player.isInsideFactory;
         }
+        if (player.ItemOnlySlot == null) { return; }
         player.ItemOnlySlot.isInFactory = player.isInsideFactory;
     }
 
@@ -1125,8 +1127,10 @@ public static partial class Utils
 
         foreach (var item in player.ItemSlots)
         {
+            if (item == null) { continue; }
             item.isInFactory = player.isInsideFactory;
         }
+        if (player.ItemOnlySlot == null) { return; }
         player.ItemOnlySlot.isInFactory = player.isInsideFactory;
     }
 }
