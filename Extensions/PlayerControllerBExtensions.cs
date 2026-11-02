@@ -170,7 +170,13 @@ namespace SnowyLib
             return voicePlayerState;
         }
 
+        [System.Obsolete("Use DiscardItemInSlotSynced instead", true)]
         public static void DiscardItemInSlotAndSync(this PlayerControllerB player, int slot, bool placeObject = false, NetworkObject? parentObjectTo = null, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
+        {
+            player.DiscardItemInSlotSynced(slot, placeObject, parentObjectTo, placePosition, matchRotationOfParent, setInShip, setInElevator, syncedPlayerPosition, syncedHeldObjectPosition, syncedHeldObjectRotation, syncedPlayerCamPosition, syncedPlayerCamRotation);
+        }
+
+        public static void DiscardItemInSlotSynced(this PlayerControllerB player, int slot, bool placeObject = false, NetworkObject? parentObjectTo = null, Vector3 placePosition = default(Vector3), bool matchRotationOfParent = true, bool setInShip = false, bool setInElevator = false, Vector3 syncedPlayerPosition = default(Vector3), Vector3 syncedHeldObjectPosition = default(Vector3), Vector3 syncedHeldObjectRotation = default(Vector3), Vector3 syncedPlayerCamPosition = default(Vector3), Vector3 syncedPlayerCamRotation = default(Vector3))
         {
             if (parentObjectTo != null)
             {
@@ -238,7 +244,13 @@ namespace SnowyLib
             }
         }
 
+        [System.Obsolete("Use HealPlayerSynced instead", true)]
         public static void HealPlayerAndSync(this PlayerControllerB player, int healAmount, bool allowOverhealing = false)
+        {
+            player.HealPlayerSynced(healAmount, allowOverhealing);
+        }
+
+        public static void HealPlayerSynced(this PlayerControllerB player, int healAmount, bool allowOverhealing = false)
         {
             NetworkHandler.Instance.HealPlayerRpc(player.actualClientId, healAmount, allowOverhealing);
         }
@@ -273,9 +285,17 @@ namespace SnowyLib
                     localPlayer.localVisor.gameObject.SetActive(true);
                 }
             }
+
+            logger.LogDebug($"Changed player size to {player.thisPlayerBody.localScale}");
         }
 
+        [System.Obsolete("Use ChangePlayerSizeSynced instead", true)]
         public static void ChangePlayerSizeAndSync(this PlayerControllerB player, float size, bool hideScavengerHelmet = false)
+        {
+            player.ChangePlayerSizeSynced(size, hideScavengerHelmet);
+        }
+
+        public static void ChangePlayerSizeSynced(this PlayerControllerB player, float size, bool hideScavengerHelmet = false)
         {
             NetworkHandler.Instance.ChangePlayerSizeRpc(player.actualClientId, size, hideScavengerHelmet);
         }
