@@ -18,6 +18,16 @@ namespace SnowyLib
             return node;
         }
 
+        public static bool RegisterTerminalCommand(string command, Func<string[], TerminalNode> operation, string category = "", string title = "", string description = "")
+        {
+            return RegisterTerminalCommand(new TerminalCommand(command, operation, category, title, description));
+        }
+
+        public static bool RegisterTerminalCommand(string command, Func<string[], string> operation, string category = "", string title = "", string description = "")
+        {
+            return RegisterTerminalCommand(new TerminalCommand(command, operation, category, title, description));
+        }
+
         public static bool RegisterTerminalCommand(TerminalCommand terminalCommand)
         {
             if (registeredTerminalCommands.Any(x => x.command == terminalCommand.command)) { return false; }
@@ -86,7 +96,7 @@ namespace SnowyLib
                 TerminalNode node = new TerminalNode
                 {
                     clearPreviousText = true,
-                    displayText = output
+                    displayText = output + "\n\n"
                 };
 
                 return node;
