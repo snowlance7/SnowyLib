@@ -309,5 +309,10 @@ namespace SnowyLib
         {
             NetworkHandler.Instance.TeleportPlayerRpc(player.actualClientId, pos, isInsideFactory, withRotation, rot, allowInteractTrigger, enableController);
         }
+
+        public static void DespawnHeldObject(this PlayerControllerB player, float delay)
+        {
+            Utils.InvokeAfterDelay(() => player.DespawnHeldObject(), delay);
+        }
     }
 }
