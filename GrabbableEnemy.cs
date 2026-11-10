@@ -245,7 +245,15 @@ public abstract class GrabbableEnemyAI : EnemyAI
         }
         serverPosition = base.transform.position;
         bool flag = true;
-        Vector3 itemFloorPosition = propScript.GetItemFloorPosition(propScript.previousPlayerHeldBy.transform.position + Vector3.up * 0.5f);
+        Vector3 itemFloorPosition;
+        if (propScript.itemProperties.allowDroppingAheadOfPlayer && propScript.previousPlayerHeldBy.cameraUp < 56f)
+        {
+            itemFloorPosition = propScript.previousPlayerHeldBy.DropItemAheadOfPlayer();
+        }
+        else
+        {
+            itemFloorPosition = propScript.GetItemFloorPosition(propScript.previousPlayerHeldBy.transform.position + Vector3.up * 0.5f);
+        }
         Vector3 navMeshPosition = RoundManager.Instance.GetNavMeshPosition(itemFloorPosition, default(NavMeshHit), 10f);
         if (!RoundManager.Instance.GotNavMeshPositionResult || DebugEnemy)
         {
