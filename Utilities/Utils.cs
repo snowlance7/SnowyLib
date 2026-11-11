@@ -1133,4 +1133,31 @@ public static partial class Utils
         if (player.ItemOnlySlot == null) { return; }
         player.ItemOnlySlot.isInFactory = player.isInsideFactory;
     }
+
+    public static string GetClockTime(float dayTime)
+    {
+        TimeOfDay tod = TimeOfDay.Instance;
+        float timeNormalized = dayTime / tod.totalTime;
+        int num = (int)(timeNormalized * (60f * tod.numberOfHours)) + 360;
+        int num2 = (int)Mathf.Floor(num / 60);
+        string amPM = " AM";
+        if (num2 >= 24)
+        {
+            return "12:00 AM";
+        }
+        if (num2 < 12)
+        {
+            amPM = " AM";
+        }
+        else
+        {
+            amPM = " PM";
+        }
+        if (num2 > 12)
+        {
+            num2 %= 12;
+        }
+        int num3 = num % 60;
+        return $"{num2:00}:{num3:00}".TrimStart('0') + amPM;
+    }
 }
