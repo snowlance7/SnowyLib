@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace SnowyLib.Extensions;
+namespace SnowyLib;
 
 public static class ActionExtensions
 {
