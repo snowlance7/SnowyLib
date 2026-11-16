@@ -169,23 +169,21 @@ public class DeliverableItem(NamespacedKey<DawnItemInfo> key, Action<GrabbableOb
 internal static class ItemDeliveryPatches
 {
     [HarmonyPostfix, HarmonyPatch(typeof(ItemDropship), nameof(ItemDropship.OpenShipDoorsOnServer))]
-    private static void ItemDropship_OpenShipDoorsOnServer_Postfix(ItemDropship __instance)
+    public static void ItemDropship_OpenShipDoorsOnServer_Postfix(ItemDropship __instance)
     {
         try
         {
             if (Utils.orderedItems.Count <= 0 || !__instance.IsServer) { return; }
-            if (__instance.shipLanded && !__instance.shipDoorsOpened)
-            {
-                foreach (DeliverableItem item in Utils.orderedItems)
-                {
-                    GameObject obj = GameObject.Instantiate(LethalContent.Items[item.key].Item.spawnPrefab, __instance.itemSpawnPositions.GetRandom().position, Quaternion.identity, __instance.playersManager.propsContainer);
-                    obj.GetComponent<GrabbableObject>().fallTime = 0f;
-                    obj.GetComponent<NetworkObject>().Spawn(actionAfterSpawn: (netObj) => item.action.Invoke(netObj.GetComponent<GrabbableObject>()));
-                    obj.GetComponent<NetworkObject>().TrySetParent(obj.transform.parent);
-                }
 
-                Utils.orderedItems.Clear();
+            foreach (DeliverableItem item in Utils.orderedItems)
+            {
+                GameObject obj = GameObject.Instantiate(LethalContent.Items[item.key].Item.spawnPrefab, __instance.itemSpawnPositions.GetRandom().position, Quaternion.identity, __instance.playersManager.propsContainer);
+                obj.GetComponent<GrabbableObject>().fallTime = 0f;
+                obj.GetComponent<NetworkObject>().Spawn(actionAfterSpawn: (netObj) => item.action?.Invoke(netObj.GetComponent<GrabbableObject>()));
+                obj.GetComponent<NetworkObject>().TrySetParent(obj.transform.parent);
             }
+
+            Utils.orderedItems.Clear();
         }
         catch (Exception e)
         {
