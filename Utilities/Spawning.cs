@@ -1,9 +1,12 @@
 ﻿using Dawn;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem.Utilities;
 using static SnowyLib.Plugin;
 
@@ -107,6 +110,37 @@ namespace SnowyLib
             if (prefab == null) { logger.LogError($"Couldnt find prefab for {key}"); return null; }
             GameObject obj = UnityEngine.Object.Instantiate(prefab, position, rotation, parentTo);
             obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: destroyWithScene);
+            return obj;
+        }
+
+        public static GameObject? SpawnMapObject(GameObject prefab, InsideMapObjectSettings insideMapObjectSettings, Transform? parentTo = null, bool destroyWithScene = true)
+        {
+            Vector3 position = Utils.insideAINodes.GetRandom().transform.position.GetFloorPosition();
+            position = RoundManager.Instance.GetRandomNavMeshPositionInBoxPredictable(position, default, default, default, -8193);
+
+            GameObject obj = UnityEngine.Object.Instantiate(prefab, position, Quaternion.identity, parentTo);
+            if (insideMapObjectSettings.spawnFacingAwayFromWall)
+            {
+                obj.transform.eulerAngles = new Vector3(0f, RoundManager.Instance.YRotationThatFacesTheFarthestFromPosition(position + Vector3.up * 0.2f), 0f);
+            }
+            else if (insideMapObjectSettings.spawnFacingWall)
+            {
+                obj.transform.eulerAngles = new Vector3(0f, RoundManager.Instance.YRotationThatFacesTheNearestFromPosition(position + Vector3.up * 0.2f), 0f);
+            }
+            else
+            {
+                obj.transform.eulerAngles = new Vector3(obj.transform.eulerAngles.x, UnityEngine.Random.Range(0, 360), obj.transform.eulerAngles.z);
+            }
+            if (insideMapObjectSettings.spawnWithBackToWall && Physics.Raycast(obj.transform.position, -obj.transform.forward, out var hitInfo, 100f, StartOfRound.Instance.collidersAndRoomMaskAndDefault, QueryTriggerInteraction.Ignore))
+            {
+                obj.transform.position = hitInfo.point;
+                if (insideMapObjectSettings.spawnWithBackFlushAgainstWall)
+                {
+                    obj.transform.forward = hitInfo.normal;
+                    obj.transform.eulerAngles = new Vector3(0f, obj.transform.eulerAngles.y, 0f);
+                }
+            }
+            obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: true);
             return obj;
         }
     }

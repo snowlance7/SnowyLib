@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Text;
 
-namespace SnowyLib
-{
-    internal class EdibleObject
-    {
-    }
-}
+//namespace SnowyLib;
+
+//public abstract class EdibleObject : PhysicsProp
+//{
+//    public override void ItemActivate(bool used, bool buttonDown = true)
+//    {
+//        base.ItemActivate(used, buttonDown);
+//    }
+//}
