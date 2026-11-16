@@ -359,6 +359,12 @@ namespace SnowyLib
             PlayerControllerB player = PlayerFromId(clientId);
             Utils.TeleportPlayer(player, pos, isInsideFactory, withRotation, rot, allowInteractTrigger, enableController, inElevator, inHangarShipRoom);
         }
+
+        [Rpc(SendTo.Server, RequireOwnership = false)]
+        internal void BuyItemsRpc(NamespacedKey<DawnItemInfo>[] keys)
+        {
+
+        }
     }
 
     [HarmonyPatch]

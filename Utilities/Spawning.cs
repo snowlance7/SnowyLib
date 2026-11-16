@@ -116,7 +116,7 @@ namespace SnowyLib
         public static GameObject? SpawnMapObject(GameObject prefab, InsideMapObjectSettings insideMapObjectSettings, Transform? parentTo = null, bool destroyWithScene = true)
         {
             Vector3 position = Utils.insideAINodes.GetRandom().transform.position.GetFloorPosition();
-            position = RoundManager.Instance.GetRandomNavMeshPositionInBoxPredictable(position, default, default, default, -8193);
+            position = RoundManager.Instance.GetRandomNavMeshPositionInBoxPredictable(position, default, default, randomLocal, -8193);
 
             GameObject obj = UnityEngine.Object.Instantiate(prefab, position, Quaternion.identity, parentTo);
             if (insideMapObjectSettings.spawnFacingAwayFromWall)
