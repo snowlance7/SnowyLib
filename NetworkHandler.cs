@@ -360,10 +360,50 @@ namespace SnowyLib
             Utils.TeleportPlayer(player, pos, isInsideFactory, withRotation, rot, allowInteractTrigger, enableController, inElevator, inHangarShipRoom);
         }
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
-        internal void BuyItemsRpc(NamespacedKey<DawnItemInfo>[] keys)
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        internal void UpdateItemDropshipTriggerRpc(string message)
         {
+            var trigger = ItemDropshipOperations.itemDropship?.triggerScript;
+            if (trigger == null) { logger.LogError("UpdateItemDropshipTriggerRpc: ItemDropship trigger is null"); return; }
+            if (!trigger.interactable)
+            {
+                trigger.interactable = true;
+                trigger.onInteract.RemoveAllListeners();
+                trigger.onInteract.AddListener((player) => ItemDropshipOperations.TrySatisfyConditionLocalClient());
+            }
+            trigger.hoverTip = message;
+        }
 
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        internal void ResetItemDropshipTriggerRpc()
+        {
+            var trigger = ItemDropshipOperations.itemDropship?.triggerScript;
+            if (trigger == null) { logger.LogError("ResetItemDropshipTriggerRpc: ItemDropship trigger is null"); return; }
+            trigger.interactable = false;
+            trigger.onInteract.RemoveAllListeners();
+            trigger.onInteract.AddListener((player) => ItemDropshipOperations.itemDropship!.TryOpeningShip());
+            trigger.hoverTip = "Open : [LMB]";
+        }
+
+        [Rpc(SendTo.Server, RequireOwnership = false)]
+        internal void TrySatisfyItemDropshipOperationConditionRpc(ulong clientId)
+        {
+            if (!IsServer) { return; }
+            ItemDropshipOperations.TrySatisfyCondition(PlayerFromId(clientId));
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        internal void SyncGroupCreditsRpc(int newGroupCredits)
+        {
+            if (Utils.terminal == null) { return; }
+            Utils.terminal.groupCredits = newGroupCredits;
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        internal void DespawnHeldObjectRpc(ulong clientId)
+        {
+            if (localPlayer.actualClientId != clientId) { return; }
+            localPlayer.DespawnHeldObject();
         }
     }
 

@@ -314,5 +314,10 @@ namespace SnowyLib
         {
             Utils.InvokeAfterDelay(() => player.DespawnHeldObject(), delay);
         }
+
+        public static void DespawnHeldObjectSynced(this PlayerControllerB player)
+        {
+            NetworkHandler.Instance.DespawnHeldObjectRpc(player.actualClientId);
+        }
     }
 }

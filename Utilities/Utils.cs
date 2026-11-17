@@ -1160,4 +1160,9 @@ public static partial class Utils
         int num3 = num % 60;
         return $"{num2:00}:{num3:00}".TrimStart('0') + amPM;
     }
+
+    public static void SyncGroupCredits(int newGroupCredits)
+    {
+        NetworkHandler.Instance.SyncGroupCreditsRpc(newGroupCredits);
+    }
 }
