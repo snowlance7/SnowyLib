@@ -69,7 +69,17 @@ public static class ItemDropshipOperations // TODO: Test this
         var satisfiedCondition = currentOperation.conditions.FirstOrDefault(x => x.condition.Invoke(player));
         if (satisfiedCondition == null) { logger.LogDebug("No conditionals met"); return; }
         currentOperation.conditions.Remove(satisfiedCondition);
-        NetworkHandler.Instance.UpdateItemDropshipTriggerRpc(GetCurrentOperationMessage());
+
+        if (currentOperation.conditions.Count > 0)
+        {
+            NetworkHandler.Instance.UpdateItemDropshipTriggerRpc(GetCurrentOperationMessage());
+        }
+        else if (itemDropship != null)
+        {
+            itemDropship.timesPlayedWithoutTurningOff = 0;
+            itemDropship.shipLanded = false;
+            itemDropship.ShipLeaveClientRpc();
+        }
     }
 
     internal static bool IsItemDropshipNeeded()
@@ -183,6 +193,7 @@ public static class ItemDropshipOperations // TODO: Test this
 
                 if (currentOperation != null && currentOperation.inProgress && !currentOperation.awaitingResult)
                 {
+                    NetworkHandler.Instance.ResetItemDropshipTriggerRpc();
                     currentOperation.awaitingResult = true;
                     InvokeAfterDelay(() =>
                     {
