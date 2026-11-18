@@ -53,7 +53,7 @@ public static class ItemDropshipOperations // TODO: Test this
         }
     }
 
-    private static string GetCurrentOperationMessage()
+    internal static string GetCurrentOperationMessage()
     {
         return $"{currentOperation!.baseConditionMessage}{(string.Join(currentOperation.conditionSeparator, currentOperation.conditions.Select(x => x.message)))}";
     }
@@ -121,97 +121,97 @@ public static class ItemDropshipOperations // TODO: Test this
         if (!IsServerOrHost) { logger.LogError("DeliverItems: Only the server can order Deliverables"); return; }
         orderedItems.AddRange(items);
     }
+}
 
-    public class ItemDropshipOperation(List<OperationCondition> conditions, Action<bool> postRetrieval, float processingTime, string baseConditionMessage = "Requires: ", string conditionSeparator = ", ")
-    {
-        public List<OperationCondition> conditions = conditions;
-        public Action<bool> postRetrieval = postRetrieval;
-        public float processingTime = processingTime;
-        public string baseConditionMessage = baseConditionMessage;
-        public string conditionSeparator = conditionSeparator;
-        internal bool inProgress;
-        internal bool awaitingResult;
-    }
+public class ItemDropshipOperation(List<OperationCondition> conditions, Action<bool> postRetrieval, float processingTime, string baseConditionMessage = "Requires: ", string conditionSeparator = ", ")
+{
+    public List<OperationCondition> conditions = conditions;
+    public Action<bool> postRetrieval = postRetrieval;
+    public float processingTime = processingTime;
+    public string baseConditionMessage = baseConditionMessage;
+    public string conditionSeparator = conditionSeparator;
+    internal bool inProgress;
+    internal bool awaitingResult;
+}
 
-    public class OperationCondition(Func<PlayerControllerB, bool> condition, string message)
-    {
-        public Func<PlayerControllerB, bool> condition = condition;
-        public string message = message;
-    }
+public class OperationCondition(Func<PlayerControllerB, bool> condition, string message)
+{
+    public Func<PlayerControllerB, bool> condition = condition;
+    public string message = message;
+}
 
-    public class DeliverableItem(NamespacedKey<DawnItemInfo> key, Action<GrabbableObject>? action = null)
-    {
-        public NamespacedKey<DawnItemInfo> key = key;
-        public Action<GrabbableObject>? action = action;
-    }
+public class DeliverableItem(NamespacedKey<DawnItemInfo> key, Action<GrabbableObject>? action = null)
+{
+    public NamespacedKey<DawnItemInfo> key = key;
+    public Action<GrabbableObject>? action = action;
+}
 
-    [HarmonyPatch]
-    internal static class Patches // TODO: Check to make sure this patches if inside class like this
+[HarmonyPatch]
+internal static class Patches // TODO: Check to make sure this patches if inside class like this
+{
+    [HarmonyPostfix, HarmonyPatch(typeof(ItemDropship), nameof(ItemDropship.OpenShipDoorsOnServer))]
+    public static void ItemDropship_OpenShipDoorsOnServer_Postfix(ItemDropship __instance)
     {
-        [HarmonyPostfix, HarmonyPatch(typeof(ItemDropship), nameof(ItemDropship.OpenShipDoorsOnServer))]
-        public static void ItemDropship_OpenShipDoorsOnServer_Postfix(ItemDropship __instance)
+        try
         {
-            try
+            if (!__instance.IsServer) { return; }
+
+            if (ItemDropshipOperations.orderedItems.Count > 0)
             {
-                if (!__instance.IsServer) { return; }
+                logger.LogDebug($"Spawning {ItemDropshipOperations.orderedItems.Count} items from dropship");
 
-                if (orderedItems.Count > 0)
+                foreach (DeliverableItem item in ItemDropshipOperations.orderedItems)
                 {
-                    logger.LogDebug($"Spawning {orderedItems.Count} items from dropship");
-
-                    foreach (DeliverableItem item in orderedItems)
-                    {
-                        GameObject obj = GameObject.Instantiate(LethalContent.Items[item.key].Item.spawnPrefab, __instance.itemSpawnPositions.GetRandom().position, Quaternion.identity, __instance.playersManager.propsContainer);
-                        obj.GetComponent<GrabbableObject>().fallTime = 0f;
-                        obj.GetComponent<NetworkObject>().Spawn(actionAfterSpawn: (netObj) => item.action?.Invoke(netObj.GetComponent<GrabbableObject>()));
-                        obj.GetComponent<NetworkObject>().TrySetParent(obj.transform.parent);
-                    }
-
-                    orderedItems.Clear();
+                    GameObject obj = GameObject.Instantiate(LethalContent.Items[item.key].Item.spawnPrefab, __instance.itemSpawnPositions.GetRandom().position, Quaternion.identity, __instance.playersManager.propsContainer);
+                    obj.GetComponent<GrabbableObject>().fallTime = 0f;
+                    obj.GetComponent<NetworkObject>().Spawn(actionAfterSpawn: (netObj) => item.action?.Invoke(netObj.GetComponent<GrabbableObject>()));
+                    obj.GetComponent<NetworkObject>().TrySetParent(obj.transform.parent);
                 }
 
-                if (currentOperation != null)
-                {
-                    currentOperation.inProgress = true;
-                    NetworkHandler.Instance.UpdateItemDropshipTriggerRpc(GetCurrentOperationMessage());
-                    logger.LogDebug("ItemDropship operation started");
-                }
+                ItemDropshipOperations.orderedItems.Clear();
             }
-            catch (Exception e)
+
+            if (ItemDropshipOperations.currentOperation != null)
             {
-                logger.LogError(e);
-                return;
+                ItemDropshipOperations.currentOperation.inProgress = true;
+                NetworkHandler.Instance.UpdateItemDropshipTriggerRpc(ItemDropshipOperations.GetCurrentOperationMessage());
+                logger.LogDebug("ItemDropship operation started");
             }
         }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(ItemDropship), nameof(ItemDropship.ShipLeave))]
-        public static void ItemDropship_ShipLeave_Postfix(ItemDropship __instance)
+        catch (Exception e)
         {
-            try
-            {
-                if (!__instance.IsServer) { return; }
+            logger.LogError(e);
+            return;
+        }
+    }
 
-                if (currentOperation != null && currentOperation.inProgress && !currentOperation.awaitingResult)
+    [HarmonyPostfix, HarmonyPatch(typeof(ItemDropship), nameof(ItemDropship.ShipLeave))]
+    public static void ItemDropship_ShipLeave_Postfix(ItemDropship __instance)
+    {
+        try
+        {
+            if (!__instance.IsServer) { return; }
+
+            if (ItemDropshipOperations.currentOperation != null && ItemDropshipOperations.currentOperation.inProgress && !ItemDropshipOperations.currentOperation.awaitingResult)
+            {
+                NetworkHandler.Instance.ResetItemDropshipTriggerRpc();
+                ItemDropshipOperations.currentOperation.awaitingResult = true;
+                InvokeAfterDelay(() =>
                 {
-                    NetworkHandler.Instance.ResetItemDropshipTriggerRpc();
-                    currentOperation.awaitingResult = true;
-                    InvokeAfterDelay(() =>
+                    if (ItemDropshipOperations.currentOperation.conditions.Count > 0)
                     {
-                        if (currentOperation.conditions.Count > 0)
-                        {
-                            currentOperation.postRetrieval.Invoke(false);
-                            return;
-                        }
+                        ItemDropshipOperations.currentOperation.postRetrieval.Invoke(false);
+                        return;
+                    }
 
-                        InvokeAfterDelay(() => currentOperation.postRetrieval.Invoke(true), currentOperation.processingTime);
-                    }, 50f);
-                }
+                    InvokeAfterDelay(() => ItemDropshipOperations.currentOperation.postRetrieval.Invoke(true), ItemDropshipOperations.currentOperation.processingTime);
+                }, 50f);
             }
-            catch (Exception e)
-            {
-                logger.LogError(e);
-                return;
-            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e);
+            return;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SnowyLib
         {
             if (previousCommand != null)
             {
-                TerminalCommand? callbackCommand = previousCommand.callbacks.FirstOrDefault(x => x.command == args[0]);
+                TerminalCommand? callbackCommand = previousCommand.callbacks.FirstOrDefault(x => SharesCommonPrefix(x.command, args[0]));
                 if (callbackCommand != null)
                 {
                     return callbackCommand.operation.Invoke(args);
@@ -27,6 +27,18 @@ namespace SnowyLib
 
             previousCommand = command;
             return command.operation.Invoke(args);
+        }
+
+        internal static bool SharesCommonPrefix(string word1, string word2)
+        {
+            for (int num = word1.Length; num > 0; num--)
+            {
+                if (word2.StartsWith(word1.Substring(0, num)))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static bool RegisterTerminalCommand(string command, Func<string[], TerminalNode> operation, string category = "", string title = "", string description = "")
