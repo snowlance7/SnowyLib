@@ -8,14 +8,25 @@ namespace SnowyLib
 {
     public static class TerminalAPI
     {
+        internal static TerminalCommand? previousCommand;
         internal static List<TerminalCommand> registeredTerminalCommands = new List<TerminalCommand>();
         internal static TerminalNode? TryParseCommand(string[] args)
         {
-            TerminalCommand? terminalCommand = registeredTerminalCommands.Where(x => x.command == args[0]).FirstOrDefault();
-            if (terminalCommand == null) { return null; }
+            if (previousCommand != null)
+            {
+                TerminalCommand? callbackCommand = previousCommand.callbacks.FirstOrDefault(x => x.command == args[0]);
+                if (callbackCommand != null)
+                {
+                    return callbackCommand.operation.Invoke(args);
+                }
+            }
 
-            TerminalNode? node = terminalCommand.operation.Invoke(args);
-            return node;
+            previousCommand = null;
+            TerminalCommand? command = registeredTerminalCommands.FirstOrDefault(x => x.command == args[0]);
+            if (command == null) { return null; }
+
+            previousCommand = command;
+            return command.operation.Invoke(args);
         }
 
         public static bool RegisterTerminalCommand(string command, Func<string[], TerminalNode> operation, string category = "", string title = "", string description = "")
@@ -26,6 +37,16 @@ namespace SnowyLib
         public static bool RegisterTerminalCommand(string command, Func<string[], string> operation, string category = "", string title = "", string description = "")
         {
             return RegisterTerminalCommand(new TerminalCommand(command, operation, category, title, description));
+        }
+
+        public static bool RegisterTerminalCommand(string command, Func<string[], TerminalNode> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
+        {
+            return RegisterTerminalCommand(new TerminalCommand(command, operation, callbacks, category, title, description));
+        }
+
+        public static bool RegisterTerminalCommand(string command, Func<string[], string> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
+        {
+            return RegisterTerminalCommand(new TerminalCommand(command, operation, callbacks, category, title, description));
         }
 
         public static bool RegisterTerminalCommand(TerminalCommand terminalCommand)
@@ -70,6 +91,7 @@ namespace SnowyLib
     {
         public string command;
         public Func<string[], TerminalNode> operation;
+        public TerminalCommand[] callbacks = [];
         public string category;
         public string title;
         public string description;
@@ -102,6 +124,41 @@ namespace SnowyLib
                 return node;
             };
 
+            this.category = category;
+            this.title = title;
+            this.description = description;
+        }
+
+        public TerminalCommand(string command, Func<string[], TerminalNode> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
+        {
+            this.command = command;
+            this.operation = operation;
+            this.callbacks = callbacks;
+            this.category = category;
+            this.title = title;
+            this.description = description;
+        }
+
+        public TerminalCommand(string command, Func<string[], string> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
+        {
+            this.command = command;
+
+            this.operation = args =>
+            {
+                string output = operation(args);
+
+                if (string.IsNullOrWhiteSpace(output)) { return null; }
+
+                TerminalNode node = new TerminalNode
+                {
+                    clearPreviousText = true,
+                    displayText = output + "\n\n"
+                };
+
+                return node;
+            };
+
+            this.callbacks = callbacks;
             this.category = category;
             this.title = title;
             this.description = description;
