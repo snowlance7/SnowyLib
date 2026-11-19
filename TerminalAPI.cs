@@ -8,25 +8,26 @@ namespace SnowyLib
 {
     public static class TerminalAPI
     {
-        internal static TerminalCommand? previousCommand;
+        internal static TerminalResult? previousResult;
         internal static List<TerminalCommand> registeredTerminalCommands = new List<TerminalCommand>();
-        internal static TerminalNode? TryParseCommand(string[] args)
+        internal static TerminalResult? TryParseCommand(string[] args)
         {
-            if (previousCommand != null)
+            if (previousResult != null)
             {
-                TerminalCommand? callbackCommand = previousCommand.callbacks.FirstOrDefault(x => SharesCommonPrefix(x.command, args[0]));
+                TerminalCommand? callbackCommand = previousResult.callbacks.FirstOrDefault(x => SharesCommonPrefix(x.command, args[0]));
                 if (callbackCommand != null)
                 {
-                    return callbackCommand.operation.Invoke(args);
+                    previousResult = callbackCommand.operation.Invoke(args);
+                    return previousResult;
                 }
             }
 
-            previousCommand = null;
+            previousResult = null;
             TerminalCommand? command = registeredTerminalCommands.FirstOrDefault(x => x.command == args[0]);
             if (command == null) { return null; }
 
-            previousCommand = command;
-            return command.operation.Invoke(args);
+            previousResult = command.operation.Invoke(args);
+            return previousResult;
         }
 
         internal static bool SharesCommonPrefix(string word1, string word2)
@@ -41,7 +42,7 @@ namespace SnowyLib
             return false;
         }
 
-        public static bool RegisterTerminalCommand(string command, Func<string[], TerminalNode> operation, string category = "", string title = "", string description = "")
+        public static bool RegisterTerminalCommand(string command, Func<string[], TerminalResult> operation, string category = "", string title = "", string description = "")
         {
             return RegisterTerminalCommand(new TerminalCommand(command, operation, category, title, description));
         }
@@ -49,16 +50,6 @@ namespace SnowyLib
         public static bool RegisterTerminalCommand(string command, Func<string[], string> operation, string category = "", string title = "", string description = "")
         {
             return RegisterTerminalCommand(new TerminalCommand(command, operation, category, title, description));
-        }
-
-        public static bool RegisterTerminalCommand(string command, Func<string[], TerminalNode> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
-        {
-            return RegisterTerminalCommand(new TerminalCommand(command, operation, callbacks, category, title, description));
-        }
-
-        public static bool RegisterTerminalCommand(string command, Func<string[], string> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
-        {
-            return RegisterTerminalCommand(new TerminalCommand(command, operation, callbacks, category, title, description));
         }
 
         public static bool RegisterTerminalCommand(TerminalCommand terminalCommand)
@@ -102,13 +93,12 @@ namespace SnowyLib
     public class TerminalCommand
     {
         public string command;
-        public Func<string[], TerminalNode> operation;
-        public TerminalCommand[] callbacks = [];
+        public Func<string[], TerminalResult> operation;
         public string category;
         public string title;
         public string description;
 
-        public TerminalCommand(string command, Func<string[], TerminalNode> operation, string category = "", string title = "", string description = "")
+        public TerminalCommand(string command, Func<string[], TerminalResult> operation, string category = "", string title = "", string description = "")
         {
             this.command = command;
             this.operation = operation;
@@ -124,56 +114,50 @@ namespace SnowyLib
             this.operation = args =>
             {
                 string output = operation(args);
-
-                if (string.IsNullOrWhiteSpace(output)) { return null; }
-
-                TerminalNode node = new TerminalNode
-                {
-                    clearPreviousText = true,
-                    displayText = output + "\n\n"
-                };
-
-                return node;
+                return new TerminalResult(output);
             };
 
             this.category = category;
             this.title = title;
             this.description = description;
         }
+    }
 
-        public TerminalCommand(string command, Func<string[], TerminalNode> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
+    public class TerminalResult
+    {
+        public TerminalNode output;
+        public TerminalCommand[] callbacks;
+
+        public TerminalResult(string output)
         {
-            this.command = command;
-            this.operation = operation;
-            this.callbacks = callbacks;
-            this.category = category;
-            this.title = title;
-            this.description = description;
-        }
-
-        public TerminalCommand(string command, Func<string[], string> operation, TerminalCommand[] callbacks, string category = "", string title = "", string description = "")
-        {
-            this.command = command;
-
-            this.operation = args =>
+            this.output = new TerminalNode
             {
-                string output = operation(args);
-
-                if (string.IsNullOrWhiteSpace(output)) { return null; }
-
-                TerminalNode node = new TerminalNode
-                {
-                    clearPreviousText = true,
-                    displayText = output + "\n\n"
-                };
-
-                return node;
+                clearPreviousText = true,
+                displayText = output + "\n\n"
             };
+            this.callbacks = [];
+        }
 
+        public TerminalResult(string output, TerminalCommand[] callbacks)
+        {
+            this.output = new TerminalNode
+            {
+                clearPreviousText = true,
+                displayText = output + "\n\n"
+            };
             this.callbacks = callbacks;
-            this.category = category;
-            this.title = title;
-            this.description = description;
+        }
+
+        public TerminalResult(TerminalNode output)
+        {
+            this.output = output;
+            this.callbacks = [];
+        }
+
+        public TerminalResult(TerminalNode output, TerminalCommand[] callbacks)
+        {
+            this.output = output;
+            this.callbacks = callbacks;
         }
     }
 
@@ -189,9 +173,9 @@ namespace SnowyLib
                 string s = __instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded);
                 s = __instance.RemovePunctuation(s);
                 string[] array = s.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                TerminalNode? result = TerminalAPI.TryParseCommand(array);
+                TerminalResult? result = TerminalAPI.TryParseCommand(array);
                 if (result == null) { return true; }
-                __result = result;
+                __result = result.output;
                 return false;
             }
             catch (Exception e)
