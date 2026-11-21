@@ -32,6 +32,9 @@ namespace SnowyLib
 
         internal static bool SharesCommonPrefix(string word1, string word2)
         {
+            word1 = word1.ToLower();
+            word2 = word2.ToLower();
+
             for (int num = word1.Length; num > 0; num--)
             {
                 if (word2.StartsWith(word1.Substring(0, num)))
