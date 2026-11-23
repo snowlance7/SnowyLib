@@ -147,7 +147,7 @@ public class DeliverableItem(NamespacedKey<DawnItemInfo> key, Action<GrabbableOb
 }
 
 [HarmonyPatch]
-internal static class Patches // TODO: Check to make sure this patches if inside class like this
+internal static class Patches
 {
     [HarmonyPostfix, HarmonyPatch(typeof(ItemDropship), nameof(ItemDropship.OpenShipDoorsOnServer))]
     public static void ItemDropship_OpenShipDoorsOnServer_Postfix(ItemDropship __instance)

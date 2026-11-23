@@ -8,11 +8,14 @@ using static SnowyLib.Plugin;
 
 namespace SnowyLib;
 
-public static class AttachableObjectManager
+public abstract class AttachableObject : PhysicsProp
 {
     public static List<AttachmentPoint> AvailableAttachmentPoints { get; } = new();
 
     public static AutoDictionary<PlayerControllerB, List<AttachmentPoint>> PlayerAttachmentPoints = new(player => AvailableAttachmentPoints.ToList());
+
+    public PlayerControllerB? playerAttachedTo;
+    public AttachmentPoint? attachmentPoint;
 
     [StaticInit]
     public static void Init()
@@ -94,24 +97,6 @@ public static class AttachableObjectManager
 
         return true;
     }
-}
-
-public class AttachmentPoint(int bodyPartIndex, Vector3 positionOffset, Vector3 rotationOffset)
-{
-    public int bodyPartIndex = bodyPartIndex;
-
-    public Vector3 positionOffset = positionOffset;
-    public Vector3 rotationOffset = rotationOffset;
-
-    public AttachableObject? occupant = null;
-
-    public bool IsOccupied => occupant != null;
-}
-
-public abstract class AttachableObject : PhysicsProp
-{
-    public PlayerControllerB? playerAttachedTo;
-    public AttachmentPoint? attachmentPoint;
 
     public override void LateUpdate()
     {
@@ -154,7 +139,7 @@ public abstract class AttachableObject : PhysicsProp
 
     public void SetPlayerAttachedTo(PlayerControllerB player, AttachmentPoint attachmentPoint)
     {
-        SetPlayerAttachedToRpc(player.actualClientId, AttachableObjectManager.PlayerAttachmentPoints[player].IndexOf(attachmentPoint));
+        SetPlayerAttachedToRpc(player.actualClientId, PlayerAttachmentPoints[player].IndexOf(attachmentPoint));
     }
 
     public void Detach()
@@ -191,7 +176,19 @@ public abstract class AttachableObject : PhysicsProp
             EnableItemMeshes(false);
         }
 
-        attachmentPoint = AttachableObjectManager.PlayerAttachmentPoints[playerAttachedTo][attachmentPointIndex];
+        attachmentPoint = PlayerAttachmentPoints[playerAttachedTo][attachmentPointIndex];
         attachmentPoint.occupant = this;
     }
+}
+
+public class AttachmentPoint(int bodyPartIndex, Vector3 positionOffset, Vector3 rotationOffset)
+{
+    public int bodyPartIndex = bodyPartIndex;
+
+    public Vector3 positionOffset = positionOffset;
+    public Vector3 rotationOffset = rotationOffset;
+
+    public AttachableObject? occupant = null;
+
+    public bool IsOccupied => occupant != null;
 }
