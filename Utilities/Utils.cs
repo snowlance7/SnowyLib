@@ -1165,4 +1165,17 @@ public static partial class Utils
     {
         NetworkHandler.Instance.SyncGroupCreditsRpc(newGroupCredits);
     }
+
+    public static string GetTransformPath(Transform target, Transform root)
+    {
+        string path = target.name;
+
+        while (target.parent != null && target.parent != root)
+        {
+            target = target.parent;
+            path = target.name + "/" + path;
+        }
+
+        return path;
+    }
 }

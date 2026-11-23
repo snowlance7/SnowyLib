@@ -6,7 +6,7 @@ namespace SnowyLib;
 
 public static class SkinnedMeshRendererExtensions
 {
-    public static Transform GetDominantBone(SkinnedMeshRenderer renderer, RaycastHit hit) // TODO: Try to understand how this works more when im medicated
+    public static Transform GetDominantBone(this SkinnedMeshRenderer renderer, RaycastHit hit) // TODO: Try to understand how this works more when im medicated
     {
         Mesh mesh = renderer.sharedMesh;
 

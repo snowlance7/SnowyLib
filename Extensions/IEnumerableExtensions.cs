@@ -42,9 +42,9 @@ public static class IEnumerableExtensions
     /// <param name="fastDistanceCheck">true to use a faster, approximate distance calculation; otherwise, false.</param>
     /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
     /// <returns>The element closest to the specified position, or null if no element is found.</returns>
-    public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float closestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    public static T GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float closestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
     {
-        T? closest = null;
+        T closest = null!;
         closestDistance = Mathf.Infinity;
         excluded ??= [];
 
@@ -72,9 +72,9 @@ public static class IEnumerableExtensions
     /// <param name="fastDistanceCheck">true to use a faster, less precise distance calculation; otherwise, false.</param>
     /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
     /// <returns>The element closest to the specified position, or null if no suitable element is found.</returns>
-    public static T? GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    public static T GetClosestToPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
     {
-        T? closest = null;
+        T closest = null!;
         float closestDistance = Mathf.Infinity;
         excluded ??= [];
 
@@ -103,9 +103,9 @@ public static class IEnumerableExtensions
     /// <param name="fastDistanceCheck">true to use a faster, approximate distance calculation; otherwise, false.</param>
     /// <param name="excluded">A collection of elements to exclude from the search, or null to include all elements.</param>
     /// <returns>The element farthest from the specified position, or null if no valid element is found.</returns>
-    public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    public static T GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, out float farthestDistance, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
     {
-        T? farthest = null;
+        T farthest = null!;
         farthestDistance = 0f;
         excluded ??= [];
 
@@ -134,9 +134,9 @@ public static class IEnumerableExtensions
     /// <param name="excluded">A sequence of elements to exclude from the search, or null to include all elements.</param>
     /// <returns>The element farthest from the specified position, or null if the collection is empty or all elements are
     /// excluded.</returns>
-    public static T? GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
+    public static T GetFarthestFromPosition<T>(this IEnumerable<T> list, Vector3 position, Func<T, Vector3> positionSelector, bool fastDistanceCheck = false, IEnumerable<T>? excluded = null) where T : class
     {
-        T? farthest = null;
+        T farthest = null!;
         float farthestDistance = 0f;
         excluded ??= [];
 
