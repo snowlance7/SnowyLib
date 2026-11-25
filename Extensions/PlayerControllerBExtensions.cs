@@ -2,6 +2,7 @@
 using Dawn.Utils;
 using Dissonance;
 using GameNetcodeStuff;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -25,6 +26,12 @@ namespace SnowyLib
         /// <returns>true if the object was successfully grabbed; otherwise, false.</returns>
         public static bool GrabGrabbableObject(this PlayerControllerB player, GrabbableObject grabbableObject)
         {
+            if (player != localPlayer)
+            {
+                NetworkHandler.Instance.GrabGrabbableObjectRpc(player.actualClientId, grabbableObject.NetworkObject);
+                return true;
+            }
+
             if (player.twoHanded || player.sinkingValue > 0.73f) { return false; }
 
             player.currentlyGrabbingObject = grabbableObject;
@@ -229,7 +236,23 @@ namespace SnowyLib
             return StartOfRound.Instance.shipBounds.bounds.Contains(player.transform.position);
         }
 
+        [System.Obsolete("Use SpawnAndGrabGrabbableObjectSynced instead", true)]
         public static void SpawnAndGrabItem(this PlayerControllerB player, NamespacedKey<DawnItemInfo> key)
+        {
+            SpawnAndGrabGrabbableObjectSynced(player, key);
+        }
+
+        public static void SpawnAndGrabGrabbableObject(this PlayerControllerB player, NamespacedKey<DawnItemInfo> key, Action<GrabbableObject> actionAfterSpawn)
+        {
+            if (!IsServerOrHost) { logger.LogError("SpawnAndGrabGrabbableObject: This method can only be used by the server"); return; }
+            Utils.SpawnItem(key, player.transform.position, actionAfterSpawn: (item) =>
+            {
+                actionAfterSpawn.Invoke(item);
+                player.GrabGrabbableObject(item);
+            });
+        }
+
+        public static void SpawnAndGrabGrabbableObjectSynced(this PlayerControllerB player, NamespacedKey<DawnItemInfo> key)
         {
             NetworkHandler.Instance.SpawnAndGrabItemRpc(player.actualClientId, key);
         }

@@ -315,22 +315,12 @@ namespace SnowyLib
         [Rpc(SendTo.Server, RequireOwnership = false)]
         public void SpawnAndGrabItemRpc(ulong playerGrabbingId, NamespacedKey<DawnItemInfo> key)
         {
-            PlayerControllerB? player = PlayerFromId(playerGrabbingId);
-            if (player == null) { return; }
-            var item = Utils.SpawnItem(key, player.transform.position);
-            if (item == null) { return; }
-
-            IEnumerator grabItemAfterNetworkSpawn()
-            {
-                yield return new WaitUntil(() => item.NetworkObject != null && item.NetworkObject.IsSpawned);
-                SpawnAndGrabItemClientRpc(playerGrabbingId, item.NetworkObject);
-            }
-
-            StartCoroutine(grabItemAfterNetworkSpawn());
+            PlayerControllerB player = PlayerFromId(playerGrabbingId);
+            var item = Utils.SpawnItem(key, player.transform.position, actionAfterSpawn: (x) => GrabGrabbableObjectRpc(playerGrabbingId, x.NetworkObject));
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        private void SpawnAndGrabItemClientRpc(ulong playerGrabbingId, NetworkObjectReference netRef)
+        public void GrabGrabbableObjectRpc(ulong playerGrabbingId, NetworkObjectReference netRef)
         {
             if (localPlayer.actualClientId != playerGrabbingId) { return; }
             if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get networkobject from networkobjectreference"); return; }
@@ -341,8 +331,7 @@ namespace SnowyLib
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
         public void HealPlayerRpc(ulong clientId, int healAmount, bool allowOverhealing = false)
         {
-            PlayerControllerB? player = PlayerFromId(clientId);
-            if (player == null) { logger.LogError("HealPlayerRpc: Failed to get player from id: " + clientId); return; }
+            PlayerControllerB player = PlayerFromId(clientId);
             player.HealPlayer(healAmount, allowOverhealing);
         }
 
