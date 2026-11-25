@@ -369,7 +369,7 @@ namespace SnowyLib
             {
                 trigger.interactable = true;
                 trigger.onInteract.RemoveAllListeners();
-                trigger.onInteract.AddListener((player) => ItemDropshipOperations.TrySatisfyConditionLocalClient());
+                trigger.onInteract.AddListener((player) => ItemDropshipOperations.OnInteractLocalClient());
             }
             trigger.hoverTip = message;
         }
@@ -386,10 +386,10 @@ namespace SnowyLib
         }
 
         [Rpc(SendTo.Server, RequireOwnership = false)]
-        internal void TrySatisfyItemDropshipOperationConditionRpc(ulong clientId)
+        internal void ItemDropshipOperationOnInteractRpc(ulong clientId)
         {
             if (!IsServer) { return; }
-            ItemDropshipOperations.TrySatisfyCondition(PlayerFromId(clientId));
+            ItemDropshipOperations.OnInteract(PlayerFromId(clientId));
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]

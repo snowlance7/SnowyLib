@@ -83,6 +83,7 @@
   
   <ItemGroup>
     <Compile Remove="AttachableObject - Copy.cs" />
+    <Compile Remove="ItemDropshipOperations - Copy.cs" />
   </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->
